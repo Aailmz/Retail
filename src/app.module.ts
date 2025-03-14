@@ -7,6 +7,8 @@ import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { ProductModule } from './product/product.module';
 import { CategoryModule } from './category/category.module';
+import { Product } from './product/entities/product.entity';
+import { Category } from './category/entities/category.entity';
 
 @Module({
   imports: [
@@ -17,7 +19,7 @@ import { CategoryModule } from './category/category.module';
       username: 'root',
       password: '',
       database: 'discount_ukk',
-      entities: [User],
+      entities: [User, Product, Category],
       synchronize: true,
     }),
     AuthModule,
