@@ -1,10 +1,14 @@
 import { Controller, Get, UseGuards, Request, Render, Post, Body, Res, Req } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { AuthService } from './auth/auth.service';
+import { ProductService } from './product/product.service';
 
 @Controller()
 export class AppController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private productService: ProductService
+  ) {}
 
   // Halaman home (root endpoint /)
   @Get()
@@ -31,7 +35,7 @@ export class AppController {
         const token = await this.authService.login(result);
         // Simpan token di cookie atau session
         res.cookie('jwt', token.access_token, { httpOnly: true });
-        return res.redirect('/dashboard');
+        return res.redirect('/product');
       } else {
         return res.render('login', { 
           title: 'Login Page', 
@@ -58,15 +62,18 @@ export class AppController {
     };
   }
 
-  @Get('/products')
+  @Get('product')
   @Render('products')
-  getProducts() {
+  async getProducts() {
+    const products = await this.productService.findAll();
+    
     return { 
       title: 'Products',
       user: { username: 'Admin' },
       isActivePage: {
         products: true
-      }
+      },
+      products: products
     };
   }
 

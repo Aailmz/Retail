@@ -11,136 +11,7 @@
   <!-- CSS Files -->
   <link id="pagestyle" href="/css/corporate-ui-dashboard.css" rel="stylesheet" />
   
-  <style>
-    body, html {
-      height: 100%;
-    }
-    
-    /* Sidebar styles */
-    .sidebar {
-      width: 250px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-      z-index: 999;
-      transition: transform 0.3s ease;
-    }
-    .sidebar-header {
-      padding: 20px 15px;
-      border-bottom: 1px solid #e9ecef;
-    }
-    .sidebar-menu {
-      padding: 15px 0;
-    }
-    .sidebar-menu-item {
-      padding: 12px 20px;
-      display: flex;
-      align-items: center;
-      color: #344767;
-      font-weight: 500;
-      font-size: 1rem;
-      transition: all 0.2s ease;
-    }
-    .sidebar-menu-item:hover {
-      background-color: #f9fafb;
-      color: #252f40;
-      text-decoration: none;
-    }
-    .sidebar-menu-item.active {
-      background-color: #e9ecef;
-      color: #252f40;
-      font-weight: 600;
-    }
-    .sidebar-menu-item svg {
-      margin-right: 12px;
-    }
-    
-    /* Main content styles */
-    .main-content {
-      margin-left: 250px;
-      padding: 20px;
-      min-height: 100vh;
-      transition: margin-left 0.3s ease;
-    }
-    .navbar {
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      background-color: white;
-    }
-    .card-stats {
-      transition: all 0.2s ease;
-    }
-    .card-stats:hover {
-      transform: translateY(-5px);
-    }
-    .logout-btn {
-      position: absolute;
-      bottom: 20px;
-      width: calc(100% - 40px);
-      left: 20px;
-    }
-    
-    /* Mobile menu toggle */
-    .menu-toggle {
-      display: none;
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      margin-right: 15px;
-    }
-    
-    /* Responsive styles */
-    @media (max-width: 991.98px) {
-      .sidebar {
-        transform: translateX(-100%);
-      }
-      
-      .sidebar.active {
-        transform: translateX(0);
-      }
-      
-      .main-content {
-        margin-left: 0;
-        width: 100%;
-      }
-      
-      .menu-toggle {
-        display: block;
-      }
-      
-      .sidebar-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0,0,0,0.5);
-        z-index: 998;
-        display: none;
-      }
-      
-      .sidebar-overlay.active {
-        display: block;
-      }
-    }
-    
-    /* Additional responsive improvements */
-    @media (max-width: 767.98px) {
-      .card-stats {
-        margin-bottom: 1rem;
-      }
-      
-      .navbar .container-fluid {
-        flex-direction: row;
-      }
-      
-      .table-responsive {
-        overflow-x: auto;
-      }
-    }
-  </style>
+  {{> style}}
 </head>
 
 <body class="bg-gray-100">
@@ -157,7 +28,7 @@
               <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
           </button>
-          <h4 class="font-weight-bold mb-0">Dashboard</h4>
+          <h4 class="font-weight-bold mb-0">Products</h4>
         </div>
         <div class="ms-auto">
           <span class="font-weight-bold d-none d-sm-inline">Welcome, {{user.username}}</span>
@@ -166,97 +37,29 @@
       </div>
     </nav>
     
-    <!-- Dashboard Content -->
+    <!-- Products Content -->
     <div class="container-fluid px-0">
-      <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-          <div class="card border shadow-xs card-stats">
-            <div class="card-body p-3">
-              <div class="row">
-                <div class="col-8">
-                  <div class="numbers">
-                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Products</p>
-                    <h5 class="font-weight-bolder mb-0">350</h5>
-                    <p class="mb-0 text-success">
-                      <span class="font-weight-bolder">+12%</span> this month
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="col-xl-3 col-md-6 mb-4">
-          <div class="card border shadow-xs card-stats">
-            <div class="card-body p-3">
-              <div class="row">
-                <div class="col-8">
-                  <div class="numbers">
-                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Sales</p>
-                    <h5 class="font-weight-bolder mb-0">$53,000</h5>
-                    <p class="mb-0 text-success">
-                      <span class="font-weight-bolder">+8%</span> this week
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="col-xl-3 col-md-6 mb-4">
-          <div class="card border shadow-xs card-stats">
-            <div class="card-body p-3">
-              <div class="row">
-                <div class="col-8">
-                  <div class="numbers">
-                    <p class="text-sm mb-0 text-uppercase font-weight-bold">New Orders</p>
-                    <h5 class="font-weight-bolder mb-0">45</h5>
-                    <p class="mb-0 text-danger">
-                      <span class="font-weight-bolder">-3%</span> since yesterday
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="col-xl-3 col-md-6 mb-4">
-          <div class="card border shadow-xs card-stats">
-            <div class="card-body p-3">
-              <div class="row">
-                <div class="col-8">
-                  <div class="numbers">
-                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Active Users</p>
-                    <h5 class="font-weight-bolder mb-0">2,300</h5>
-                    <p class="mb-0 text-success">
-                      <span class="font-weight-bolder">+5%</span> this month
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
       <div class="row">
-        <div class="col-lg-8 mb-4">
+        <div class="col-12 mb-4">
           <div class="card border shadow-xs">
             <div class="card-header border-bottom pb-0">
               <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
                 <div class="mb-3 mb-md-0">
-                  <h6 class="font-weight-semibold text-lg mb-0">Recent Sales Overview</h6>
-                  <p class="text-sm mb-0">Monthly sales performance</p>
+                  <h6 class="font-weight-semibold text-lg mb-0">Product Catalog</h6>
+                  <p class="text-sm mb-0">View all available products</p>
                 </div>
                 <div class="d-flex">
                   <button type="button" class="btn btn-sm btn-white me-2">
-                    View Report
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16">
+                      <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2z"/>
+                    </svg>
+                    Filter
                   </button>
                   <button type="button" class="btn btn-sm btn-dark">
-                    Export Data
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                      <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                    </svg>
+                    Add Product
                   </button>
                 </div>
               </div>
@@ -266,178 +69,27 @@
                 <table class="table align-items-center justify-content-center mb-0">
                   <thead class="bg-gray-100">
                     <tr>
-                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-3">Product</th>
+                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-3">ID</th>
+                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Name</th>
+                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Price</th>
                       <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Category</th>
-                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Sales</th>
                       <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2 text-center">Status</th>
-                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Last Updated</th>
+                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-3">
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Premium Keyboard</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">Electronics</p>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">$2,500</p>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="badge bg-success">In Stock</span>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">Mar 15, 2025</p>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-3">
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Ergonomic Mouse</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">Electronics</p>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">$1,200</p>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="badge bg-success">In Stock</span>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">Mar 14, 2025</p>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-3">
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Monitor 27"</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">Electronics</p>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">$3,400</p>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="badge bg-warning">Low Stock</span>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">Mar 13, 2025</p>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-3">
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Premium Headphones</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">Audio</p>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">$1,800</p>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="badge bg-danger">Out of Stock</span>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">Mar 10, 2025</p>
-                      </td>
-                    </tr>
+                  <tbody id="productsTableBody">
+                    <!-- Products will be loaded here -->
                   </tbody>
                 </table>
               </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="col-lg-4 mb-4">
-          <div class="card border shadow-xs h-100">
-            <div class="card-header border-bottom pb-0">
-              <h6 class="font-weight-semibold text-lg mb-0">Quick Actions</h6>
-              <p class="text-sm mb-0">Commonly used functions</p>
-            </div>
-            <div class="card-body">
-              <div class="list-group">
-                <a href="/products/new" class="list-group-item list-group-item-action border-0 py-3">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h6 class="mb-1 font-weight-semibold">Add New Product</h6>
-                      <p class="mb-0 text-sm">Create a new product listing</p>
-                    </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                      <circle cx="12" cy="12" r="10"/>
-                      <line x1="12" y1="8" x2="12" y2="16"/>
-                      <line x1="8" y1="12" x2="16" y2="12"/>
-                    </svg>
-                  </div>
-                </a>
-                
-                <a href="/products/inventory" class="list-group-item list-group-item-action border-0 py-3">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h6 class="mb-1 font-weight-semibold">Manage Inventory</h6>
-                      <p class="mb-0 text-sm">Update stock and quantities</p>
-                    </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                      <rect x="2" y="5" width="20" height="14" rx="2"/>
-                      <line x1="2" y1="10" x2="22" y2="10"/>
-                    </svg>
-                  </div>
-                </a>
-                
-                <a href="/orders" class="list-group-item list-group-item-action border-0 py-3">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h6 class="mb-1 font-weight-semibold">Review Orders</h6>
-                      <p class="mb-0 text-sm">Process pending orders</p>
-                    </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                      <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                      <line x1="9" y1="10" x2="15" y2="10"/>
-                      <line x1="9" y1="14" x2="15" y2="14"/>
-                      <line x1="9" y1="18" x2="12" y2="18"/>
-                    </svg>
-                  </div>
-                </a>
-                
-                <a href="/analytics" class="list-group-item list-group-item-action border-0 py-3">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h6 class="mb-1 font-weight-semibold">View Analytics</h6>
-                      <p class="mb-0 text-sm">Check performance metrics</p>
-                    </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                      <rect x="3" y="3" width="18" height="18" rx="2"/>
-                      <line x1="3" y1="9" x2="21" y2="9"/>
-                      <line x1="3" y1="15" x2="21" y2="15"/>
-                      <line x1="9" y1="3" x2="9" y2="21"/>
-                      <line x1="15" y1="3" x2="15" y2="21"/>
-                    </svg>
-                  </div>
-                </a>
+              <div id="loadingIndicator" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading products...</p>
+              </div>
+              <div id="noProductsMessage" class="text-center py-5 d-none">
+                <p>No products found.</p>
               </div>
             </div>
           </div>
@@ -449,49 +101,129 @@
   <!-- Core JS Files -->
   <script src="/js/core/popper.min.js"></script>
   <script src="/js/core/bootstrap.min.js"></script>
-  
-  <!-- Custom JavaScript for mobile responsiveness -->
+
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const menuToggle = document.getElementById('menuToggle');
-      const sidebar = document.querySelector('.sidebar');
-      const sidebarOverlay = document.querySelector('.sidebar-overlay');
-      const sidebarMenuItems = document.querySelectorAll('.sidebar-menu-item');
-      
-      // Toggle sidebar on menu button click
-      menuToggle.addEventListener('click', function() {
-        sidebar.classList.toggle('active');
-        sidebarOverlay.classList.toggle('active');
-        document.body.classList.toggle('overflow-hidden');
-      });
-      
-      // Close sidebar when clicking outside
-      sidebarOverlay.addEventListener('click', function() {
-        sidebar.classList.remove('active');
-        sidebarOverlay.classList.remove('active');
-        document.body.classList.remove('overflow-hidden');
-      });
-      
-      // Close sidebar when a menu item is clicked (on mobile)
-      sidebarMenuItems.forEach(item => {
-        item.addEventListener('click', function() {
-          if (window.innerWidth < 992) {
-            sidebar.classList.remove('active');
-            sidebarOverlay.classList.remove('active');
-            document.body.classList.remove('overflow-hidden');
-          }
-        });
-      });
-      
-      // Handle resize events
-      window.addEventListener('resize', function() {
-        if (window.innerWidth >= 992) {
-          sidebar.classList.remove('active');
-          sidebarOverlay.classList.remove('active');
-          document.body.classList.remove('overflow-hidden');
+    // Function to fetch products
+    async function fetchProducts() {
+      try {
+        const response = await fetch('/products');
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
         }
+        const products = await response.json();
+        return products;
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        return [];
+      }
+    }
+
+    // Function to render products
+    function renderProducts(products) {
+      const tableBody = document.getElementById('productsTableBody');
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      const noProductsMessage = document.getElementById('noProductsMessage');
+      
+      // Hide loading indicator
+      loadingIndicator.classList.add('d-none');
+      
+      // Check if products exist
+      if (!products.length) {
+        noProductsMessage.classList.remove('d-none');
+        return;
+      }
+      
+      // Clear existing rows
+      tableBody.innerHTML = '';
+      
+      // Add products to table
+      products.forEach(product => {
+        const row = document.createElement('tr');
+        
+        // Determine status class
+        let statusClass = 'bg-success';
+        let statusText = 'In Stock';
+        
+        if (product.stock <= 0) {
+          statusClass = 'bg-danger';
+          statusText = 'Out of Stock';
+        } else if (product.stock < 10) {
+          statusClass = 'bg-warning';
+          statusText = 'Low Stock';
+        }
+        
+        row.innerHTML = `
+          <td>
+            <p class="text-sm font-weight-normal mb-0 px-3">${product.id}</p>
+          </td>
+          <td>
+            <div class="d-flex px-2">
+              <div class="my-auto">
+                <h6 class="mb-0 text-sm">${product.name}</h6>
+              </div>
+            </div>
+          </td>
+          <td>
+            <p class="text-sm font-weight-normal mb-0">$${product.price ? product.price.toFixed(2) : '0.00'}</p>
+          </td>
+          <td>
+            <p class="text-sm font-weight-normal mb-0">${product.category || 'Uncategorized'}</p>
+          </td>
+          <td class="align-middle text-center">
+            <div class="d-flex align-items-center justify-content-center">
+              <span class="badge ${statusClass}">${statusText}</span>
+            </div>
+          </td>
+          <td>
+            <div class="d-flex">
+              <button class="btn btn-sm btn-link text-primary px-3 mb-0" onclick="viewProduct(${product.id})">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                  <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                  <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                </svg>
+              </button>
+              <button class="btn btn-sm btn-link text-secondary px-3 mb-0" onclick="editProduct(${product.id})">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                  <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                </svg>
+              </button>
+              <button class="btn btn-sm btn-link text-danger px-3 mb-0" onclick="deleteProduct(${product.id})">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                  <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        `;
+        
+        tableBody.appendChild(row);
       });
+    }
+
+    // Placeholder functions for CRUD operations
+    function viewProduct(id) {
+      console.log('View product', id);
+      // Implement view functionality
+    }
+
+    function editProduct(id) {
+      console.log('Edit product', id);
+      // Implement edit functionality
+    }
+
+    function deleteProduct(id) {
+      console.log('Delete product', id);
+      // Implement delete functionality
+    }
+
+    // Load products when the page loads
+    document.addEventListener('DOMContentLoaded', async () => {
+      const products = await fetchProducts();
+      renderProducts(products);
     });
   </script>
+
+  {{> script}}
 </body>
 </html>
