@@ -31,7 +31,7 @@ export class AppController {
         const token = await this.authService.login(result);
         // Simpan token di cookie atau session
         res.cookie('jwt', token.access_token, { httpOnly: true });
-        return res.redirect('/profile');
+        return res.redirect('/dashboard');
       } else {
         return res.render('login', { 
           title: 'Login Page', 
@@ -46,9 +46,33 @@ export class AppController {
     }
   }
 
+  @Get('/dashboard')
+  @Render('dashboard')
+  getDashboard() {
+    return { 
+      title: 'Dashboard',
+      user: { username: 'Admin' },
+      isActivePage: {
+        dashboard: true
+      }
+    };
+  }
+
+  @Get('/products')
+  @Render('products')
+  getProducts() {
+    return { 
+      title: 'Products',
+      user: { username: 'Admin' },
+      isActivePage: {
+        products: true
+      }
+    };
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  @Render('dashboard')
+  @Render('profile')
   getProfile(@Request() req) {
     return { user: req.user };
   }
