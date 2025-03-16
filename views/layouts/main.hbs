@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+{{> head}}
+<body class="bg-gray-100">
+  <!-- Sidebar overlay for mobile -->
+  <div class="sidebar-overlay"></div>
+  
+  <!-- Sidebar -->
+  {{> sidebar}}
+
+  <!-- Main Content -->
+  <div class="main-content bg-gray-100">
+    {{> navbar}}
+    
+    <!-- Page Content -->
+    <div class="container-fluid px-0">
+      {{{body}}}
+    </div>
+  </div>
+  
+  {{> scripts}}
+</body>
+</html>

@@ -1,0 +1,18 @@
+<nav class="navbar navbar-expand-lg mb-4 p-3">
+  <div class="container-fluid px-0">
+    <div class="d-flex align-items-center">
+      <button class="menu-toggle" id="menuToggle">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <h4 class="font-weight-bold mb-0">{{pageTitle}}</h4>
+    </div>
+    <div class="ms-auto">
+      <span class="font-weight-bold d-none d-sm-inline">Welcome, {{user.username}}</span>
+      <span class="d-inline d-sm-none">{{user.username}}</span>
+    </div>
+  </div>
+</nav>
