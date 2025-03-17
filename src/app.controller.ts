@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Request, Render, Post, Body, Res, Req } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Render, Post, Body, Res, Req, Redirect  } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { AuthService } from './auth/auth.service';
 import { ProductService } from './product/product.service';
@@ -65,18 +65,10 @@ export class AppController {
   }
 
   @Get('product')
-  @Render('products')
-  async getProducts() {
-    const products = await this.productService.findAll();
-    
-    return { 
-      title: 'Products',
-      user: { username: 'Admin' },
-      isActivePage: {
-        products: true
-      },
-      products: products
-    };
+  @UseGuards(JwtAuthGuard)
+  @Redirect('/products')
+  redirectToProducts() {
+    return;
   }
 
   @Get('category')
