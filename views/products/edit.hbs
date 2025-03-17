@@ -1,76 +1,122 @@
-<!-- views/products/edit.hbs -->
-<div class="container-fluid px-4">
-  <div class="row">
-    <div class="col-12 mb-4">
-      <div class="card border shadow-xs">
-        <div class="card-header border-bottom pb-0">
-          <div class="d-sm-flex align-items-center">
-            <div>
-              <h6 class="font-weight-semibold text-lg mb-0">Edit Product</h6>
-              <p class="text-sm mb-sm-0">Update product information</p>
-            </div>
-            <div class="ms-auto d-flex">
-              <a href="/products" class="btn btn-sm btn-white mb-0">
-                Back to Products
-              </a>
-            </div>
-          </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>{{title}}</title>
+  
+  <!-- Fonts and icons -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Noto+Sans:300,400,500,600,700,800|PT+Mono:300,400,500,600,700" rel="stylesheet" />
+  
+  <!-- CSS Files -->
+  <link id="pagestyle" href="/css/corporate-ui-dashboard.css" rel="stylesheet" />
+  
+  {{> style}}
+</head>
+
+<body class="bg-gray-100">
+  {{> sidebar}}
+
+  <div class="main-content bg-gray-100">
+    <nav class="navbar navbar-expand-lg mb-4 p-3">
+      <div class="container-fluid px-0">
+        <div class="d-flex align-items-center">
+          <button class="menu-toggle" id="menuToggle">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h4 class="font-weight-bold mb-0">Products</h4>
         </div>
-        <div class="card-body">
-          <form action="/products/{{product.id}}/update" method="POST">
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Product Name</label>
-                <input type="text" class="form-control" name="name" value="{{product.name}}" required>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Product Code</label>
-                <input type="text" class="form-control" name="productCode" value="{{product.productCode}}">
-              </div>
-            </div>
-            
-            <div class="row">
-              <div class="col-md-4 mb-3">
-                <label class="form-label">Cost Price</label>
-                <div class="input-group">
-                  <span class="input-group-text">$</span>
-                  <input type="number" class="form-control" name="costPrice" step="0.01" value="{{product.costPrice}}" required>
-                </div>
-              </div>
-              <div class="col-md-4 mb-3">
-                <label class="form-label">Selling Price</label>
-                <div class="input-group">
-                  <span class="input-group-text">$</span>
-                  <input type="number" class="form-control" name="sellingPrice" step="0.01" value="{{product.sellingPrice}}" required>
-                </div>
-              </div>
-              <div class="col-md-4 mb-3">
-                <label class="form-label">Stock</label>
-                <input type="number" class="form-control" name="stock" value="{{product.stock}}" required>
-              </div>
-            </div>
-            
-            <div class="mb-3">
-              <label class="form-label">Category</label>
-              <select class="form-select" name="categoryId" required>
-                <option value="">Select Category</option>
-                {{#each categories}}
-                  <option value="{{this.id}}" {{#if (eq this.id ../product.categoryId)}}selected{{/if}}>{{this.name}}</option>
-                {{/each}}
-              </select>
-            </div>
-            
-            <div class="mb-3">
-              <label class="form-label">Description</label>
-              <textarea class="form-control" name="description" rows="3">{{product.description}}</textarea>
-            </div>
-            
-            <div class="text-end mt-4">
-              <button type="submit" class="btn btn-primary">Update Product</button>
-            </div>
-          </form>
+        <div class="ms-auto">
+          <span class="font-weight-bold d-none d-sm-inline">Welcome, {{user.username}}</span>
+          <span class="d-inline d-sm-none">{{user.username}}</span>
         </div>
       </div>
-    </div>
+    </nav>
+    
+    <div class="container-fluid px-4">
+        <div class="row">
+            <div class="col-12 mb-4">
+            <div class="card border shadow-xs">
+                <div class="card-header border-bottom pb-0">
+                <div class="d-sm-flex align-items-center">
+                    <div>
+                    <h6 class="font-weight-semibold text-lg mb-0">Edit Product</h6>
+                    <p class="text-sm mb-sm-0">Update product information</p>
+                    </div>
+                    <div class="ms-auto d-flex">
+                    <a href="/products" class="btn btn-sm btn-white mb-0">
+                        Back to Products
+                    </a>
+                    </div>
+                </div>
+                </div>
+                <div class="card-body">
+                <form action="/products/{{product.id}}/update" method="POST">
+                    <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Product Name</label>
+                        <input type="text" class="form-control" name="name" value="{{product.name}}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Product Code</label>
+                        <input type="text" class="form-control" name="productCode" value="{{product.productCode}}">
+                    </div>
+                    </div>
+                    
+                    <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Cost Price</label>
+                        <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" name="costPrice" step="0.01" value="{{product.costPrice}}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Selling Price</label>
+                        <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" name="sellingPrice" step="0.01" value="{{product.sellingPrice}}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Stock</label>
+                        <input type="number" class="form-control" name="stock" value="{{product.stock}}" required>
+                    </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" name="categoryId" required>
+                        <option value="">Select Category</option>
+                        {{#each categories}}
+                        <option value="{{this.id}}" {{#if (eq this.id ../product.categoryId)}}selected{{/if}}>{{this.name}}</option>
+                        {{/each}}
+                    </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" name="description" rows="3">{{product.description}}</textarea>
+                    </div>
+                    
+                    <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-primary">Update Product</button>
+                    </div>
+                </form>
+                </div>
+            </div>
+            </div>
+        </div>
   </div>
-</div>
+  
+  <!-- Core JS Files -->
+  <script src="/js/core/popper.min.js"></script>
+  <script src="/js/core/bootstrap.min.js"></script>
+
+  {{> script}}
+</body>
+</html>
