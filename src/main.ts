@@ -14,6 +14,10 @@ async function bootstrap() {
 
   hbs.registerPartials(join(__dirname, '..', 'views/partials'));
 
+  hbs.registerHelper('eq', function(a, b) {
+    return a === b;
+  });
+
   app.use(cookieParser());
     
   await app.listen(process.env.PORT ?? 3000);
