@@ -15,6 +15,8 @@ export class ProductController {
   ) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @Render('products/index')
   async findAll() {
     const products = await this.productService.findAll();
