@@ -2,12 +2,14 @@ import { Controller, Get, UseGuards, Request, Render, Post, Body, Res, Req } fro
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { AuthService } from './auth/auth.service';
 import { ProductService } from './product/product.service';
+import { CategoryService } from './category/category.service';
 
 @Controller()
 export class AppController {
   constructor(
     private authService: AuthService,
-    private productService: ProductService
+    private productService: ProductService,
+    private categoryService: CategoryService
   ) {}
 
   // Halaman home (root endpoint /)
@@ -74,6 +76,21 @@ export class AppController {
         products: true
       },
       products: products
+    };
+  }
+
+  @Get('category')
+  @Render('categories')
+  async getCategory() {
+    const category = await this.categoryService.findAll();
+    
+    return { 
+      title: 'Categories',
+      user: { username: 'Admin' },
+      isActivePage: {
+        products: true
+      },
+      category: category
     };
   }
 
