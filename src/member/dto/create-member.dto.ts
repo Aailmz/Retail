@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 
-export class CreateProductDto {
+export class CreateMemberDto {
   @IsNotEmpty()
   @IsString()
   name: string;
