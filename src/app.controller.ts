@@ -3,13 +3,15 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { AuthService } from './auth/auth.service';
 import { ProductService } from './product/product.service';
 import { CategoryService } from './category/category.service';
+import { MemberService } from './member/member.service';
 
 @Controller()
 export class AppController {
   constructor(
     private authService: AuthService,
     private productService: ProductService,
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
+    private memberService: MemberService
   ) {}
 
   // Halaman home (root endpoint /)
@@ -68,6 +70,13 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Redirect('/products')
   redirectToProducts() {
+    return;
+  }
+
+  @Get('member')
+  @UseGuards(JwtAuthGuard)
+  @Redirect('/members')
+  redirectToMembers() {
     return;
   }
 

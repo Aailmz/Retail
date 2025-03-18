@@ -9,6 +9,7 @@ import { ProductModule } from './product/product.module';
 import { CategoryModule } from './category/category.module';
 import { Product } from './product/entities/product.entity';
 import { Category } from './category/entities/category.entity';
+import { Member } from './member/entities/member.entity';
 import { MemberModule } from './member/member.module';
 
 @Module({
@@ -20,7 +21,7 @@ import { MemberModule } from './member/member.module';
       username: 'root',
       password: '',
       database: 'discount_ukk',
-      entities: [User, Product, Category],
+      entities: [User, Product, Category, Member],
       synchronize: true,
     }),
     AuthModule,
