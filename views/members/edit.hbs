@@ -28,7 +28,7 @@
               <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
           </button>
-          <h4 class="font-weight-bold mb-0">Products</h4>
+          <h4 class="font-weight-bold mb-0">Members</h4>
         </div>
         <div class="ms-auto">
           <span class="font-weight-bold d-none d-sm-inline">Welcome, {{user.username}}</span>
@@ -44,73 +44,62 @@
                 <div class="card-header border-bottom pb-0">
                 <div class="d-sm-flex align-items-center">
                     <div>
-                    <h6 class="font-weight-semibold text-lg mb-0">Edit Product</h6>
-                    <p class="text-sm mb-sm-0">Update product information</p>
+                    <h6 class="font-weight-semibold text-lg mb-0">Edit Member</h6>
+                    <p class="text-sm mb-sm-0">Update member information</p>
                     </div>
                     <div class="ms-auto d-flex">
-                    <a href="/products" class="btn btn-sm btn-white mb-0">
-                        Back to Products
+                    <a href="/members" class="btn btn-sm btn-white me-2">
+                        Back to Members
+                    </a>
+                    <a href="/members/{{member.id}}" class="btn btn-sm btn-info mb-0">
+                        View Details
                     </a>
                     </div>
                 </div>
                 </div>
                 <div class="card-body">
-                <form action="/products/{{product.id}}/update" method="POST">
+                <form action="/members/{{member.id}}/update" method="POST">
                     <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Product Name</label>
-                        <input type="text" class="form-control" name="name" value="{{product.name}}" required>
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" name="name" value="{{member.name}}" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Product Code</label>
-                        <input type="text" class="form-control" name="productCode" value="{{product.productCode}}">
-                    </div>
-                    </div>
-                    
-                    <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Cost Price</label>
-                        <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" class="form-control" name="costPrice" step="0.01" value="{{product.costPrice}}" required>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Selling Price</label>
-                        <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" class="form-control" name="sellingPrice" step="0.01" value="{{product.sellingPrice}}" required>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Stock</label>
-                        <input type="number" class="form-control" name="stock" value="{{product.stock}}" required>
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" name="phone" value="{{member.phone}}" required>
                     </div>
                     </div>
                     
                     <div class="mb-3">
-                    <label class="form-label">Category</label>
-                    <select class="form-select" name="categoryId" required>
-                        <option value="">Select Category</option>
-                        {{#each categories}}
-                        <option value="{{this.id}}" {{#if (eq this.id ../product.categoryId)}}selected{{/if}}>{{this.name}}</option>
-                        {{/each}}
-                    </select>
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" name="email" value="{{member.email}}" placeholder="Optional">
+                    <div class="form-text">Email address is optional</div>
                     </div>
                     
-                    <div class="mb-3">
-                    <label class="form-label">Description</label>
-                    <textarea class="form-control" name="description" rows="3">{{product.description}}</textarea>
+                    <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                        <label class="form-label">Created At</label>
+                        <input type="text" class="form-control" value="{{formatDate member.createdAt}}" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                        <label class="form-label">Last Updated</label>
+                        <input type="text" class="form-control" value="{{formatDate member.updatedAt}}" disabled>
+                        </div>
+                    </div>
                     </div>
                     
                     <div class="text-end mt-4">
-                    <button type="submit" class="btn btn-primary">Update Product</button>
+                    <button type="submit" class="btn btn-primary">Update Member</button>
                     </div>
                 </form>
                 </div>
             </div>
             </div>
         </div>
+    </div>
   </div>
   
   <!-- Core JS Files -->

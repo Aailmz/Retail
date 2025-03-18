@@ -28,7 +28,7 @@
               <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
           </button>
-          <h4 class="font-weight-bold mb-0">Products</h4>
+          <h4 class="font-weight-bold mb-0">Members</h4>
         </div>
         <div class="ms-auto">
           <span class="font-weight-bold d-none d-sm-inline">Welcome, {{user.username}}</span>
@@ -37,7 +37,6 @@
       </div>
     </nav>
     
-    
     <div class="container-fluid px-4">
         <div class="row">
             <div class="col-12 mb-4">
@@ -45,12 +44,12 @@
                 <div class="card-header border-bottom pb-0">
                 <div class="d-sm-flex align-items-center">
                     <div>
-                    <h6 class="font-weight-semibold text-lg mb-0">Create New Product</h6>
-                    <p class="text-sm mb-sm-0">Add a new product to your inventory</p>
+                    <h6 class="font-weight-semibold text-lg mb-0">Create New Member</h6>
+                    <p class="text-sm mb-sm-0">Add a new member to your database</p>
                     </div>
                     <div class="ms-auto d-flex">
                     <a href="/members" class="btn btn-sm btn-white mb-0">
-                        Back to Products
+                        Back to Members
                     </a>
                     </div>
                 </div>
@@ -64,48 +63,18 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Phone Number</label>
-                        <input type="text" class="form-control" name="productCode">
-                    </div>
-                    </div>
-                    
-                    <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Cost Price</label>
-                        <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" class="form-control" name="costPrice" step="0.01" required>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Selling Price</label>
-                        <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" class="form-control" name="sellingPrice" step="0.01" required>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Stock</label>
-                        <input type="number" class="form-control" name="stock" required>
+                        <input type="tel" class="form-control" name="phone" required>
                     </div>
                     </div>
                     
                     <div class="mb-3">
-                    <label class="form-label">Category</label>
-                    <select class="form-select" name="categoryId" required>
-                        <option value="">Select Category</option>
-                        {{#each categories}}
-                        <option value="{{this.id}}">{{this.name}}</option>
-                        {{/each}}
-                    </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                    <label class="form-label">Description</label>
-                    <textarea class="form-control" name="description" rows="3"></textarea>
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" name="email" placeholder="Optional">
+                    <div class="form-text">Email address is optional</div>
                     </div>
                     
                     <div class="text-end mt-4">
-                    <button type="submit" class="btn btn-primary">Save Product</button>
+                    <button type="submit" class="btn btn-primary">Save Member</button>
                     </div>
                 </form>
                 </div>
@@ -113,6 +82,7 @@
             </div>
         </div>
     </div>
+  </div>
   
   <!-- Core JS Files -->
   <script src="/js/core/popper.min.js"></script>
