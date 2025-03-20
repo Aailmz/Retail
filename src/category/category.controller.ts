@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Render, Res } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -10,30 +10,79 @@ import { Roles } from '../auth/roles.decorator';
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Render('categories/index')
+  async findAll() {
+    const categories = await this.categoryService.findAll();
+    return { 
+      title: 'Category List',
+      categories: categories,
+      user: { username: 'Admin' },
+      isActivePage: { categories: true }
+    };
+  }
+
+  @Get('create')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Render('categories/create')
+  showCreateForm() {
+    return { 
+      title: 'Create Category',
+      user: { username: 'Admin' },
+      isActivePage: { categories: true }
+    };
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoryService.create(createCategoryDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.categoryService.findAll();
+  async create(@Body() createCategoryDto: CreateCategoryDto, @Res() res) {
+    await this.categoryService.create(createCategoryDto);
+    return res.redirect('/categories');
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoryService.findOne(+id);
+  @Render('categories/show')
+  async findOne(@Param('id') id: string) {
+    const category = await this.categoryService.findOne(+id);
+    return { 
+      title: 'Category Details',
+      category: category,
+      user: { username: 'Admin' },
+      isActivePage: { categories: true }
+    };
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
-    return this.categoryService.update(+id, updateCategoryDto);
+  @Get(':id/edit')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Render('categories/edit')
+  async showEditForm(@Param('id') id: string) {
+    const category = await this.categoryService.findOne(+id);
+    return { 
+      title: 'Edit Category',
+      category: category,
+      user: { username: 'Admin' },
+      isActivePage: { categories: true }
+    };
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.categoryService.remove(+id);
+  @Post(':id/update')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto, @Res() res) {
+    await this.categoryService.update(+id, updateCategoryDto);
+    return res.redirect('/categories');
+  }
+
+  @Post(':id/delete')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async remove(@Param('id') id: string, @Res() res) {
+    await this.categoryService.remove(+id);
+    return res.redirect('/categories');
   }
 }
