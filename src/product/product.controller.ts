@@ -6,6 +6,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { CategoryService } from '../category/category.service';
+import { Request, Response } from 'express';
 
 @Controller('products')
 export class ProductController {
@@ -18,13 +19,27 @@ export class ProductController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Render('products/index')
-  async findAll() {
+  async findAll(@Req() req: Request) {
     const products = await this.productService.findAll();
+    
+    // Get flash messages
+    const successMessage = req.flash('success');
+    const errorMessage = req.flash('error');
+    
+    // Create notification object if there are messages
+    let notification = null;
+    if (successMessage && successMessage.length > 0) {
+      notification = { type: 'success', message: successMessage[0] };
+    } else if (errorMessage && errorMessage.length > 0) {
+      notification = { type: 'danger', message: errorMessage[0] };
+    }
+    
     return { 
       title: 'Product List',
       products: products,
       user: { username: 'Admin' },
-      isActivePage: { products: true }
+      isActivePage: { products: true },
+      notification: notification
     };
   }
 
@@ -32,22 +47,37 @@ export class ProductController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Render('products/create')
-  async showCreateForm() {
+  async showCreateForm(@Req() req: Request) {
     const categories = await this.categoryService.findAll();
+    
+    // Get error messages if redirected from failed creation
+    const errorMessage = req.flash('error');
+    let notification = null;
+    if (errorMessage && errorMessage.length > 0) {
+      notification = { type: 'danger', message: errorMessage[0] };
+    }
+    
     return { 
       title: 'Create Product',
       categories: categories,
       user: { username: 'Admin' },
-      isActivePage: { products: true }
+      isActivePage: { products: true },
+      notification: notification
     };
   }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  async create(@Body() createProductDto: CreateProductDto, @Res() res) {
-    await this.productService.create(createProductDto);
-    return res.redirect('/products');
+  async create(@Body() createProductDto: CreateProductDto, @Res() res: Response, @Req() req: Request) {
+    try {
+      await this.productService.create(createProductDto);
+      req.flash('success', 'Product created successfully!');
+      return res.redirect('/products');
+    } catch (error) {
+      req.flash('error', 'Failed to create product: ' + error.message);
+      return res.redirect('/products/create');
+    }
   }
 
   @Get(':id')
@@ -66,31 +96,52 @@ export class ProductController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Render('products/edit')
-  async showEditForm(@Param('id') id: string) {
+  async showEditForm(@Param('id') id: string, @Req() req: Request) {
     const product = await this.productService.findOne(+id);
     const categories = await this.categoryService.findAll();
+    
+    // Get error messages if redirected from failed update
+    const errorMessage = req.flash('error');
+    let notification = null;
+    if (errorMessage && errorMessage.length > 0) {
+      notification = { type: 'danger', message: errorMessage[0] };
+    }
+    
     return { 
       title: 'Edit Product',
       product: product,
       categories: categories,
       user: { username: 'Admin' },
-      isActivePage: { products: true }
+      isActivePage: { products: true },
+      notification: notification
     };
   }
 
   @Post(':id/update')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  async update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto, @Res() res) {
-    await this.productService.update(+id, updateProductDto);
-    return res.redirect('/products');
+  async update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto, @Res() res: Response, @Req() req: Request) {
+    try {
+      await this.productService.update(+id, updateProductDto);
+      req.flash('success', 'Product updated successfully!');
+      return res.redirect('/products');
+    } catch (error) {
+      req.flash('error', 'Failed to update product: ' + error.message);
+      return res.redirect(`/products/${id}/edit`);
+    }
   }
 
   @Post(':id/delete')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  async remove(@Param('id') id: string, @Res() res) {
-    await this.productService.remove(+id);
-    return res.redirect('/products');
+  async remove(@Param('id') id: string, @Res() res: Response, @Req() req: Request) {
+    try {
+      await this.productService.remove(+id);
+      req.flash('success', 'Product deleted successfully!');
+      return res.redirect('/products');
+    } catch (error) {
+      req.flash('error', 'Failed to delete product: ' + error.message);
+      return res.redirect('/products');
+    }
   }
 }

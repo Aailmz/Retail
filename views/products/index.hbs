@@ -105,9 +105,16 @@
                             <a href="/products/{{this.id}}/edit" class="btn btn-sm btn-primary">
                               Edit
                             </a>
-                            <form action="/products/{{this.id}}/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this product?');" style="display: inline;">
-                              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                            </form>
+                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{this.id}}">
+                              Delete
+                            </button>
+                            
+                            {{> delete
+                              id=this.id 
+                              itemType="product" 
+                              itemName=this.name 
+                              route="products"
+                            }}
                           </div>
                         </td>
                       </tr>
