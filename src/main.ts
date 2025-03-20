@@ -34,6 +34,15 @@ async function bootstrap() {
     });
   });
 
+  app.use(session({
+    secret: 'your-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 60000 }
+  }));
+  
+  app.use(flash());
+
   app.use(cookieParser());
     
   await app.listen(process.env.PORT ?? 3000);
