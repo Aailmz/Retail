@@ -98,9 +98,36 @@
                             <a href="/categories/{{this.id}}/edit" class="btn btn-sm btn-primary">
                               Edit
                             </a>
-                            <form action="/categories/{{this.id}}/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this category?');" style="display: inline;">
-                              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                            </form>
+                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{this.id}}">
+                              Delete
+                            </button>
+                            
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal-{{this.id}}" tabindex="-1" aria-labelledby="deleteModalLabel-{{this.id}}" aria-hidden="true">
+                              <div class="modal-dialog">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel-{{this.id}}">Confirm Deletion</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <p>Are you sure you want to delete the category: <strong>{{this.name}}</strong>?</p>
+                                    <p class="text-danger">This action cannot be undone.</p>
+                                    {{#if this.products.length}}
+                                      <div class="alert alert-warning">
+                                        <strong>Warning:</strong> This category has {{this.products.length}} product(s) associated with it.
+                                      </div>
+                                    {{/if}}
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <form action="/categories/{{this.id}}/delete" method="POST" style="display: inline;">
+                                      <button type="submit" class="btn btn-danger">Delete Category</button>
+                                    </form>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </td>
                       </tr>
