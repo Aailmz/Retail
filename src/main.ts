@@ -4,6 +4,9 @@ import { join } from 'path';
 import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser';
 import * as hbs from 'hbs';
+import * as session from 'express-session';
+import * as flash from 'connect-flash';
+
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -35,7 +38,7 @@ async function bootstrap() {
   });
 
   app.use(session({
-    secret: 'your-secret-key',
+    secret: 'rahasia',
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 60000 }
