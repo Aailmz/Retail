@@ -1,0 +1,26 @@
+<!-- Delete Modal Partial -->
+<div class="modal fade" id="deleteModal-{{id}}" tabindex="-1" aria-labelledby="deleteModalLabel-{{id}}" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel-{{id}}">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete the {{itemType}}: <strong>{{itemName}}</strong>?</p>
+        <p class="text-danger">This action cannot be undone.</p>
+        {{#if warning}}
+          <div class="alert alert-warning">
+            <strong>Warning:</strong> {{warning}}
+          </div>
+        {{/if}}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form action="/{{route}}/{{id}}/delete" method="POST" style="display: inline;">
+          <button type="submit" class="btn btn-danger">Delete {{itemType}}</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
