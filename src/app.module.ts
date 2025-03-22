@@ -11,6 +11,7 @@ import { Product } from './product/entities/product.entity';
 import { Category } from './category/entities/category.entity';
 import { Member } from './member/entities/member.entity';
 import { MemberModule } from './member/member.module';
+import { PromotionModule } from './promotion/promotion.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { MemberModule } from './member/member.module';
     ProductModule,
     CategoryModule,
     MemberModule,
+    PromotionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
