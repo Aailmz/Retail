@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>{{title}}</title>
+  
+  <!-- Fonts and icons -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Noto+Sans:300,400,500,600,700,800|PT+Mono:300,400,500,600,700" rel="stylesheet" />
+  
+  <!-- CSS Files -->
+  <link id="pagestyle" href="/css/corporate-ui-dashboard.css" rel="stylesheet" />
+  
+  {{> style}}
+</head>
+
+<body class="bg-gray-100">
+  {{> sidebar}}
+  <!-- Main Content -->
+  <div class="main-content bg-gray-100">
+    <nav class="navbar navbar-expand-lg mb-4 p-3">
+      <div class="container-fluid px-0">
+        <div class="d-flex align-items-center">
+          <button class="menu-toggle" id="menuToggle">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h4 class="font-weight-bold mb-0">Edit Promotion</h4>
+        </div>
+        <div class="ms-auto">
+          <span class="font-weight-bold d-none d-sm-inline">Welcome, {{user.username}}</span>
+          <span class="d-inline d-sm-none">{{user.username}}</span>
+        </div>
+      </div>
+    </nav>
+
+    {{> notification}}
+    
+    <!-- Edit Promotion Content -->
+    <div class="container-fluid px-4">
+      <div class="row">
+        <div class="col-12 mb-4">
+          <div class="card border shadow-xs">
+            <div class="card-header border-bottom pb-0">
+              <div class="d-flex justify-content-between align-items-center">
+                <h6 class="font-weight-semibold text-lg mb-0">Edit Promotion: {{promotion.name}}</h6>
+                <a href="/promotions" class="btn btn-sm btn-secondary">Back to List</a>
+              </div>
+            </div>
+            <div class="card-body">
+              <form action="/promotions/{{promotion.id}}/update" method="POST">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="name" class="form-control-label">Promotion Name</label>
+                      <input type="text" class="form-control" id="name" name="name" value="{{promotion.name}}" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="type" class="form-control-label">Promotion Type</label>
+                      <select class="form-control" id="type" name="type" required>
+                        <option value="">-- Select Type --</option>
+                        {{#each promotionTypes}}
+                          <option value="{{this}}" {{#if (eq this ../promotion.type)}}selected{{/if}}>
+                            {{#if (eq this "buy_x_get_y")}}
+                              Buy X Get Y
+                            {{else if (eq this "discount_percentage")}}
+                              Discount Percentage
+                            {{else if (eq this "bundle")}}
+                              Bundle Deal
+                            {{else}}
+                              {{this}}
+                            {{/if}}
+                          </option>
+                        {{/each}}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="row mt-3">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="description" class="form-control-label">Description</label>
+                      <textarea class="form-control" id="description" name="description" rows="3">{{promotion.description}}</textarea>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="status" class="form-control-label">Status</label>
+                      <select class="form-control" id="status" name="status" required>
+                        <option value="">-- Select Status --</option>
+                        {{#each statusOptions}}
+                          <option value="{{this}}" {{#if (eq this ../promotion.status)}}selected{{/if}}>
+                            {{capitalize this}}
+                          </option>
+                        {{/each}}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="row mt-3">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="startDate" class="form-control-label">Start Date</label>
+                      <input type="datetime-local" class="form-control" id="startDate" name="startDate" value="{{formatDateTimeLocal promotion.startDate}}" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="endDate" class="form-control-label">End Date</label>
+                      <input type="datetime-local" class="form-control" id="endDate" name="endDate" value="{{formatDateTimeLocal promotion.endDate}}" required>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="row mt-3">
+                  <div class="col-12">
+                    <div class="form-group">
+                      <label for="rules" class="form-control-label">Rules (JSON)</label>
+                      <textarea class="form-control" id="rules" name="rules" rows="5">{{jsonStringify promotion.rules}}</textarea>
+                      <small class="form-text text-muted">Define conditions when this promotion applies</small>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="row mt-3">
+                  <div class="col-12">
+                    <div class="form-group">
+                      <label for="configuration" class="form-control-label">Configuration (JSON)</label>
+                      <textarea class="form-control" id="configuration" name="configuration" rows="5">{{jsonStringify promotion.configuration}}</textarea>
+                      <small class="form-text text-muted">Define how the promotion calculates discounts</small>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Discount Calculation Tool -->
+                <div class="row mt-4 discount-calculator" style="display: {{#if (eq promotion.type 'discount_percentage')}}block{{else}}none{{/if}};">
+                  <div class="col-12">
+                    <div class="card border">
+                      <div class="card-header">
+                        <h6 class="mb-0">Discount Markup Calculator</h6>
+                      </div>
+                      <div class="card-body">
+                        <div class="row">
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="discountRate">Discount Rate (%)</label>
+                              <input type="number" id="discountRate" class="form-control" min="0" max="100" step="0.01">
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label>&nbsp;</label>
+                              <button type="button" id="calculateMarkup" class="btn btn-info d-block">Calculate Markup</button>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="markupResult">Required Markup (%)</label>
+                              <input type="text" id="markupResult" class="form-control" readonly>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="d-flex justify-content-end mt-4">
+                  <a href="/promotions" class="btn btn-light me-2">Cancel</a>
+                  <button type="submit" class="btn btn-primary">Update Promotion</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Core JS Files -->
+  <script src="/js/core/popper.min.js"></script>
+  <script src="/js/core/bootstrap.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Show/hide discount calculator based on promotion type
+      const typeSelect = document.getElementById('type');
+      const discountCalculator = document.querySelector('.discount-calculator');
+      
+      typeSelect.addEventListener('change', function() {
+        if (this.value === 'discount_percentage') {
+          discountCalculator.style.display = 'block';
+        } else {
+          discountCalculator.style.display = 'none';
+        }
+      });
+      
+      // Handle markup calculation
+      const calculateBtn = document.getElementById('calculateMarkup');
+      calculateBtn.addEventListener('click', function() {
+        const discountRate = parseFloat(document.getElementById('discountRate').value);
+        if (isNaN(discountRate) || discountRate < 0 || discountRate > 100) {
+          alert('Please enter a valid discount rate between 0-100');
+          return;
+        }
+        
+        fetch('/promotions/calculate-markup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ discountRate: discountRate })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('markupResult').value = data.markup.toFixed(2) + '%';
+          } else {
+            alert('Error: ' + data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Failed to calculate markup');
+        });
+      });
+    });
+  </script>
+
+  {{> script}}
+</body>
+</html>
