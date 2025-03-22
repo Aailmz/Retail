@@ -21,11 +21,7 @@ async function bootstrap() {
     return a === b;
   });
 
-  hbs.registerHelper('profitMargin', function(sellingPrice, costPrice) {
-    const margin = ((sellingPrice - costPrice) / sellingPrice) * 100;
-    return margin.toFixed(2);
-  });
-  
+  // (YYYY-MM-DD)
   hbs.registerHelper('formatDate', function(date) {
     if (!date) return '';
     return new Date(date).toLocaleDateString('id-ID', {
@@ -35,6 +31,40 @@ async function bootstrap() {
       hour: '2-digit',
       minute: '2-digit'
     });
+  });
+
+  // (YYYY-MM-DD HH:MM)
+  hbs.registerHelper('formatDateTime', function(date) {
+    if (!date) return '';
+    const d = new Date(date);
+    return `${d.toISOString().split('T')[0]} ${d.toTimeString().split(' ')[0].substring(0, 5)}`;
+  });
+
+  // (YYYY-MM-DDTHH:MM)
+  hbs.registerHelper('formatDateTimeLocal', function(date) {
+    if (!date) return '';
+    const d = new Date(date);
+    return d.toISOString().slice(0, 16);
+  });
+
+  hbs.registerHelper('jsonStringify', function(obj) {
+    if (!obj) return '';
+    return JSON.stringify(obj);
+  });
+
+  hbs.registerHelper('jsonPretty', function(obj) {
+    if (!obj) return '';
+    return JSON.stringify(obj, null, 2);
+  });
+
+  hbs.registerHelper('capitalize', function(text) {
+    if (!text) return '';
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  });
+
+  hbs.registerHelper('profitMargin', function(sellingPrice, costPrice) {
+    const margin = ((sellingPrice - costPrice) / sellingPrice) * 100;
+    return margin.toFixed(2);
   });
 
   app.use(session({
