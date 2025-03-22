@@ -7,37 +7,34 @@ export class Promotion {
 
   @Column()
   name: string;
-
-  @Column('text', { nullable: true })
+  
+  @Column()
+  type: string;
+  
+  @Column({ nullable: true })
   description: string;
-
-  @Column('enum', { enum: ['buy_x_get_y', 'discount_percentage', 'bundle'] })
-  promotionType: string;
-
-  @Column('datetime')
-  startDate: Date;
-
-  @Column('datetime')
-  endDate: Date;
-
-  @Column('enum', { enum: ['active', 'inactive', 'scheduled', 'expired'], default: 'active' })
+  
+  @Column()
   status: string;
-
-  @Column('decimal', { precision: 10, scale: 2, default: 0 })
-  markupPercentage: number;
-
-  @Column('decimal', { precision: 10, scale: 2, default: 0 })
-  targetMargin: number;
-
-  @Column('json', { nullable: true })
-  rules: any;
-
-  @Column('json', { nullable: true })
+  
+  @Column()
+  startDate: Date;
+  
+  @Column()
+  endDate: Date;
+  
+  @Column('simple-json')
+  rules: {
+    eligible_products: number[];
+    min_purchase?: number;
+  };
+  
+  @Column('simple-json')
   configuration: any;
-
+  
   @CreateDateColumn()
   createdAt: Date;
-
+  
   @UpdateDateColumn()
   updatedAt: Date;
 }
