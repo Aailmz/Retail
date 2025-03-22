@@ -35,6 +35,7 @@ export class PromotionService {
   async remove(id: number): Promise<void> {
     await this.promotionRepository.delete(id);
   }
+  
   async calculateMarkup(discountRate: number): Promise<number> {
     if (discountRate < 0 || discountRate >= 100) {
       throw new Error('Discount rate must be between 0 and 100');
