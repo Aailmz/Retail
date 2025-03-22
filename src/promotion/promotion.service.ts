@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Promotion } from './entities/promotion.entity';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
 import { UpdatePromotionDto } from './dto/update-promotion.dto';
+import { Promotion } from './entities/promotion.entity';
 
 @Injectable()
 export class PromotionService {
@@ -18,33 +18,29 @@ export class PromotionService {
   }
 
   async findAll(): Promise<Promotion[]> {
-    return this.promotionRepository.find();
+    return this.promotionRepository.find({
+      order: { createdAt: 'DESC' }
+    });
   }
 
   async findOne(id: number): Promise<Promotion> {
-    const promotion = await this.promotionRepository.findOne({
-      where: { id },
-    });
-    
-    if (!promotion) {
-      throw new NotFoundException(`Promotion with ID ${id} not found`);
-    }
-    
-    return promotion;
+    return this.promotionRepository.findOneBy({ id });
   }
 
   async update(id: number, updatePromotionDto: UpdatePromotionDto): Promise<Promotion> {
-    const promotion = await this.findOne(id);
-    this.promotionRepository.merge(promotion, updatePromotionDto);
-    return this.promotionRepository.save(promotion);
+    await this.promotionRepository.update(id, updatePromotionDto);
+    return this.promotionRepository.findOneBy({ id });
   }
 
   async remove(id: number): Promise<void> {
-    const promotion = await this.findOne(id);
-    await this.promotionRepository.remove(promotion);
+    await this.promotionRepository.delete(id);
   }
-  
   async calculateMarkup(discountRate: number): Promise<number> {
-    return (1 / (1 - discountRate)) - 1;
+    if (discountRate < 0 || discountRate >= 100) {
+      throw new Error('Discount rate must be between 0 and 100');
+    }
+    
+    const markup = (discountRate / (100 - discountRate)) * 100;
+    return markup;
   }
 }
