@@ -6,11 +6,13 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Request, Response } from 'express';
+import { ProductService } from '../product/product.service';
 
 @Controller('promotions')
 export class PromotionController {
   constructor(
     private readonly promotionService: PromotionService,
+    private readonly productService: ProductService,
   ) {}
 
   @Get()
@@ -45,7 +47,10 @@ export class PromotionController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Render('promotions/create')
-  showCreateForm(@Req() req: Request) {
+  async showCreateForm(@Req() req: Request) {
+    // Get all products for the product selection
+    const products = await this.productService.findAll();
+    
     // Get error messages if redirected from failed creation
     const errorMessage = req.flash('error');
     let notification = null;
@@ -59,7 +64,8 @@ export class PromotionController {
       isActivePage: { promotions: true },
       notification: notification,
       promotionTypes: ['buy_x_get_y', 'discount_percentage', 'bundle'],
-      statusOptions: ['active', 'inactive', 'scheduled', 'expired']
+      statusOptions: ['active', 'inactive', 'scheduled', 'expired'],
+      products: products
     };
   }
 
@@ -106,6 +112,7 @@ export class PromotionController {
   @Render('promotions/edit')
   async showEditForm(@Param('id') id: string, @Req() req: Request) {
     const promotion = await this.promotionService.findOne(+id);
+    const products = await this.productService.findAll();
     
     // Get error messages if redirected from failed update
     const errorMessage = req.flash('error');
@@ -117,6 +124,7 @@ export class PromotionController {
     return { 
       title: 'Edit Promotion',
       promotion: promotion,
+      products: products,
       user: { username: 'Admin' },
       isActivePage: { promotions: true },
       notification: notification,
