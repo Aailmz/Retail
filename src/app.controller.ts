@@ -4,6 +4,7 @@ import { AuthService } from './auth/auth.service';
 import { ProductService } from './product/product.service';
 import { CategoryService } from './category/category.service';
 import { MemberService } from './member/member.service';
+import { PromotionService } from './promotion/promotion.service';
 
 @Controller()
 export class AppController {
@@ -11,7 +12,8 @@ export class AppController {
     private authService: AuthService,
     private productService: ProductService,
     private categoryService: CategoryService,
-    private memberService: MemberService
+    private memberService: MemberService,
+    private promotionService: PromotionService
   ) {}
 
   // Halaman home (root endpoint /)
@@ -77,6 +79,13 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Redirect('/members')
   redirectToMembers() {
+    return;
+  }
+
+  @Get('promotion')
+  @UseGuards(JwtAuthGuard)
+  @Redirect('/promotions')
+  redirectToPromotion() {
     return;
   }
 

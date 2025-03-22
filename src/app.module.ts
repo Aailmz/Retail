@@ -12,6 +12,7 @@ import { Category } from './category/entities/category.entity';
 import { Member } from './member/entities/member.entity';
 import { MemberModule } from './member/member.module';
 import { PromotionModule } from './promotion/promotion.module';
+import { Promotion } from './promotion/entities/promotion.entity';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { PromotionModule } from './promotion/promotion.module';
       username: 'root',
       password: '',
       database: 'discount_ukk',
-      entities: [User, Product, Category, Member],
+      entities: [User, Product, Category, Member, Promotion],
       synchronize: true,
     }),
     AuthModule,
