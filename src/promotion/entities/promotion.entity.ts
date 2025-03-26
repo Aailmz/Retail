@@ -27,6 +27,9 @@ export class Promotion {
   rules: {
     eligible_products: number[];
     min_purchase?: number;
+    member_only?: boolean;
+    max_usage?: number;
+    voucher_code?: string;
   };
   
   @Column('simple-json')
