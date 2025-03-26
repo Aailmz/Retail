@@ -3,21 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>{{title}}</title>
+  <title>Create Promotion</title>
   
   <!-- Fonts and icons -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Noto+Sans:300,400,500,600,700,800|PT+Mono:300,400,500,600,700" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
   
+  {{> style}}
+
   <!-- CSS Files -->
   <link id="pagestyle" href="/css/corporate-ui-dashboard.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-  
-  {{> style}}
 </head>
 
 <body class="bg-gray-100">
   {{> sidebar}}
-  <!-- Main Content -->
+
   <div class="main-content bg-gray-100">
     <nav class="navbar navbar-expand-lg mb-4 p-3">
       <div class="container-fluid px-0">
@@ -29,7 +29,7 @@
               <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
           </button>
-          <h4 class="font-weight-bold mb-0">Create Promotion</h4>
+          <h4 class="font-weight-bold mb-0">Promotions</h4>
         </div>
         <div class="ms-auto">
           <span class="font-weight-bold d-none d-sm-inline">Welcome, {{user.username}}</span>
@@ -39,213 +39,152 @@
     </nav>
 
     {{> notification}}
-    
-    <!-- Create Promotion Content -->
-    <div class="container-fluid px-4">
-      <div class="row">
-        <div class="col-12 mb-4">
-          <div class="card border shadow-xs">
-            <div class="card-header border-bottom pb-0">
-              <div class="d-flex justify-content-between align-items-center">
-                <h6 class="font-weight-semibold text-lg mb-0">Create a New Promotion</h6>
-                <a href="/promotions" class="btn btn-sm btn-secondary">Back to List</a>
+
+  <div class="container-fluid px-4 mt-4">
+    <div class="row">
+      <div class="col-12">
+        <div class="card border shadow-xs">
+          <div class="card-header border-bottom pb-0">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Create Promotion</h5>
+              <a href="/promotions" class="btn btn-sm btn-secondary">Back to List</a>
+            </div>
+          </div>
+          <div class="card-body">
+            <form action="/promotions" method="POST" id="promotionForm">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group mb-3">
+                    <label for="name" class="form-label">Promotion Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group mb-3">
+                    <label for="type" class="form-label">Promotion Type</label>
+                    <select class="form-control" id="type" name="type" required>
+                      <option value="">Select Type</option>
+                      <option value="buy_x_get_y">Buy X Get Y</option>
+                      <option value="discount_percentage">Discount Percentage</option>
+                      <option value="bundle">Bundle Deal</option>
+                    </select>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div class="card-body">
-              <form action="/promotions" method="POST" id="promotionForm">
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="name" class="form-control-label">Promotion Name</label>
-                      <input type="text" class="form-control" id="name" name="name" required>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="type" class="form-control-label">Promotion Type</label>
-                      <select class="form-control" id="type" name="type" required>
-                        <option value="">-- Select Type --</option>
-                        {{#each promotionTypes}}
-                          <option value="{{this}}">
-                            {{#if (eq this "buy_x_get_y")}}
-                              Buy X Get Y
-                            {{else if (eq this "discount_percentage")}}
-                              Discount Percentage
-                            {{else if (eq this "bundle")}}
-                              Bundle Deal
-                            {{else}}
-                              {{this}}
-                            {{/if}}
-                          </option>
-                        {{/each}}
-                      </select>
-                    </div>
+              
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                   </div>
                 </div>
-                
-                <div class="row mt-3">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="description" class="form-control-label">Description</label>
-                      <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="status" class="form-control-label">Status</label>
-                      <select class="form-control" id="status" name="status" required>
-                        <option value="">-- Select Status --</option>
-                        {{#each statusOptions}}
-                          <option value="{{this}}">{{capitalize this}}</option>
-                        {{/each}}
-                      </select>
-                    </div>
+                <div class="col-md-6">
+                  <div class="form-group mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-control" id="status" name="status" required>
+                      <option value="">Select Status</option>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="draft">Draft</option>
+                    </select>
                   </div>
                 </div>
-                
-                <div class="row mt-3">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="startDate" class="form-control-label">Start Date</label>
-                      <input type="datetime-local" class="form-control" id="startDate" name="startDate" required>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="endDate" class="form-control-label">End Date</label>
-                      <input type="datetime-local" class="form-control" id="endDate" name="endDate" required>
-                    </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group mb-3">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <input type="datetime-local" class="form-control" id="startDate" name="startDate" required>
                   </div>
                 </div>
-                
-                <!-- Product Selection -->
-                <div class="row mt-3">
-                  <div class="col-12">
-                    <div class="form-group">
-                      <label for="eligibleProducts" class="form-control-label">Eligible Products</label>
-                      <select class="form-control select2-multiple" id="eligibleProducts" name="eligibleProducts" multiple>
-                        {{#each products}}
-                          <option value="{{this.id}}">{{this.name}} ({{this.productCode}})</option>
-                        {{/each}}
-                      </select>
-                      <small class="form-text text-muted">Select products that this promotion applies to</small>
-                    </div>
+                <div class="col-md-6">
+                  <div class="form-group mb-3">
+                    <label for="endDate" class="form-label">End Date</label>
+                    <input type="datetime-local" class="form-control" id="endDate" name="endDate" required>
                   </div>
                 </div>
-                
-                <!-- Minimum Purchase Requirement -->
-                <div class="row mt-3">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="minPurchase" class="form-control-label">Minimum Purchase (Optional)</label>
-                      <input type="number" class="form-control" id="minPurchase" name="minPurchase" min="0" step="0.01">
-                      <small class="form-text text-muted">Minimum purchase amount to qualify for this promotion</small>
-                    </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-12">
+                  <div class="form-group mb-3">
+                    <label for="eligibleProducts" class="form-label">Eligible Products</label>
+                    <select class="form-control select2-multiple" id="eligibleProducts" name="eligibleProducts" multiple required>
+                      {{#each products}}
+                        <option value="{{this.id}}" data-selling-price="{{this.sellingPrice}}">
+                          {{this.name}} ({{this.productCode}}) - Rp{{this.sellingPrice}}
+                        </option>
+                      {{/each}}
+                    </select>
                   </div>
                 </div>
-                
-                <!-- Dynamic Configuration Fields -->
-                <!-- Buy X Get Y Fields -->
-                <div id="buy_x_get_y_fields" class="promotion-config mt-4" style="display: none;">
-                  <div class="card border">
-                    <div class="card-header">
-                      <h6 class="mb-0">Buy X Get Y Configuration</h6>
-                    </div>
-                    <div class="card-body">
-                      <div class="row">
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label for="buyCount">Buy Count (X)</label>
-                            <input type="number" id="buyCount" name="buyCount" class="form-control" min="1" value="1">
-                            <small class="form-text text-muted">Number of items customer must buy</small>
-                          </div>
-                        </div>
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label for="getCount">Get Count (Y)</label>
-                            <input type="number" id="getCount" name="getCount" class="form-control" min="1" value="1">
-                            <small class="form-text text-muted">Number of free items customer gets</small>
-                          </div>
+              </div>
+              
+              <!-- Dynamic Configuration Sections -->
+              <div id="buy_x_get_y_fields" class="promotion-config" style="display: none;">
+                <div class="card border mb-3">
+                  <div class="card-header">Buy X Get Y Configuration</div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-4">
+                        <div class="form-group mb-3">
+                          <label for="buyProductSelect">Buy Product</label>
+                          <select id="buyProductSelect" class="form-control select2-single" required>
+                            <option value="">Select Buy Product</option>
+                            {{#each products}}
+                              <option value="{{this.id}}" data-selling-price="{{this.sellingPrice}}">
+                                {{this.name}} ({{this.productCode}}) - Rp{{this.sellingPrice}}
+                              </option>
+                            {{/each}}
+                          </select>
                         </div>
                       </div>
-                      
-                      <div class="row mt-3">
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label for="getFreeProducts" class="form-control-label">Free Products (Optional)</label>
-                            <select class="form-control select2-multiple" id="getFreeProducts" name="getFreeProducts" multiple>
-                              {{#each products}}
-                                <option value="{{this.id}}">{{this.name}} ({{this.productCode}})</option>
-                              {{/each}}
-                            </select>
-                            <small class="form-text text-muted">If different from eligible products</small>
-                          </div>
+                      <div class="col-md-4">
+                        <div class="form-group mb-3">
+                          <label for="buyCount">Buy Count (X)</label>
+                          <input type="number" id="buyCount" name="buyCount" class="form-control" min="1" value="1">
                         </div>
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label for="discountPercent">Discount Percentage</label>
-                            <input type="number" id="discountPercent" name="discountPercent" class="form-control" min="0" max="100" value="100">
-                            <small class="form-text text-muted">100% means completely free items</small>
-                          </div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="form-group mb-3">
+                          <label for="discountPercent">Discount (%)</label>
+                          <input type="number" id="discountPercent" name="discountPercent" class="form-control" min="0" max="100" value="100">
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-                
-                <!-- Discount Percentage Fields -->
-                <div id="discount_percentage_fields" class="promotion-config mt-4" style="display: none;">
-                  <div class="card border">
-                    <div class="card-header">
-                      <h6 class="mb-0">Discount Percentage Configuration</h6>
-                    </div>
-                    <div class="card-body">
-                      <div class="row">
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label for="discountRate">Discount Rate (%)</label>
-                            <input type="number" id="discountRate" name="discountRate" class="form-control" min="0" max="100" step="0.01" value="10">
-                            <small class="form-text text-muted">Percentage off regular price</small>
-                          </div>
-                        </div>
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label for="maxDiscountAmount">Maximum Discount Amount (Optional)</label>
-                            <input type="number" id="maxDiscountAmount" name="maxDiscountAmount" class="form-control" min="0" step="0.01">
-                            <small class="form-text text-muted">Maximum discount amount per transaction</small>
-                          </div>
+                    
+                    <div class="row">
+                      <div class="col-md-4">
+                        <div class="form-group mb-3">
+                          <label for="freeProductSelect">Free Product</label>
+                          <select id="freeProductSelect" class="form-control select2-single" required>
+                            <option value="">Select Free Product</option>
+                            {{#each products}}
+                              <option value="{{this.id}}" data-selling-price="{{this.sellingPrice}}">
+                                {{this.name}} ({{this.productCode}}) - Rp{{this.sellingPrice}}
+                              </option>
+                            {{/each}}
+                          </select>
                         </div>
                       </div>
-                      
-                      <!-- Markup Calculator -->
-                      <div class="row mt-3">
-                        <div class="col-12">
-                          <div class="card border">
-                            <div class="card-header bg-light">
-                              <h6 class="mb-0">Discount Markup Calculator</h6>
-                            </div>
-                            <div class="card-body">
-                              <div class="row">
-                                <div class="col-md-4">
-                                  <div class="form-group">
-                                    <label>Using discount rate above</label>
-                                  </div>
-                                </div>
-                                <div class="col-md-4">
-                                  <div class="form-group">
-                                    <button type="button" id="calculateMarkup" class="btn btn-info d-block">Calculate Required Markup</button>
-                                  </div>
-                                </div>
-                                <div class="col-md-4">
-                                  <div class="form-group">
-                                    <label for="markupResult">Required Markup (%)</label>
-                                    <input type="text" id="markupResult" class="form-control" readonly>
-                                  </div>
-                                </div>
-                              </div>
-                              <div class="mt-2">
-                                <small class="text-muted">This helps you calculate how much markup you need on your original price to maintain profit margins after discount.</small>
-                              </div>
+                      <div class="col-md-4">
+                        <div class="form-group mb-3">
+                          <label for="getCount">Get Count (Y)</label>
+                          <input type="number" id="getCount" name="getCount" class="form-control" min="1" value="1">
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Markup Recommendation Section -->
+                    <div class="row mt-3">
+                      <div class="col-12">
+                        <div class="card bg-light">
+                          <div class="card-body">
+                            <h6 class="card-title">Markup Recommendation</h6>
+                            <div id="markupRecommendation">
+                              <p class="text-muted">Select products to see markup details</p>
                             </div>
                           </div>
                         </div>
@@ -253,44 +192,60 @@
                     </div>
                   </div>
                 </div>
-                
-                <!-- Bundle Deal Fields -->
-                <div id="bundle_fields" class="promotion-config mt-4" style="display: none;">
-                  <div class="card border">
-                    <div class="card-header">
-                      <h6 class="mb-0">Bundle Deal Configuration</h6>
-                    </div>
-                    <div class="card-body">
-                      <div class="row">
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label for="bundlePrice">Bundle Price</label>
-                            <input type="number" id="bundlePrice" name="bundlePrice" class="form-control" min="0" step="0.01">
-                            <small class="form-text text-muted">Special price for the entire bundle</small>
-                          </div>
+              </div>
+              
+              <div id="discount_percentage_fields" class="promotion-config" style="display: none;">
+                <div class="card border mb-3">
+                  <div class="card-header">Discount Percentage Configuration</div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label for="discountRate">Discount Rate (%)</label>
+                          <input type="number" id="discountRate" name="discountRate" class="form-control" min="0" max="100" step="0.01" value="10">
                         </div>
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label for="minItems">Minimum Items in Bundle</label>
-                            <input type="number" id="minItems" name="minItems" class="form-control" min="2" value="2">
-                            <small class="form-text text-muted">Minimum number of items required</small>
-                          </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label for="maxDiscountAmount">Max Discount Amount</label>
+                          <input type="number" id="maxDiscountAmount" name="maxDiscountAmount" class="form-control" min="0" step="0.01">
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                
-                <!-- Hidden fields for JSON data -->
-                <input type="hidden" id="rulesJson" name="rules">
-                <input type="hidden" id="configurationJson" name="configuration">
-                
-                <div class="d-flex justify-content-end mt-4">
-                  <a href="/promotions" class="btn btn-light me-2">Cancel</a>
-                  <button type="submit" class="btn btn-primary">Create Promotion</button>
+              </div>
+              
+              <div id="bundle_fields" class="promotion-config" style="display: none;">
+                <div class="card border mb-3">
+                  <div class="card-header">Bundle Deal Configuration</div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label for="bundlePrice">Bundle Price</label>
+                          <input type="number" id="bundlePrice" name="bundlePrice" class="form-control" min="0" step="0.01">
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label for="minItems">Minimum Items</label>
+                          <input type="number" id="minItems" name="minItems" class="form-control" min="2" value="2">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </form>
-            </div>
+              </div>
+              
+              <input type="hidden" id="rulesJson" name="rules">
+              <input type="hidden" id="configurationJson" name="configuration">
+              
+              <div class="d-flex justify-content-end">
+                <a href="/promotions" class="btn btn-light me-2">Cancel</a>
+                <button type="submit" class="btn btn-primary">Create Promotion</button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -298,22 +253,28 @@
   </div>
   
   <!-- Core JS Files -->
-  <script src="/js/core/popper.min.js"></script>
-  <script src="/js/core/bootstrap.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Initialize Select2
+      // Initialize Select2 for multiple and single selects
       $('.select2-multiple').select2({
         placeholder: "Select products",
+        allowClear: true
+      });
+      
+      $('.select2-single').select2({
+        placeholder: "Select a product",
         allowClear: true
       });
       
       // Show/hide configuration fields based on promotion type
       const typeSelect = document.getElementById('type');
       const promotionConfigDivs = document.querySelectorAll('.promotion-config');
+      
+      // Buy and Free Product Select Elements
+      const buyProductSelect = document.getElementById('buyProductSelect');
+      const freeProductSelect = document.getElementById('freeProductSelect');
       
       typeSelect.addEventListener('change', function() {
         // Hide all config sections first
@@ -331,97 +292,163 @@
         }
       });
       
-      // Handle markup calculation
-      const calculateBtn = document.getElementById('calculateMarkup');
-      calculateBtn.addEventListener('click', function() {
-        const discountRate = parseFloat(document.getElementById('discountRate').value);
-        if (isNaN(discountRate) || discountRate < 0 || discountRate > 100) {
-          alert('Please enter a valid discount rate between 0-100');
-          return;
-        }
+      // Markup Calculation Function
+      function calculateMarkup(buyCount, getCount, paidProductPrice, freeProductPrice, discountPercentage) {
+        const totalCount = buyCount + getCount;
+        const paidCost = buyCount * paidProductPrice;
+        const totalCost = buyCount * paidProductPrice + getCount * freeProductPrice;
+        const discountRate = 1 - (discountPercentage / 100);
+        const targetRevenue = (paidCost / discountRate);
+        const markup = ((targetRevenue / paidCost) - 1) * 100;
         
-        fetch('/promotions/calculate-markup', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ discountRate: discountRate })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            document.getElementById('markupResult').value = data.markup.toFixed(2) + '%';
-          } else {
-            alert('Error: ' + data.error);
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          alert('Failed to calculate markup');
-        });
-      });
+        return {
+          totalCost,
+          paidCost,
+          targetRevenue,
+          markup,
+          discountRate
+        };
+      }
+      
+      function recommendMarkup(buyCount, getCount, paidProductPrice, freeProductPrice) {
+      // Total produk dalam promosi
+      const totalCount = buyCount + getCount;
+      
+      // Biaya total produk
+      const totalCost = (buyCount * paidProductPrice) + (getCount * freeProductPrice);
+      
+      // Biaya produk berbayar
+      const paidCost = buyCount * paidProductPrice;
+      
+      // Perhitungan markup minimum untuk menutupi biaya
+      const minimumMarkup = ((totalCost / paidCost) - 1) * 100;
+      
+      // Rekomendasi markup dengan tambahan margin keamanan
+      const recommendedMarkup = Math.ceil(minimumMarkup + 20); // Tambah 20% margin keamanan
+      
+      return {
+        minimumMarkup: minimumMarkup.toFixed(2),
+        recommendedMarkup: recommendedMarkup,
+        totalCost,
+        paidCost,
+        breakEvenPrice: (totalCost / buyCount).toFixed(2)
+      };
+    }
+
+    // Contoh penggunaan di event listener
+    function updateMarkupRecommendation() {
+      const buyProduct = buyProductSelect.options[buyProductSelect.selectedIndex];
+      const freeProduct = freeProductSelect.options[freeProductSelect.selectedIndex];
+      
+      if (!buyProduct || !freeProduct || buyProduct.value === '' || freeProduct.value === '') {
+        markupRecommendation.innerHTML = '<p class="text-muted">Pilih produk beli dan gratis untuk melihat rekomendasi markup</p>';
+        return;
+      }
+      
+      const buyCount = parseInt(document.getElementById('buyCount').value);
+      const getCount = parseInt(document.getElementById('getCount').value);
+      
+      const buyProductPrice = parseFloat(buyProduct.getAttribute('data-selling-price'));
+      const freeProductPrice = parseFloat(freeProduct.getAttribute('data-selling-price'));
+      
+      const markupCalculation = recommendMarkup(
+        buyCount, 
+        getCount, 
+        buyProductPrice, 
+        freeProductPrice
+      );
+      
+      // Format rekomendasi
+      markupRecommendation.innerHTML = `
+        <div class="row">
+          <div class="col-md-6">
+            <strong>Produk Berbayar:</strong> ${buyProduct.textContent}<br>
+            <strong>Harga:</strong> Rp${buyProductPrice.toFixed(2)}
+          </div>
+          <div class="col-md-6">
+            <strong>Produk Gratis:</strong> ${freeProduct.textContent}<br>
+            <strong>Harga:</strong> Rp${freeProductPrice.toFixed(2)}
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-md-6">
+            <strong>Total Biaya:</strong> Rp${markupCalculation.totalCost.toFixed(2)}<br>
+            <strong>Biaya Produk Berbayar:</strong> Rp${markupCalculation.paidCost.toFixed(2)}
+          </div>
+          <div class="col-md-6">
+            <strong>Markup Minimum:</strong> ${markupCalculation.minimumMarkup}%<br>
+            <strong>Rekomendasi Markup:</strong> ${markupCalculation.recommendedMarkup}%
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col-12">
+            <div class="alert alert-info">
+              <strong>Harga Impas:</strong> Rp${markupCalculation.breakEvenPrice}
+              <small class="d-block">Harga minimal untuk menutupi biaya produk</small>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+      
+      // Event listeners for dynamic updates
+      buyProductSelect.addEventListener('change', updateMarkupRecommendation);
+      freeProductSelect.addEventListener('change', updateMarkupRecommendation);
+      document.getElementById('buyCount').addEventListener('input', updateMarkupRecommendation);
+      document.getElementById('getCount').addEventListener('input', updateMarkupRecommendation);
+      document.getElementById('discountPercent').addEventListener('input', updateMarkupRecommendation);
       
       // Form submission - convert form data to JSON
       const form = document.getElementById('promotionForm');
       form.addEventListener('submit', function(e) {
-        e.preventDefault();
+      e.preventDefault();
+      
+      // Prepare rules object
+      const rules = {
+        eligible_products: Array.from(document.getElementById('eligibleProducts').selectedOptions).map(opt => parseInt(opt.value))
+      };
+      
+      // Prepare configuration object based on promotion type
+      const promotionType = document.getElementById('type').value;
+      let configuration = {};
+      
+      if (promotionType === 'buy_x_get_y') {
+        const buyProduct = buyProductSelect.options[buyProductSelect.selectedIndex];
+        const freeProduct = freeProductSelect.options[freeProductSelect.selectedIndex];
         
-        // Prepare rules object
-        const rules = {
-          eligible_products: Array.from(document.getElementById('eligibleProducts').selectedOptions).map(opt => parseInt(opt.value)),
+        const buyCount = parseInt(document.getElementById('buyCount').value);
+        const getCount = parseInt(document.getElementById('getCount').value);
+        
+        const buyProductPrice = parseFloat(buyProduct.getAttribute('data-selling-price'));
+        const freeProductPrice = parseFloat(freeProduct.getAttribute('data-selling-price'));
+        
+        const markupCalculation = recommendMarkup(
+          buyCount, 
+          getCount, 
+          buyProductPrice, 
+          freeProductPrice
+        );
+        
+        configuration = {
+          buy_product_id: parseInt(buyProduct.value),
+          free_product_id: parseInt(freeProduct.value),
+          buy_count: buyCount,
+          get_count: getCount,
+          paid_product_price: buyProductPrice,
+          free_product_price: freeProductPrice,
+          markup_calculation: markupCalculation
         };
-        
-        // Add min purchase if provided
-        const minPurchase = document.getElementById('minPurchase').value;
-        if (minPurchase && !isNaN(parseFloat(minPurchase))) {
-          rules.min_purchase = parseFloat(minPurchase);
-        }
-        
-        // Prepare configuration object based on promotion type
-        const promotionType = document.getElementById('type').value;
-        let configuration = {};
-        
-        if (promotionType === 'buy_x_get_y') {
-          configuration = {
-            buy_count: parseInt(document.getElementById('buyCount').value),
-            get_count: parseInt(document.getElementById('getCount').value),
-            discount_percentage: parseFloat(document.getElementById('discountPercent').value)
-          };
-          
-          // Add free products if selected
-          const freeProducts = document.getElementById('getFreeProducts');
-          if (freeProducts && freeProducts.selectedOptions.length > 0) {
-            configuration.free_products = Array.from(freeProducts.selectedOptions).map(opt => parseInt(opt.value));
-          }
-        } 
-        else if (promotionType === 'discount_percentage') {
-          configuration = {
-            discount_rate: parseFloat(document.getElementById('discountRate').value)
-          };
-          
-          // Add max discount amount if provided
-          const maxDiscount = document.getElementById('maxDiscountAmount').value;
-          if (maxDiscount && !isNaN(parseFloat(maxDiscount))) {
-            configuration.max_discount_amount = parseFloat(maxDiscount);
-          }
-        } 
-        else if (promotionType === 'bundle') {
-          configuration = {
-            bundle_price: parseFloat(document.getElementById('bundlePrice').value),
-            min_items: parseInt(document.getElementById('minItems').value)
-          };
-        }
-        
-        // Set the hidden JSON fields
-        document.getElementById('rulesJson').value = JSON.stringify(rules);
-        document.getElementById('configurationJson').value = JSON.stringify(configuration);
-        
-        // Submit the form
-        form.submit();
-      });
+      }
+      
+      // Set the hidden JSON fields
+      document.getElementById('rulesJson').value = JSON.stringify(rules);
+      document.getElementById('configurationJson').value = JSON.stringify(configuration);
+      
+      // Submit the form
+      form.submit();
+    });
     });
   </script>
-
-  {{> script}}
 </body>
 </html>
