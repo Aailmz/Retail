@@ -116,7 +116,7 @@
                       <div class="col-md-4">
                         <div class="form-group mb-3">
                           <label for="buyProductSelect">Buy Product</label>
-                          <select id="buyProductSelect" class="form-control select2-single" required>
+                          <select id="buyProductSelect" class="form-control select2-single">
                             <option value="">Select Buy Product</option>
                             {{#each products}}
                               <option value="{{this.id}}" data-selling-price="{{this.sellingPrice}}">
@@ -144,7 +144,7 @@
                       <div class="col-md-4">
                         <div class="form-group mb-3">
                           <label for="freeProductSelect">Free Product</label>
-                          <select id="freeProductSelect" class="form-control select2-single" required>
+                          <select id="freeProductSelect" class="form-control select2-single">
                             <option value="">Select Free Product</option>
                             {{#each products}}
                               <option value="{{this.id}}" data-selling-price="{{this.sellingPrice}}">
@@ -185,15 +185,44 @@
                   <div class="card-body">
                     <div class="row">
                       <div class="col-md-6">
+                        <div class="form-group mb-3">
+                          <label for="discountProductSelect">Select Product</label>
+                          <select id="discountProductSelect" class="form-control select2-single">
+                            <option value="">Select Product</option>
+                            {{#each products}}
+                              <option value="{{this.id}}" data-selling-price="{{this.sellingPrice}}">
+                                {{this.name}} ({{this.productCode}}) - Rp{{this.sellingPrice}}
+                              </option>
+                            {{/each}}
+                          </select>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
                         <div class="form-group">
                           <label for="discountRate">Discount Rate (%)</label>
                           <input type="number" id="discountRate" name="discountRate" class="form-control" min="0" max="100" step="0.01" value="10">
                         </div>
                       </div>
+                    </div>
+                    <div class="row">
                       <div class="col-md-6">
                         <div class="form-group">
                           <label for="maxDiscountAmount">Max Discount Amount</label>
                           <input type="number" id="maxDiscountAmount" name="maxDiscountAmount" class="form-control" min="0" step="0.01">
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Markup Recommendation Section -->
+                    <div class="row mt-3">
+                      <div class="col-12">
+                        <div class="card bg-light">
+                          <div class="card-body">
+                            <h6 class="card-title">Markup Recommendation</h6>
+                            <div id="discountMarkupRecommendation">
+                              <p class="text-muted">Select a product to see markup details</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -353,6 +382,88 @@
           </div>
         `;
       }
+
+      function recommendDiscountMarkup(originalPrice, discountRate, maxDiscountAmount) {
+        // Calculate discount amount
+        const discountAmount = originalPrice * (discountRate / 100);
+        const effectiveDiscountAmount = maxDiscountAmount 
+          ? Math.min(discountAmount, maxDiscountAmount) 
+          : discountAmount;
+        
+        // Calculate selling price after discount
+        const discountedPrice = originalPrice - effectiveDiscountAmount;
+        
+        // Calculate minimum markup to cover costs
+        const minimumMarkup = ((originalPrice / discountedPrice) - 1) * 100;
+        
+        // Recommended markup with safety margin
+        const recommendedMarkup = Math.ceil(minimumMarkup + 20);
+        
+        return {
+          originalPrice,
+          discountRate,
+          discountAmount: effectiveDiscountAmount,
+          discountedPrice,
+          minimumMarkup: minimumMarkup.toFixed(2),
+          recommendedMarkup,
+          breakEvenPrice: discountedPrice.toFixed(2)
+        };
+      }
+
+      // Update markup recommendation for discount percentage
+      function updateDiscountMarkupRecommendation() {
+        const discountProduct = document.getElementById('discountProductSelect');
+        const selectedProduct = discountProduct.options[discountProduct.selectedIndex];
+        
+        if (!selectedProduct || selectedProduct.value === '') {
+          document.getElementById('discountMarkupRecommendation').innerHTML = 
+            '<p class="text-muted">Select a product to see markup details</p>';
+          return;
+        }
+        
+        const originalPrice = parseFloat(selectedProduct.getAttribute('data-selling-price'));
+        const discountRate = parseFloat(document.getElementById('discountRate').value);
+        const maxDiscountAmount = parseFloat(document.getElementById('maxDiscountAmount').value) || null;
+        
+        const markupCalculation = recommendDiscountMarkup(
+          originalPrice, 
+          discountRate, 
+          maxDiscountAmount
+        );
+        
+        // Format recommendation
+        document.getElementById('discountMarkupRecommendation').innerHTML = `
+          <div class="row">
+            <div class="col-md-6">
+              <strong>Product:</strong> ${selectedProduct.textContent}<br>
+              <strong>Original Price:</strong> Rp${originalPrice.toFixed(2)}
+            </div>
+            <div class="col-md-6">
+              <strong>Discount Rate:</strong> ${discountRate}%<br>
+              <strong>Discount Amount:</strong> Rp${markupCalculation.discountAmount.toFixed(2)}
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col-md-6">
+              <strong>Discounted Price:</strong> Rp${markupCalculation.discountedPrice.toFixed(2)}<br>
+              <strong>Minimum Markup:</strong> ${markupCalculation.minimumMarkup}%
+            </div>
+            <div class="col-md-6">
+              <strong>Recommended Markup:</strong> ${markupCalculation.recommendedMarkup}%<br>
+              <strong>Break-even Price:</strong> Rp${markupCalculation.breakEvenPrice}
+            </div>
+          </div>
+        `;
+      }
+
+      const discountProductSelect = document.getElementById('discountProductSelect');
+      const discountRateInput = document.getElementById('discountRate');
+      const maxDiscountAmountInput = document.getElementById('maxDiscountAmount');
+      
+      discountProductSelect.addEventListener('change', updateDiscountMarkupRecommendation);
+      discountRateInput.addEventListener('input', updateDiscountMarkupRecommendation);
+      maxDiscountAmountInput.addEventListener('input', updateDiscountMarkupRecommendation);
       
       // Event listeners for dynamic updates
       buyProductSelect.addEventListener('change', updateMarkupRecommendation);
@@ -404,6 +515,34 @@
             get_count: getCount,
             paid_product_price: buyProductPrice,
             free_product_price: freeProductPrice,
+            markup_calculation: markupCalculation
+          };
+        }
+
+        if (promotionType === 'discount_percentage') {
+          const discountProduct = document.getElementById('discountProductSelect');
+          const selectedProduct = discountProduct.options[discountProduct.selectedIndex];
+          
+          const originalPrice = parseFloat(selectedProduct.getAttribute('data-selling-price'));
+          const discountRate = parseFloat(document.getElementById('discountRate').value);
+          const maxDiscountAmount = parseFloat(document.getElementById('maxDiscountAmount').value) || null;
+          
+          // Rules now include the buy product
+          rules = {
+            buy_product_id: parseInt(selectedProduct.value)
+          };
+          
+          const markupCalculation = recommendDiscountMarkup(
+            originalPrice, 
+            discountRate, 
+            maxDiscountAmount
+          );
+          
+          configuration = {
+            product_id: parseInt(selectedProduct.value),
+            discount_rate: discountRate,
+            max_discount_amount: maxDiscountAmount,
+            original_price: originalPrice,
             markup_calculation: markupCalculation
           };
         }
