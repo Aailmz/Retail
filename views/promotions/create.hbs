@@ -107,21 +107,6 @@
                 </div>
               </div>
               
-              <div class="row">
-                <div class="col-12">
-                  <div class="form-group mb-3">
-                    <label for="eligibleProducts" class="form-label">Eligible Products</label>
-                    <select class="form-control select2-multiple" id="eligibleProducts" name="eligibleProducts" multiple required>
-                      {{#each products}}
-                        <option value="{{this.id}}" data-selling-price="{{this.sellingPrice}}">
-                          {{this.name}} ({{this.productCode}}) - Rp{{this.sellingPrice}}
-                        </option>
-                      {{/each}}
-                    </select>
-                  </div>
-                </div>
-              </div>
-              
               <!-- Dynamic Configuration Sections -->
               <div id="buy_x_get_y_fields" class="promotion-config" style="display: none;">
                 <div class="card border mb-3">
@@ -258,11 +243,6 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Initialize Select2 for multiple and single selects
-      $('.select2-multiple').select2({
-        placeholder: "Select products",
-        allowClear: true
-      });
-      
       $('.select2-single').select2({
         placeholder: "Select a product",
         allowClear: true
@@ -292,130 +272,40 @@
         }
       });
       
-      // Markup Calculation Function
-      function calculateMarkup(buyCount, getCount, paidProductPrice, freeProductPrice, discountPercentage) {
+      function recommendMarkup(buyCount, getCount, paidProductPrice, freeProductPrice) {
+        // Total produk dalam promosi
         const totalCount = buyCount + getCount;
+        
+        // Biaya total produk
+        const totalCost = (buyCount * paidProductPrice) + (getCount * freeProductPrice);
+        
+        // Biaya produk berbayar
         const paidCost = buyCount * paidProductPrice;
-        const totalCost = buyCount * paidProductPrice + getCount * freeProductPrice;
-        const discountRate = 1 - (discountPercentage / 100);
-        const targetRevenue = (paidCost / discountRate);
-        const markup = ((targetRevenue / paidCost) - 1) * 100;
+        
+        // Perhitungan markup minimum untuk menutupi biaya
+        const minimumMarkup = ((totalCost / paidCost) - 1) * 100;
+        
+        // Rekomendasi markup dengan tambahan margin keamanan
+        const recommendedMarkup = Math.ceil(minimumMarkup + 20); // Tambah 20% margin keamanan
         
         return {
+          minimumMarkup: minimumMarkup.toFixed(2),
+          recommendedMarkup: recommendedMarkup,
           totalCost,
           paidCost,
-          targetRevenue,
-          markup,
-          discountRate
+          breakEvenPrice: (totalCost / buyCount).toFixed(2)
         };
       }
-      
-      function recommendMarkup(buyCount, getCount, paidProductPrice, freeProductPrice) {
-      // Total produk dalam promosi
-      const totalCount = buyCount + getCount;
-      
-      // Biaya total produk
-      const totalCost = (buyCount * paidProductPrice) + (getCount * freeProductPrice);
-      
-      // Biaya produk berbayar
-      const paidCost = buyCount * paidProductPrice;
-      
-      // Perhitungan markup minimum untuk menutupi biaya
-      const minimumMarkup = ((totalCost / paidCost) - 1) * 100;
-      
-      // Rekomendasi markup dengan tambahan margin keamanan
-      const recommendedMarkup = Math.ceil(minimumMarkup + 20); // Tambah 20% margin keamanan
-      
-      return {
-        minimumMarkup: minimumMarkup.toFixed(2),
-        recommendedMarkup: recommendedMarkup,
-        totalCost,
-        paidCost,
-        breakEvenPrice: (totalCost / buyCount).toFixed(2)
-      };
-    }
 
-    // Contoh penggunaan di event listener
-    function updateMarkupRecommendation() {
-      const buyProduct = buyProductSelect.options[buyProductSelect.selectedIndex];
-      const freeProduct = freeProductSelect.options[freeProductSelect.selectedIndex];
-      
-      if (!buyProduct || !freeProduct || buyProduct.value === '' || freeProduct.value === '') {
-        markupRecommendation.innerHTML = '<p class="text-muted">Pilih produk beli dan gratis untuk melihat rekomendasi markup</p>';
-        return;
-      }
-      
-      const buyCount = parseInt(document.getElementById('buyCount').value);
-      const getCount = parseInt(document.getElementById('getCount').value);
-      
-      const buyProductPrice = parseFloat(buyProduct.getAttribute('data-selling-price'));
-      const freeProductPrice = parseFloat(freeProduct.getAttribute('data-selling-price'));
-      
-      const markupCalculation = recommendMarkup(
-        buyCount, 
-        getCount, 
-        buyProductPrice, 
-        freeProductPrice
-      );
-      
-      // Format rekomendasi
-      markupRecommendation.innerHTML = `
-        <div class="row">
-          <div class="col-md-6">
-            <strong>Produk Berbayar:</strong> ${buyProduct.textContent}<br>
-            <strong>Harga:</strong> Rp${buyProductPrice.toFixed(2)}
-          </div>
-          <div class="col-md-6">
-            <strong>Produk Gratis:</strong> ${freeProduct.textContent}<br>
-            <strong>Harga:</strong> Rp${freeProductPrice.toFixed(2)}
-          </div>
-        </div>
-        <hr>
-        <div class="row">
-          <div class="col-md-6">
-            <strong>Total Biaya:</strong> Rp${markupCalculation.totalCost.toFixed(2)}<br>
-            <strong>Biaya Produk Berbayar:</strong> Rp${markupCalculation.paidCost.toFixed(2)}
-          </div>
-          <div class="col-md-6">
-            <strong>Markup Minimum:</strong> ${markupCalculation.minimumMarkup}%<br>
-            <strong>Rekomendasi Markup:</strong> ${markupCalculation.recommendedMarkup}%
-          </div>
-        </div>
-        <div class="row mt-2">
-          <div class="col-12">
-            <div class="alert alert-info">
-              <strong>Harga Impas:</strong> Rp${markupCalculation.breakEvenPrice}
-              <small class="d-block">Harga minimal untuk menutupi biaya produk</small>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-      
-      // Event listeners for dynamic updates
-      buyProductSelect.addEventListener('change', updateMarkupRecommendation);
-      freeProductSelect.addEventListener('change', updateMarkupRecommendation);
-      document.getElementById('buyCount').addEventListener('input', updateMarkupRecommendation);
-      document.getElementById('getCount').addEventListener('input', updateMarkupRecommendation);
-      document.getElementById('discountPercent').addEventListener('input', updateMarkupRecommendation);
-      
-      // Form submission - convert form data to JSON
-      const form = document.getElementById('promotionForm');
-      form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      // Prepare rules object
-      const rules = {
-        eligible_products: Array.from(document.getElementById('eligibleProducts').selectedOptions).map(opt => parseInt(opt.value))
-      };
-      
-      // Prepare configuration object based on promotion type
-      const promotionType = document.getElementById('type').value;
-      let configuration = {};
-      
-      if (promotionType === 'buy_x_get_y') {
+      // Contoh penggunaan di event listener
+      function updateMarkupRecommendation() {
         const buyProduct = buyProductSelect.options[buyProductSelect.selectedIndex];
         const freeProduct = freeProductSelect.options[freeProductSelect.selectedIndex];
+        
+        if (!buyProduct || !freeProduct || buyProduct.value === '' || freeProduct.value === '') {
+          markupRecommendation.innerHTML = '<p class="text-muted">Pilih produk beli dan gratis untuk melihat rekomendasi markup</p>';
+          return;
+        }
         
         const buyCount = parseInt(document.getElementById('buyCount').value);
         const getCount = parseInt(document.getElementById('getCount').value);
@@ -430,24 +320,101 @@
           freeProductPrice
         );
         
-        configuration = {
-          buy_product_id: parseInt(buyProduct.value),
-          free_product_id: parseInt(freeProduct.value),
-          buy_count: buyCount,
-          get_count: getCount,
-          paid_product_price: buyProductPrice,
-          free_product_price: freeProductPrice,
-          markup_calculation: markupCalculation
-        };
+        // Format rekomendasi
+        markupRecommendation.innerHTML = `
+          <div class="row">
+            <div class="col-md-6">
+              <strong>Produk Berbayar:</strong> ${buyProduct.textContent}<br>
+              <strong>Harga:</strong> Rp${buyProductPrice.toFixed(2)}
+            </div>
+            <div class="col-md-6">
+              <strong>Produk Gratis:</strong> ${freeProduct.textContent}<br>
+              <strong>Harga:</strong> Rp${freeProductPrice.toFixed(2)}
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col-md-6">
+              <strong>Total Biaya:</strong> Rp${markupCalculation.totalCost.toFixed(2)}<br>
+              <strong>Biaya Produk Berbayar:</strong> Rp${markupCalculation.paidCost.toFixed(2)}
+            </div>
+            <div class="col-md-6">
+              <strong>Markup Minimum:</strong> ${markupCalculation.minimumMarkup}%<br>
+              <strong>Rekomendasi Markup:</strong> ${markupCalculation.recommendedMarkup}%
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-12">
+              <div class="alert alert-info">
+                <strong>Harga Impas:</strong> Rp${markupCalculation.breakEvenPrice}
+                <small class="d-block">Harga minimal untuk menutupi biaya produk</small>
+              </div>
+            </div>
+          </div>
+        `;
       }
       
-      // Set the hidden JSON fields
-      document.getElementById('rulesJson').value = JSON.stringify(rules);
-      document.getElementById('configurationJson').value = JSON.stringify(configuration);
+      // Event listeners for dynamic updates
+      buyProductSelect.addEventListener('change', updateMarkupRecommendation);
+      freeProductSelect.addEventListener('change', updateMarkupRecommendation);
+      document.getElementById('buyCount').addEventListener('input', updateMarkupRecommendation);
+      document.getElementById('getCount').addEventListener('input', updateMarkupRecommendation);
+      document.getElementById('discountPercent').addEventListener('input', updateMarkupRecommendation);
       
-      // Submit the form
-      form.submit();
-    });
+      // Form submission - convert form data to JSON
+      const form = document.getElementById('promotionForm');
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Prepare rules object
+        const promotionType = document.getElementById('type').value;
+        let rules = {};
+        
+        if (promotionType === 'buy_x_get_y') {
+          const buyProduct = buyProductSelect.options[buyProductSelect.selectedIndex];
+          rules = {
+            buy_product_id: parseInt(buyProduct.value)
+          };
+        }
+        
+        // Prepare configuration object based on promotion type
+        let configuration = {};
+        
+        if (promotionType === 'buy_x_get_y') {
+          const buyProduct = buyProductSelect.options[buyProductSelect.selectedIndex];
+          const freeProduct = freeProductSelect.options[freeProductSelect.selectedIndex];
+          
+          const buyCount = parseInt(document.getElementById('buyCount').value);
+          const getCount = parseInt(document.getElementById('getCount').value);
+          
+          const buyProductPrice = parseFloat(buyProduct.getAttribute('data-selling-price'));
+          const freeProductPrice = parseFloat(freeProduct.getAttribute('data-selling-price'));
+          
+          const markupCalculation = recommendMarkup(
+            buyCount, 
+            getCount, 
+            buyProductPrice, 
+            freeProductPrice
+          );
+          
+          configuration = {
+            buy_product_id: parseInt(buyProduct.value),
+            free_product_id: parseInt(freeProduct.value),
+            buy_count: buyCount,
+            get_count: getCount,
+            paid_product_price: buyProductPrice,
+            free_product_price: freeProductPrice,
+            markup_calculation: markupCalculation
+          };
+        }
+        
+        // Set the hidden JSON fields
+        document.getElementById('rulesJson').value = JSON.stringify(rules);
+        document.getElementById('configurationJson').value = JSON.stringify(configuration);
+        
+        // Submit the form
+        form.submit();
+      });
     });
   </script>
 </body>
