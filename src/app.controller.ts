@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Request, Render, Post, Body, Res, Req, Redirect  } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Render, Post, Body, Res, Req, Redirect, NotFoundException   } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { AuthService } from './auth/auth.service';
 import { ProductService } from './product/product.service';
@@ -109,5 +109,10 @@ export class AppController {
   @Render('profile')
   getProfile(@Request() req) {
     return { user: req.user };
+  }
+
+  @Get('*')
+  notFound() {
+    throw new NotFoundException('Page not found');
   }
 }
