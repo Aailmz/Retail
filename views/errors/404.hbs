@@ -1,41 +1,62 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Page Not Found</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>404 Not Found - Page Not Found</title>
+  
+  <!-- Fonts and icons -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Noto+Sans:300,400,500,600,700,800|PT+Mono:300,400,500,600,700" rel="stylesheet" />
+  
+  <!-- CSS Files -->
+  <link id="pagestyle" href="/css/corporate-ui-dashboard.css" rel="stylesheet" />
+  
+  {{> style}}
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
-    }
     .error-container {
-      max-width: 500px;
-      margin: 0 auto;
-    }
-    .error-code {
-      font-size: 72px;
-      margin-bottom: 20px;
-      color: #e74c3c;
-    }
-    .error-message {
-      font-size: 24px;
-      margin-bottom: 30px;
-    }
-    .back-button {
-      padding: 10px 20px;
-      background-color: #3498db;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
     }
   </style>
 </head>
-<body>
+
+<body class="bg-gray-100">
   <div class="error-container">
-    <div class="error-code">404</div>
-    <div class="error-message">Page Not Found</div>
-    <p>The page you are looking for does not exist or has been moved.</p>
-    <a href="/" class="back-button">Go to Homepage</a>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+          <div class="card border shadow-xs text-center py-5">
+            <div class="card-body">
+              <div class="mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="text-info" viewBox="0 0 16 16">
+                  <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                </svg>
+              </div>
+              <h1 class="font-weight-bold mb-3">404 Not Found</h1>
+              <p class="text-lg mb-4">Oops! The page you are looking for doesn't exist.</p>
+              <p class="text-sm text-secondary mb-4">The page might have been removed, had its name changed, or is temporarily unavailable.</p>
+              <div class="d-flex justify-content-center gap-2">
+                <a href="/" class="btn btn-primary">
+                  Go to Home and Login
+                </a>
+                <button onclick="history.back()" class="btn btn-dark">
+                  Go Back
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+  
+  <!-- Core JS Files -->
+  <script src="/js/core/popper.min.js"></script>
+  <script src="/js/core/bootstrap.min.js"></script>
+
+  {{> script}}
 </body>
 </html>
