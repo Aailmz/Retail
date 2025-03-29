@@ -1,0 +1,287 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize Select2 for multiple and single selects
+      $('.select2-single').select2({
+        placeholder: "Select a product",
+        allowClear: true
+      });
+      
+      // Show/hide configuration fields based on promotion type
+      const typeSelect = document.getElementById('type');
+      const promotionConfigDivs = document.querySelectorAll('.promotion-config');
+      
+      // Buy and Free Product Select Elements
+      const buyProductSelect = document.getElementById('buyProductSelect');
+      const freeProductSelect = document.getElementById('freeProductSelect');
+      
+      typeSelect.addEventListener('change', function() {
+        // Hide all config sections first
+        promotionConfigDivs.forEach(div => {
+          div.style.display = 'none';
+        });
+        
+        // Show the relevant section based on type
+        const selectedType = this.value;
+        if (selectedType) {
+          const configDiv = document.getElementById(selectedType + '_fields');
+          if (configDiv) {
+            configDiv.style.display = 'block';
+          }
+        }
+      });
+      
+      function recommendMarkup(buyCount, getCount, paidProductPrice, freeProductPrice) {
+        // Total produk dalam promosi
+        const totalCount = buyCount + getCount;
+        
+        // Biaya total produk
+        const totalCost = (buyCount * paidProductPrice) + (getCount * freeProductPrice);
+        
+        // Biaya produk berbayar
+        const paidCost = buyCount * paidProductPrice;
+        
+        // Perhitungan markup minimum untuk menutupi biaya
+        const minimumMarkup = ((totalCost / paidCost) - 1) * 100;
+        
+        // Rekomendasi markup dengan tambahan margin keamanan
+        const recommendedMarkup = Math.ceil(minimumMarkup + 20); // Tambah 20% margin keamanan
+        
+        return {
+          minimumMarkup: minimumMarkup.toFixed(2),
+          recommendedMarkup: recommendedMarkup,
+          totalCost,
+          paidCost,
+          breakEvenPrice: (totalCost / buyCount).toFixed(2)
+        };
+      }
+
+      // Contoh penggunaan di event listener
+      function updateMarkupRecommendation() {
+        const buyProduct = buyProductSelect.options[buyProductSelect.selectedIndex];
+        const freeProduct = freeProductSelect.options[freeProductSelect.selectedIndex];
+        
+        if (!buyProduct || !freeProduct || buyProduct.value === '' || freeProduct.value === '') {
+          markupRecommendation.innerHTML = '<p class="text-muted">Pilih produk beli dan gratis untuk melihat rekomendasi markup</p>';
+          return;
+        }
+        
+        const buyCount = parseInt(document.getElementById('buyCount').value);
+        const getCount = parseInt(document.getElementById('getCount').value);
+        
+        const buyProductPrice = parseFloat(buyProduct.getAttribute('data-selling-price'));
+        const freeProductPrice = parseFloat(freeProduct.getAttribute('data-selling-price'));
+        
+        const markupCalculation = recommendMarkup(
+          buyCount, 
+          getCount, 
+          buyProductPrice, 
+          freeProductPrice
+        );
+        
+        // Format rekomendasi
+        markupRecommendation.innerHTML = `
+          <div class="row">
+            <div class="col-md-6">
+              <strong>Produk Berbayar:</strong> ${buyProduct.textContent}<br>
+              <strong>Harga:</strong> Rp${buyProductPrice.toFixed(2)}
+            </div>
+            <div class="col-md-6">
+              <strong>Produk Gratis:</strong> ${freeProduct.textContent}<br>
+              <strong>Harga:</strong> Rp${freeProductPrice.toFixed(2)}
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col-md-6">
+              <strong>Total Biaya:</strong> Rp${markupCalculation.totalCost.toFixed(2)}<br>
+              <strong>Biaya Produk Berbayar:</strong> Rp${markupCalculation.paidCost.toFixed(2)}
+            </div>
+            <div class="col-md-6">
+              <strong>Markup Minimum:</strong> ${markupCalculation.minimumMarkup}%<br>
+              <strong>Rekomendasi Markup:</strong> ${markupCalculation.recommendedMarkup}%
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-12">
+              <div class="alert alert-info">
+                <strong>Harga Impas:</strong> Rp${markupCalculation.breakEvenPrice}
+                <small class="d-block">Harga minimal untuk menutupi biaya produk</small>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function recommendDiscountMarkup(originalPrice, discountRate, maxDiscountAmount) {
+        // Calculate discount amount
+        const discountAmount = originalPrice * (discountRate / 100);
+        const effectiveDiscountAmount = maxDiscountAmount 
+          ? Math.min(discountAmount, maxDiscountAmount) 
+          : discountAmount;
+        
+        // Calculate selling price after discount
+        const discountedPrice = originalPrice - effectiveDiscountAmount;
+        
+        // Calculate minimum markup to cover costs
+        const minimumMarkup = ((originalPrice / discountedPrice) - 1) * 100;
+        
+        // Recommended markup with safety margin
+        const recommendedMarkup = Math.ceil(minimumMarkup + 20);
+        
+        return {
+          originalPrice,
+          discountRate,
+          discountAmount: effectiveDiscountAmount,
+          discountedPrice,
+          minimumMarkup: minimumMarkup.toFixed(2),
+          recommendedMarkup,
+          breakEvenPrice: discountedPrice.toFixed(2)
+        };
+      }
+
+      // Update markup recommendation for discount percentage
+      function updateDiscountMarkupRecommendation() {
+        const discountProduct = document.getElementById('discountProductSelect');
+        const selectedProduct = discountProduct.options[discountProduct.selectedIndex];
+        
+        if (!selectedProduct || selectedProduct.value === '') {
+          document.getElementById('discountMarkupRecommendation').innerHTML = 
+            '<p class="text-muted">Select a product to see markup details</p>';
+          return;
+        }
+        
+        const originalPrice = parseFloat(selectedProduct.getAttribute('data-selling-price'));
+        const discountRate = parseFloat(document.getElementById('discountRate').value);
+        const maxDiscountAmount = parseFloat(document.getElementById('maxDiscountAmount').value) || null;
+        
+        const markupCalculation = recommendDiscountMarkup(
+          originalPrice, 
+          discountRate, 
+          maxDiscountAmount
+        );
+        
+        // Format recommendation
+        document.getElementById('discountMarkupRecommendation').innerHTML = `
+          <div class="row">
+            <div class="col-md-6">
+              <strong>Product:</strong> ${selectedProduct.textContent}<br>
+              <strong>Original Price:</strong> Rp${originalPrice.toFixed(2)}
+            </div>
+            <div class="col-md-6">
+              <strong>Discount Rate:</strong> ${discountRate}%<br>
+              <strong>Discount Amount:</strong> Rp${markupCalculation.discountAmount.toFixed(2)}
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col-md-6">
+              <strong>Discounted Price:</strong> Rp${markupCalculation.discountedPrice.toFixed(2)}<br>
+              <strong>Minimum Markup:</strong> ${markupCalculation.minimumMarkup}%
+            </div>
+            <div class="col-md-6">
+              <strong>Recommended Markup:</strong> ${markupCalculation.recommendedMarkup}%<br>
+              <strong>Break-even Price:</strong> Rp${markupCalculation.breakEvenPrice}
+            </div>
+          </div>
+        `;
+      }
+
+      const discountProductSelect = document.getElementById('discountProductSelect');
+      const discountRateInput = document.getElementById('discountRate');
+      const maxDiscountAmountInput = document.getElementById('maxDiscountAmount');
+      
+      discountProductSelect.addEventListener('change', updateDiscountMarkupRecommendation);
+      discountRateInput.addEventListener('input', updateDiscountMarkupRecommendation);
+      maxDiscountAmountInput.addEventListener('input', updateDiscountMarkupRecommendation);
+      
+      // Event listeners for dynamic updates
+      buyProductSelect.addEventListener('change', updateMarkupRecommendation);
+      freeProductSelect.addEventListener('change', updateMarkupRecommendation);
+      document.getElementById('buyCount').addEventListener('input', updateMarkupRecommendation);
+      document.getElementById('getCount').addEventListener('input', updateMarkupRecommendation);
+      document.getElementById('discountPercent').addEventListener('input', updateMarkupRecommendation);
+      
+      // Form submission - convert form data to JSON
+      const form = document.getElementById('promotionForm');
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Prepare rules object
+        const promotionType = document.getElementById('type').value;
+        let rules = {};
+        
+        if (promotionType === 'buy_x_get_y') {
+          const buyProduct = buyProductSelect.options[buyProductSelect.selectedIndex];
+          rules = {
+            buy_product_id: parseInt(buyProduct.value)
+          };
+        }
+        
+        // Prepare configuration object based on promotion type
+        let configuration = {};
+        
+        if (promotionType === 'buy_x_get_y') {
+          const buyProduct = buyProductSelect.options[buyProductSelect.selectedIndex];
+          const freeProduct = freeProductSelect.options[freeProductSelect.selectedIndex];
+          
+          const buyCount = parseInt(document.getElementById('buyCount').value);
+          const getCount = parseInt(document.getElementById('getCount').value);
+          
+          const buyProductPrice = parseFloat(buyProduct.getAttribute('data-selling-price'));
+          const freeProductPrice = parseFloat(freeProduct.getAttribute('data-selling-price'));
+          
+          const markupCalculation = recommendMarkup(
+            buyCount, 
+            getCount, 
+            buyProductPrice, 
+            freeProductPrice
+          );
+          
+          configuration = {
+            buy_product_id: parseInt(buyProduct.value),
+            free_product_id: parseInt(freeProduct.value),
+            buy_count: buyCount,
+            get_count: getCount,
+            paid_product_price: buyProductPrice,
+            free_product_price: freeProductPrice,
+            markup_calculation: markupCalculation
+          };
+        }
+
+        if (promotionType === 'discount_percentage') {
+          const discountProduct = document.getElementById('discountProductSelect');
+          const selectedProduct = discountProduct.options[discountProduct.selectedIndex];
+          
+          const originalPrice = parseFloat(selectedProduct.getAttribute('data-selling-price'));
+          const discountRate = parseFloat(document.getElementById('discountRate').value);
+          const maxDiscountAmount = parseFloat(document.getElementById('maxDiscountAmount').value) || null;
+          
+          // Rules now include the buy product
+          rules = {
+            buy_product_id: parseInt(selectedProduct.value)
+          };
+          
+          const markupCalculation = recommendDiscountMarkup(
+            originalPrice, 
+            discountRate, 
+            maxDiscountAmount
+          );
+          
+          configuration = {
+            product_id: parseInt(selectedProduct.value),
+            discount_rate: discountRate,
+            max_discount_amount: maxDiscountAmount,
+            original_price: originalPrice,
+            markup_calculation: markupCalculation
+          };
+        }
+        
+        // Set the hidden JSON fields
+        document.getElementById('rulesJson').value = JSON.stringify(rules);
+        document.getElementById('configurationJson').value = JSON.stringify(configuration);
+        
+        // Submit the form
+        form.submit();
+      });
+    });
+  </script>
