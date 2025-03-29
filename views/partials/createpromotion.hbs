@@ -112,7 +112,7 @@
         `;
       }
 
-      function recommendDiscountMarkup(originalPrice, discountRate, maxDiscountAmount) {
+      function recommendDiscountMarkup(originalPrice, discountRate, maxDiscountAmount, quantity = 1) {
         // Calculate discount amount
         const discountAmount = originalPrice * (discountRate / 100);
         const effectiveDiscountAmount = maxDiscountAmount 
@@ -122,8 +122,12 @@
         // Calculate selling price after discount
         const discountedPrice = originalPrice - effectiveDiscountAmount;
         
+        // Total cost based on quantity
+        const totalOriginalCost = originalPrice * quantity;
+        const totalDiscountedCost = discountedPrice * quantity;
+        
         // Calculate minimum markup to cover costs
-        const minimumMarkup = ((originalPrice / discountedPrice) - 1) * 100;
+        const minimumMarkup = ((totalOriginalCost / totalDiscountedCost) - 1) * 100;
         
         // Recommended markup with safety margin
         const recommendedMarkup = Math.ceil(minimumMarkup + 20);
@@ -131,8 +135,11 @@
         return {
           originalPrice,
           discountRate,
+          quantity,
           discountAmount: effectiveDiscountAmount,
           discountedPrice,
+          totalOriginalCost: totalOriginalCost.toFixed(2),
+          totalDiscountedCost: totalDiscountedCost.toFixed(2),
           minimumMarkup: minimumMarkup.toFixed(2),
           recommendedMarkup,
           breakEvenPrice: discountedPrice.toFixed(2)
@@ -153,34 +160,45 @@
         const originalPrice = parseFloat(selectedProduct.getAttribute('data-selling-price'));
         const discountRate = parseFloat(document.getElementById('discountRate').value);
         const maxDiscountAmount = parseFloat(document.getElementById('maxDiscountAmount').value) || null;
+        const quantity = parseInt(document.getElementById('minQuantity').value) || 1;
         
         const markupCalculation = recommendDiscountMarkup(
           originalPrice, 
           discountRate, 
-          maxDiscountAmount
+          maxDiscountAmount,
+          quantity
         );
         
-        // Format recommendation
         document.getElementById('discountMarkupRecommendation').innerHTML = `
           <div class="row">
             <div class="col-md-6">
               <strong>Product:</strong> ${selectedProduct.textContent}<br>
-              <strong>Original Price:</strong> Rp${originalPrice.toFixed(2)}
+              <strong>Original Price:</strong> Rp${originalPrice.toFixed(2)}<br>
+              <strong>Minimum Quantity:</strong> ${quantity}
             </div>
             <div class="col-md-6">
               <strong>Discount Rate:</strong> ${discountRate}%<br>
-              <strong>Discount Amount:</strong> Rp${markupCalculation.discountAmount.toFixed(2)}
+              <strong>Discount Per Item:</strong> Rp${markupCalculation.discountAmount.toFixed(2)}<br>
+              <strong>Discounted Price:</strong> Rp${markupCalculation.discountedPrice.toFixed(2)}
             </div>
           </div>
           <hr>
           <div class="row">
             <div class="col-md-6">
-              <strong>Discounted Price:</strong> Rp${markupCalculation.discountedPrice.toFixed(2)}<br>
-              <strong>Minimum Markup:</strong> ${markupCalculation.minimumMarkup}%
+              <strong>Total Original Cost:</strong> Rp${markupCalculation.totalOriginalCost}<br>
+              <strong>Total Discounted Cost:</strong> Rp${markupCalculation.totalDiscountedCost}
             </div>
             <div class="col-md-6">
-              <strong>Recommended Markup:</strong> ${markupCalculation.recommendedMarkup}%<br>
-              <strong>Break-even Price:</strong> Rp${markupCalculation.breakEvenPrice}
+              <strong>Minimum Markup:</strong> ${markupCalculation.minimumMarkup}%<br>
+              <strong>Recommended Markup:</strong> ${markupCalculation.recommendedMarkup}%
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-12">
+              <div class="alert alert-info">
+                <strong>Break-even Price:</strong> Rp${markupCalculation.breakEvenPrice}
+                <small class="d-block">Minimum price per item to cover costs</small>
+              </div>
             </div>
           </div>
         `;
@@ -189,10 +207,12 @@
       const discountProductSelect = document.getElementById('discountProductSelect');
       const discountRateInput = document.getElementById('discountRate');
       const maxDiscountAmountInput = document.getElementById('maxDiscountAmount');
+      const minQuantityInput = document.getElementById('minQuantity');
       
       discountProductSelect.addEventListener('change', updateDiscountMarkupRecommendation);
       discountRateInput.addEventListener('input', updateDiscountMarkupRecommendation);
       maxDiscountAmountInput.addEventListener('input', updateDiscountMarkupRecommendation);
+      minQuantityInput.addEventListener('input', updateDiscountMarkupRecommendation);
       
       // Event listeners for dynamic updates
       buyProductSelect.addEventListener('change', updateMarkupRecommendation);
@@ -255,22 +275,26 @@
           const originalPrice = parseFloat(selectedProduct.getAttribute('data-selling-price'));
           const discountRate = parseFloat(document.getElementById('discountRate').value);
           const maxDiscountAmount = parseFloat(document.getElementById('maxDiscountAmount').value) || null;
+          const minQuantity = parseInt(document.getElementById('minQuantity').value) || 1;
           
-          // Rules now include the buy product
+          // Rules now include both product ID and minimum quantity
           rules = {
-            buy_product_id: parseInt(selectedProduct.value)
+            buy_product_id: parseInt(selectedProduct.value),
+            min_quantity: minQuantity
           };
           
           const markupCalculation = recommendDiscountMarkup(
             originalPrice, 
             discountRate, 
-            maxDiscountAmount
+            maxDiscountAmount,
+            minQuantity
           );
           
           configuration = {
             product_id: parseInt(selectedProduct.value),
             discount_rate: discountRate,
             max_discount_amount: maxDiscountAmount,
+            min_quantity: minQuantity,
             original_price: originalPrice,
             markup_calculation: markupCalculation
           };
