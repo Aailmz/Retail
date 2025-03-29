@@ -1,41 +1,62 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Server Error</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>500 Server Error - Internal Server Error</title>
+  
+  <!-- Fonts and icons -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Noto+Sans:300,400,500,600,700,800|PT+Mono:300,400,500,600,700" rel="stylesheet" />
+  
+  <!-- CSS Files -->
+  <link id="pagestyle" href="/css/corporate-ui-dashboard.css" rel="stylesheet" />
+  
+  {{> style}}
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
-    }
     .error-container {
-      max-width: 500px;
-      margin: 0 auto;
-    }
-    .error-code {
-      font-size: 72px;
-      margin-bottom: 20px;
-      color: #e74c3c;
-    }
-    .error-message {
-      font-size: 24px;
-      margin-bottom: 30px;
-    }
-    .back-button {
-      padding: 10px 20px;
-      background-color: #3498db;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
     }
   </style>
 </head>
-<body>
+
+<body class="bg-gray-100">
   <div class="error-container">
-    <div class="error-code">500</div>
-    <div class="error-message">Server Error</div>
-    <p>Something went wrong on our server. We're working on fixing it.</p>
-    <a href="/" class="back-button">Go to Homepage</a>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+          <div class="card border shadow-xs text-center py-5">
+            <div class="card-body">
+              <div class="mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="text-warning" viewBox="0 0 16 16">
+                  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                </svg>
+              </div>
+              <h1 class="font-weight-bold mb-3">500 Server Error</h1>
+              <p class="text-lg mb-4">Oops! Something went wrong on our end.</p>
+              <p class="text-sm text-secondary mb-4">We're experiencing some technical difficulties. Please try again later or contact support if the problem persists.</p>
+              <div class="d-flex justify-content-center gap-2">
+                <a href="/" class="btn btn-primary">
+                  Go to Home and Login
+                </a>
+                <button onclick="location.reload()" class="btn btn-dark">
+                  Refresh Page
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+  
+  <!-- Core JS Files -->
+  <script src="/js/core/popper.min.js"></script>
+  <script src="/js/core/bootstrap.min.js"></script>
+
+  {{> script}}
 </body>
 </html>
