@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Unauthorized</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+    }
+    .error-container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .error-code {
+      font-size: 72px;
+      margin-bottom: 20px;
+      color: #e74c3c;
+    }
+    .error-message {
+      font-size: 24px;
+      margin-bottom: 30px;
+    }
+    .back-button {
+      padding: 10px 20px;
+      background-color: #3498db;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="error-container">
+    <div class="error-code">401</div>
+    <div class="error-message">Unauthorized</div>
+    <p>You don't have permission to access this page. Please log in.</p>
+    <a href="/login" class="back-button">Go to Login</a>
+    <a href="/" class="back-button">Go to Homepage</a>
+  </div>
+</body>
+</html>
