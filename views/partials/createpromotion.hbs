@@ -132,6 +132,12 @@
         // Recommended markup with safety margin
         const recommendedMarkup = Math.ceil(minimumMarkup + 20);
         
+        // Calculate price after minimum markup
+        const priceWithMinMarkup = discountedPrice * (1 + (minimumMarkup / 100));
+        
+        // Calculate price after recommended markup
+        const priceWithRecommendedMarkup = discountedPrice * (1 + (recommendedMarkup / 100));
+        
         return {
           originalPrice,
           discountRate,
@@ -142,11 +148,13 @@
           totalDiscountedCost: totalDiscountedCost.toFixed(2),
           minimumMarkup: minimumMarkup.toFixed(2),
           recommendedMarkup,
-          breakEvenPrice: discountedPrice.toFixed(2)
+          breakEvenPrice: discountedPrice.toFixed(2),
+          priceWithMinMarkup: priceWithMinMarkup.toFixed(2),
+          priceWithRecommendedMarkup: priceWithRecommendedMarkup.toFixed(2)
         };
       }
 
-      // Update markup recommendation for discount percentage
+      // Update the markup recommendation display function
       function updateDiscountMarkupRecommendation() {
         const discountProduct = document.getElementById('discountProductSelect');
         const selectedProduct = discountProduct.options[discountProduct.selectedIndex];
@@ -169,6 +177,7 @@
           quantity
         );
         
+        // Format recommendation with quantity details and markup prices
         document.getElementById('discountMarkupRecommendation').innerHTML = `
           <div class="row">
             <div class="col-md-6">
@@ -198,6 +207,23 @@
               <div class="alert alert-info">
                 <strong>Break-even Price:</strong> Rp${markupCalculation.breakEvenPrice}
                 <small class="d-block">Minimum price per item to cover costs</small>
+              </div>
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-12">
+              <div class="alert alert-success">
+                <strong>Suggested Selling Prices (after markup):</strong>
+                <div class="row mt-2">
+                  <div class="col-md-6">
+                    <strong>With Minimum Markup (${markupCalculation.minimumMarkup}%):</strong><br>
+                    Rp${markupCalculation.priceWithMinMarkup}
+                  </div>
+                  <div class="col-md-6">
+                    <strong>With Recommended Markup (${markupCalculation.recommendedMarkup}%):</strong><br>
+                    Rp${markupCalculation.priceWithRecommendedMarkup}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -290,13 +316,16 @@
             minQuantity
           );
           
+          // Make sure the entire markupCalculation object is stored, including markup prices
           configuration = {
             product_id: parseInt(selectedProduct.value),
             discount_rate: discountRate,
             max_discount_amount: maxDiscountAmount,
             min_quantity: minQuantity,
             original_price: originalPrice,
-            markup_calculation: markupCalculation
+            markup_calculation: markupCalculation,
+            price_with_min_markup: markupCalculation.priceWithMinMarkup,
+            price_with_recommended_markup: markupCalculation.priceWithRecommendedMarkup
           };
         }
         
