@@ -19,6 +19,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       });
     }
 
+    console.error('Exception:', exception);
+
     return response.status(status).json({
       statusCode: status,
       timestamp: new Date().toISOString(),

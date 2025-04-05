@@ -41,7 +41,7 @@ export class AppController {
         const token = await this.authService.login(result);
         // Simpan token di cookie atau session
         res.cookie('jwt', token.access_token, { httpOnly: true });
-        return res.redirect('/product');
+        return res.redirect('/dashboard');
       } else {
         return res.render('login', { 
           title: 'Login Page', 
@@ -109,10 +109,5 @@ export class AppController {
   @Render('profile')
   getProfile(@Request() req) {
     return { user: req.user };
-  }
-
-  @Get('*')
-  notFound() {
-    throw new NotFoundException('Page not found');
   }
 }
