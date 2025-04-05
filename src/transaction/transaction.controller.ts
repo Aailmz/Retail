@@ -122,8 +122,8 @@ export class TransactionController {
 
   @Get('reports')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
   @Render('transactions/reports')
+  
   async showReports(
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
@@ -168,7 +168,6 @@ export class TransactionController {
       reportData = {
         totalSales,
         totalItems,
-        productSales: Object.values(productSales).sort((a, b) => b.total - a.total)
       };
     }
     
