@@ -13,6 +13,7 @@ import { Member } from './member/entities/member.entity';
 import { MemberModule } from './member/member.module';
 import { PromotionModule } from './promotion/promotion.module';
 import { Promotion } from './promotion/entities/promotion.entity';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { Promotion } from './promotion/entities/promotion.entity';
     CategoryModule,
     MemberModule,
     PromotionModule,
+    TransactionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
