@@ -26,7 +26,7 @@ export class TransactionService {
 
   async findAll(): Promise<Transaction[]> {
     return this.transactionRepository.find({
-      relations: ['items', 'user'],
+      relations: ['items', 'member'],
       order: { createdAt: 'DESC' }
     });
   }
@@ -34,7 +34,7 @@ export class TransactionService {
   async findOne(id: number): Promise<Transaction> {
     const transaction = await this.transactionRepository.findOne({
       where: { id },
-      relations: ['items', 'items.product', 'user']
+      relations: ['items', 'items.product', 'member']
     });
     
     if (!transaction) {
