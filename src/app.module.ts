@@ -14,6 +14,8 @@ import { MemberModule } from './member/member.module';
 import { PromotionModule } from './promotion/promotion.module';
 import { Promotion } from './promotion/entities/promotion.entity';
 import { TransactionModule } from './transaction/transaction.module';
+import { Transaction } from './transaction/entities/transaction.entity';
+import { TransactionItem } from './transaction/entities/transaction-item.entity';
 
 @Module({
   imports: [
@@ -24,7 +26,7 @@ import { TransactionModule } from './transaction/transaction.module';
       username: 'root',
       password: '',
       database: 'discount_ukk',
-      entities: [User, Product, Category, Member, Promotion],
+      entities: [User, Product, Category, Member, Promotion, Transaction, TransactionItem],
       synchronize: true,
     }),
     AuthModule,

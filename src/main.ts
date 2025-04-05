@@ -3,7 +3,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './http-exception/http-exception.filter';
-import { AllExceptionsFilter } from './all-exceptions/all-exceptions.filter';
 import * as cookieParser from 'cookie-parser';
 import * as hbs from 'hbs';
 import * as session from 'express-session';
@@ -70,8 +69,7 @@ async function bootstrap() {
   });
 
   app.useGlobalFilters(
-    new HttpExceptionFilter(),
-    new AllExceptionsFilter()
+    new HttpExceptionFilter()
   );
 
   app.use(session({

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>{{title}}</title>
+  
+  <!-- Fonts and icons -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Noto+Sans:300,400,500,600,700,800|PT+Mono:300,400,500,600,700" rel="stylesheet" />
+  
+  <!-- CSS Files -->
+  <link id="pagestyle" href="/css/corporate-ui-dashboard.css" rel="stylesheet" />
+  
+  {{> style}}
+</head>
+
+<body class="bg-gray-100">
+  {{> sidebar}}
+  <!-- Main Content -->
+  <div class="main-content bg-gray-100">
+    <nav class="navbar navbar-expand-lg mb-4 p-3">
+      <div class="container-fluid px-0">
+        <div class="d-flex align-items-center">
+          <button class="menu-toggle" id="menuToggle">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h4 class="font-weight-bold mb-0">Transactions</h4>
+        </div>
+        <div class="ms-auto">
+          <span class="font-weight-bold d-none d-sm-inline">Welcome, {{user.username}}</span>
+          <span class="d-inline d-sm-none">{{user.username}}</span>
+        </div>
+      </div>
+    </nav>
+
+    {{> notification}}
+    
+    <!-- Transactions Content -->
+    <div class="container-fluid px-4">
+      <div class="row">
+        <div class="col-12 mb-4">
+          <div class="card border shadow-xs">
+            <div class="card-header border-bottom pb-0">
+              <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                <div class="mb-3 mb-md-0">
+                  <h6 class="font-weight-semibold text-lg mb-0">Transaction History</h6>
+                  <p class="text-sm mb-0">Manage your transactions</p>
+                </div>
+                <div class="d-flex">
+                  <a href="/transactions/create" class="btn btn-sm btn-dark">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                      <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                    </svg>
+                    New Transaction
+                  </a>
+                  <a href="/transactions/reports" class="btn btn-sm btn-outline-dark ms-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-graph-up" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M0 0h1v15h15v1H0V0Zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.15-5.073a.5.5 0 0 1 .704-.07Z"/>
+                    </svg>
+                    Reports
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div class="card-body px-0 py-0">
+              <div class="table-responsive p-0">
+                <table class="table align-items-center justify-content-center mb-0">
+                  <thead class="bg-gray-100">
+                    <tr>
+                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-3">Transaction Code</th>
+                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Date</th>
+                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Customer</th>
+                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Amount</th>
+                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Payment</th>
+                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Status</th>
+                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {{#if transactions.length}}
+                      {{#each transactions}}
+                        <tr>
+                          <td class="ps-3">
+                            <p class="text-sm font-weight-bold mb-0">{{this.transactionCode}}</p>
+                          </td>
+                          <td>
+                            <p class="text-sm font-weight-bold mb-0">{{formatDate this.createdAt}}</p>
+                            <p class="text-xs text-secondary mb-0">{{formatTime this.createdAt}}</p>
+                          </td>
+                          <td>
+                            <div class="d-flex px-2">
+                              <div class="my-auto">
+                                <h6 class="mb-0 text-sm">{{this.customerName}}</h6>
+                                <p class="text-xs text-secondary mb-0">{{this.customerPhone}}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <p class="text-sm font-weight-bold mb-0">${{formatNumber this.grandTotal}}</p>
+                          </td>
+                          <td>
+                            <span class="badge bg-light text-dark">{{capitalize this.paymentMethod}}</span>
+                          </td>
+                          <td>
+                            {{#if this.isVoided}}
+                              <span class="badge bg-danger">Voided</span>
+                            {{else}}
+                              <span class="badge bg-success">Completed</span>
+                            {{/if}}
+                          </td>
+                          <td>
+                            <div class="d-flex gap-2">
+                              <a href="/transactions/{{this.id}}" class="btn btn-sm btn-info">
+                                View
+                              </a>
+                              <a href="/transactions/receipt/{{this.id}}" class="btn btn-sm btn-secondary" target="_blank">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
+                                  <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+                                  <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
+                                </svg>
+                              </a>
+                              {{#if ../user.roles.includes 'admin'}}
+                                {{#unless this.isVoided}}
+                                  <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#voidModal-{{this.id}}">
+                                    Void
+                                  </button>
+                                  
+                                  <!-- Void Modal -->
+                                  <div class="modal fade" id="voidModal-{{this.id}}" tabindex="-1" aria-labelledby="voidModalLabel-{{this.id}}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                      <div class="modal-content">
+                                        <div class="modal-header">
+                                          <h5 class="modal-title" id="voidModalLabel-{{this.id}}">Void Transaction #{{this.transactionCode}}</h5>
+                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <form action="/transactions/{{this.id}}/void" method="POST">
+                                          <div class="modal-body">
+                                            <div class="mb-3">
+                                              <p class="text-sm">Are you sure you want to void this transaction? This action cannot be undone and will return all stock to inventory.</p>
+                                              <label for="reason-{{this.id}}" class="form-label">Reason for voiding</label>
+                                              <textarea class="form-control" id="reason-{{this.id}}" name="reason" rows="3" required></textarea>
+                                            </div>
+                                          </div>
+                                          <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-danger">Void Transaction</button>
+                                          </div>
+                                        </form>
+                                      </div>
+                                    </div>
+                                  </div>
+                                {{/unless}}
+                              {{/if}}
+                            </div>
+                          </td>
+                        </tr>
+                      {{/each}}
+                    {{else}}
+                      <tr>
+                        <td colspan="7" class="text-center py-5">
+                          <p>No transactions found.</p>
+                          <a href="/transactions/create" class="btn btn-sm btn-primary mt-2">
+                            Create New Transaction
+                          </a>
+                        </td>
+                      </tr>
+                    {{/if}}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Core JS Files -->
+  <script src="/js/core/popper.min.js"></script>
+  <script src="/js/core/bootstrap.min.js"></script>
+
+  {{> script}}
+</body>
+</html>
