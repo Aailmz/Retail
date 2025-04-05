@@ -8,7 +8,7 @@ import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { ProductService } from '../product/product.service';
 import { PromotionService } from '../promotion/promotion.service';
 import { Product } from '../product/entities/product.entity';
-import { generateTransactionCode } from '../utils/code-generator';
+import { generateTransactionCode } from './utils/code-generator';
 
 @Injectable()
 export class TransactionService {
@@ -130,7 +130,6 @@ export class TransactionService {
         paymentReference: createTransactionDto.paymentReference,
         promotionId: createTransactionDto.promotionId,
         note: createTransactionDto.note,
-        paymentStatus: PaymentStatus.PAID // Assuming paid on creation
       });
       
       const savedTransaction = await manager.save(transaction);
@@ -159,19 +158,6 @@ export class TransactionService {
     });
   }
 
-  async update(id: number, updateTransactionDto: UpdateTransactionDto): Promise<Transaction> {
-    // Implement update logic - typically only certain fields can be updated
-    // after a transaction is created (like payment status)
-    const transaction = await this.findOne(id);
-    
-    // Example: update payment status
-    if (updateTransactionDto.paymentStatus) {
-      transaction.paymentStatus = updateTransactionDto.paymentStatus;
-    }
-    
-    return this.transactionRepository.save(transaction);
-  }
-
   async voidTransaction(id: number, reason: string): Promise<Transaction> {
     return this.connection.transaction(async (manager: EntityManager) => {
       const transaction = await manager.findOne(Transaction, {
@@ -190,7 +176,6 @@ export class TransactionService {
       // Mark as voided
       transaction.isVoided = true;
       transaction.voidReason = reason;
-      transaction.paymentStatus = PaymentStatus.CANCELLED;
       
       // Return stock to inventory
       for (const item of transaction.items) {

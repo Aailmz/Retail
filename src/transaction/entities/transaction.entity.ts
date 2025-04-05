@@ -2,13 +2,6 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMan
 import { Member } from '../../member/entities/member.entity';
 import { TransactionItem } from './transaction-item.entity';
 
-export enum PaymentStatus {
-  PENDING = 'pending',
-  PAID = 'paid',
-  CANCELLED = 'cancelled',
-  REFUNDED = 'refunded'
-}
-
 export enum PaymentMethod {
   CASH = 'cash',
   CREDIT_CARD = 'credit_card',
@@ -55,13 +48,6 @@ export class Transaction {
 
   @Column({ nullable: true })
   note: string;
-
-  @Column({
-    type: 'enum',
-    enum: PaymentStatus,
-    default: PaymentStatus.PENDING
-  })
-  paymentStatus: PaymentStatus;
 
   @Column({
     type: 'enum',
