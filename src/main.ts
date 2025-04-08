@@ -68,6 +68,29 @@ async function bootstrap() {
     return margin.toFixed(2);
   });
 
+  // New helpers for POS page
+  hbs.registerHelper('formatPrice', function(price) {
+    return parseFloat(price).toFixed(2);
+  });
+  
+  hbs.registerHelper('lessThan', function(v1, v2, options) {
+    if (v1 < v2) {
+      return options.fn(this);
+    }
+    return options.inverse(this);
+  });
+  
+  hbs.registerHelper('gt', function(v1, v2, options) {
+    if (v1 > v2) {
+      return options.fn(this);
+    }
+    return options.inverse(this);
+  });
+  
+  hbs.registerHelper('subtract', function(v1, v2) {
+    return v1 - v2;
+  });
+
   app.useGlobalFilters(
     new HttpExceptionFilter()
   );
