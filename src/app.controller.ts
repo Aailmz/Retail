@@ -113,6 +113,19 @@ export class AppController {
     };
   }
 
+  @Get('pos')
+  @UseGuards(JwtAuthGuard)
+  @Render('transactions/point-of-sale')
+  async showPOS(@Req() req: Request) {
+    const products = await this.productService.findAll();
+    
+    return { 
+      title: 'Point of Sale',
+      products: products,
+      //user: req.user,
+    };
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   @Render('profile')

@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .product-card {
+      cursor: pointer;
+      transition: all 0.2s;
+      height: 140px;
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .cart-item {
+      border-bottom: 1px solid #eee;
+      padding: 8px 0;
+    }
+    .product-grid {
+      height: calc(100vh - 230px);
+      overflow-y: auto;
+    }
+    .cart-container {
+      height: calc(100vh - 230px);
+      overflow-y: auto;
+    }
+    .category-btn {
+      white-space: nowrap;
+    }
+    .quantity-control {
+      width: 35px;
+      text-align: center;
+      border: none;
+      display: inline-block;
+    }
+    #categories {
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
+    .payment-method-btn {
+      height: 50px;
+    }
+    .payment-method-btn.active {
+      background-color: #0d6efd;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  
+  <div class="container-fluid mt-3">
+    <div class="row">
+      <!-- Left Side - Product Selection -->
+      <div class="col-lg-7">
+        <div class="card mb-3">
+          <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Point of Sale</h5>
+              <div>
+                <span class="me-2">Cashier: <%= user.name %></span>
+                <span id="current-time"></span>
+              </div>
+            </div>
+          </div>
+          <div class="card-body p-2">
+            <!-- Search Bar -->
+            <div class="input-group mb-3">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+              <input type="text" class="form-control" id="product-search" placeholder="Search products...">
+            </div>
+            
+            <!-- Categories -->
+            <div class="d-flex mb-3" id="categories">
+              <button class="btn btn-outline-secondary category-btn me-2 active" data-category="all">All</button>
+              <% const categories = [...new Set(products.map(p => p.category))]; %>
+              <% categories.forEach(category => { %>
+                <button class="btn btn-outline-secondary category-btn me-2" data-category="<%= category %>"><%= category %></button>
+              <% }); %>
+            </div>
+            
+            <!-- Products Grid -->
+            <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-2 product-grid" id="products-container">
+              <% products.forEach(product => { %>
+                <div class="col product-item" data-category="<%= product.category %>">
+                  <div class="card h-100 product-card" data-id="<%= product.id %>" data-name="<%= product.name %>" data-price="<%= product.price %>" data-stock="<%= product.stock %>">
+                    <div class="card-body p-2 text-center">
+                      <div class="bg-light rounded mb-2 py-2">
+                        <i class="fas fa-box fa-2x text-secondary"></i>
+                      </div>
+                      <h6 class="card-title mb-1 text-truncate"><%= product.name %></h6>
+                      <p class="card-text mb-0 text-primary fw-bold">$<%= product.price.toFixed(2) %></p>
+                      <small class="text-muted">Stock: <%= product.stock %></small>
+                    </div>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Side - Cart -->
+      <div class="col-lg-5">
+        <div class="card">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Current Transaction</h5>
+          </div>
+          <div class="card-body p-0">
+            <!-- Customer Info -->
+            <div class="p-3 border-bottom">
+              <div class="d-flex align-items-center mb-2">
+                <button class="btn btn-sm btn-outline-primary me-2" id="member-search-btn" data-bs-toggle="modal" data-bs-target="#memberModal">
+                  <i class="fas fa-user me-1"></i> Select Member
+                </button>
+                <span id="selected-member">No member selected</span>
+              </div>
+              <div class="row g-2">
+                <div class="col-md-6">
+                  <input type="text" class="form-control form-control-sm" id="customer-name" placeholder="Customer Name (Optional)">
+                </div>
+                <div class="col-md-6">
+                  <input type="tel" class="form-control form-control-sm" id="customer-phone" placeholder="Phone (Optional)">
+                </div>
+              </div>
+            </div>
+            
+            <!-- Cart Items -->
+            <div class="cart-container p-0" id="cart-items">
+              <div class="text-center py-5 text-muted">
+                <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                <p>Cart is empty</p>
+                <p>Add products by clicking on items from the left panel</p>
+              </div>
+            </div>
+            
+            <!-- Totals -->
+            <div class="p-3 border-top">
+              <div class="d-flex justify-content-between mb-2">
+                <span>Subtotal:</span>
+                <span id="subtotal">$0.00</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Tax (10%):</span>
+                <span id="tax-amount">$0.00</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Discount:</span>
+                <div class="input-group input-group-sm" style="width: 150px;">
+                  <input type="number" class="form-control" id="discount-amount" placeholder="0.00" min="0">
+                  <button class="btn btn-outline-secondary" id="apply-discount">Apply</button>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between mb-3">
+                <span class="fw-bold">TOTAL:</span>
+                <span class="fw-bold fs-5 text-primary" id="grand-total">$0.00</span>
+              </div>
+              
+              <!-- Payment Methods -->
+              <div class="mb-3">
+                <label class="form-label">Payment Method:</label>
+                <div class="d-flex flex-wrap gap-2">
+                  <button class="btn btn-outline-secondary payment-method-btn flex-grow-1 active" data-method="cash">
+                    <i class="fas fa-money-bill me-1"></i> Cash
+                  </button>
+                  <button class="btn btn-outline-secondary payment-method-btn flex-grow-1" data-method="credit_card">
+                    <i class="fas fa-credit-card me-1"></i> Credit Card
+                  </button>
+                  <button class="btn btn-outline-secondary payment-method-btn flex-grow-1" data-method="debit_card">
+                    <i class="fas fa-credit-card me-1"></i> Debit Card
+                  </button>
+                  <button class="btn btn-outline-secondary payment-method-btn flex-grow-1" data-method="digital_wallet">
+                    <i class="fas fa-wallet me-1"></i> Digital Wallet
+                  </button>
+                </div>
+              </div>
+              
+              <div class="mb-3" id="payment-reference-container" style="display: none;">
+                <label class="form-label">Payment Reference:</label>
+                <input type="text" class="form-control" id="payment-reference" placeholder="Enter reference number">
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label">Note (Optional):</label>
+                <textarea class="form-control" id="transaction-note" rows="2"></textarea>
+              </div>
+              
+              <!-- Complete Transaction Button -->
+              <div class="d-grid gap-2">
+                <button class="btn btn-success" id="complete-transaction">
+                  <i class="fas fa-check-circle me-2"></i>Complete Transaction
+                </button>
+                <button class="btn btn-outline-secondary" id="clear-cart">
+                  <i class="fas fa-trash me-2"></i>Clear Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Member Selection Modal -->
+  <div class="modal fade" id="memberModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Select Member</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" id="member-search" placeholder="Search by name, email or phone...">
+            <button class="btn btn-outline-secondary" type="button" id="search-member-btn">Search</button>
+          </div>
+          <div id="member-search-results" class="list-group">
+            <!-- Member search results will be populated here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Quantity Modal -->
+  <div class="modal fade" id="quantityModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Update Quantity</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="text-center">
+            <h6 id="quantity-product-name" class="mb-3"></h6>
+            <div class="input-group mb-3">
+              <button class="btn btn-outline-secondary" id="decrease-qty">-</button>
+              <input type="number" class="form-control text-center" id="quantity-input" min="1" value="1">
+              <button class="btn btn-outline-secondary" id="increase-qty">+</button>
+            </div>
+            <p class="text-muted mb-0">Available stock: <span id="quantity-stock"></span></p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="confirm-quantity">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <%- include('../partials/footer') %>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize variables
+      let cart = [];
+      let selectedMember = null;
+      let selectedPaymentMethod = 'cash';
+      let currentProductForQuantity = null;
+      
+      // Get DOM elements
+      const productsContainer = document.getElementById('products-container');
+      const cartItemsContainer = document.getElementById('cart-items');
+      const subtotalElement = document.getElementById('subtotal');
+      const taxAmountElement = document.getElementById('tax-amount');
+      const grandTotalElement = document.getElementById('grand-total');
+      const discountInput = document.getElementById('discount-amount');
+      const applyDiscountBtn = document.getElementById('apply-discount');
+      const productSearchInput = document.getElementById('product-search');
+      const categoryButtons = document.querySelectorAll('.category-btn');
+      const paymentMethodButtons = document.querySelectorAll('.payment-method-btn');
+      const paymentReferenceContainer = document.getElementById('payment-reference-container');
+      const completeTransactionBtn = document.getElementById('complete-transaction');
+      const clearCartBtn = document.getElementById('clear-cart');
+      const currentTimeElement = document.getElementById('current-time');
+      
+      // Initialize quantity modal
+      const quantityModal = new bootstrap.Modal(document.getElementById('quantityModal'));
+      const quantityInput = document.getElementById('quantity-input');
+      const quantityProductName = document.getElementById('quantity-product-name');
+      const quantityStock = document.getElementById('quantity-stock');
+      const decreaseQtyBtn = document.getElementById('decrease-qty');
+      const increaseQtyBtn = document.getElementById('increase-qty');
+      const confirmQuantityBtn = document.getElementById('confirm-quantity');
+      
+      // Show current time
+      function updateCurrentTime() {
+        const now = new Date();
+        currentTimeElement.textContent = now.toLocaleString();
+      }
+      updateCurrentTime();
+      setInterval(updateCurrentTime, 1000);
+      
+      // Update cart display
+      function updateCartDisplay() {
+        if (cart.length === 0) {
+          cartItemsContainer.innerHTML = `
+            <div class="text-center py-5 text-muted">
+              <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+              <p>Cart is empty</p>
+              <p>Add products by clicking on items from the left panel</p>
+            </div>
+          `;
+        } else {
+          let cartHTML = '';
+          cart.forEach((item, index) => {
+            cartHTML += `
+              <div class="cart-item p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-0">${item.name}</h6>
+                    <small class="text-muted">$${item.price.toFixed(2)} × ${item.quantity}</small>
+                  </div>
+                  <div class="text-end">
+                    <div class="fw-bold mb-1">$${(item.price * item.quantity).toFixed(2)}</div>
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-secondary btn-sm edit-item" data-index="${index}">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn btn-outline-danger btn-sm remove-item" data-index="${index}">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          cartItemsContainer.innerHTML = cartHTML;
+          
+          // Add event listeners to cart item buttons
+          document.querySelectorAll('.edit-item').forEach(button => {
+            button.addEventListener('click', function() {
+              const index = parseInt(this.getAttribute('data-index'));
+              openQuantityModal(cart[index], index);
+            });
+          });
+          
+          document.querySelectorAll('.remove-item').forEach(button => {
+            button.addEventListener('click', function() {
+              const index = parseInt(this.getAttribute('data-index'));
+              cart.splice(index, 1);
+              updateCartDisplay();
+              calculateTotals();
+            });
+          });
+        }
+        
+        calculateTotals();
+      }
+      
+      // Calculate totals
+      function calculateTotals() {
+        const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+        const discountAmount = parseFloat(discountInput.value) || 0;
+        const taxRate = 0.1; // 10% tax
+        const taxAmount = (subtotal - discountAmount) * taxRate;
+        const grandTotal = subtotal - discountAmount + taxAmount;
+        
+        subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+        taxAmountElement.textContent = `$${taxAmount.toFixed(2)}`;
+        grandTotalElement.textContent = `$${grandTotal.toFixed(2)}`;
+      }
+      
+      // Open quantity modal
+      function openQuantityModal(product, editIndex = null) {
+        currentProductForQuantity = {
+          ...product,
+          editIndex
+        };
+        
+        quantityProductName.textContent = product.name;
+        quantityStock.textContent = product.stock;
+        quantityInput.value = editIndex !== null ? cart[editIndex].quantity : 1;
+        quantityInput.max = product.stock;
+        quantityModal.show();
+      }
+      
+      // Add product to cart
+      function addToCart(product, quantity) {
+        const existingItemIndex = cart.findIndex(item => item.id === product.id);
+        
+        if (existingItemIndex >= 0) {
+          cart[existingItemIndex].quantity += quantity;
+        } else {
+          cart.push({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            quantity: quantity,
+            stock: product.stock
+          });
+        }
+        
+        updateCartDisplay();
+      }
+      
+      // Update product in cart
+      function updateCartItem(index, quantity) {
+        cart[index].quantity = quantity;
+        updateCartDisplay();
+      }
+      
+      // Filter products by category
+      function filterProducts(category) {
+        const productItems = document.querySelectorAll('.product-item');
+        
+        productItems.forEach(item => {
+          if (category === 'all' || item.dataset.category === category) {
+            item.style.display = 'block';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      }
+      
+      // Filter products by search term
+      function searchProducts(term) {
+        const productCards = document.querySelectorAll('.product-card');
+        const searchTerm = term.toLowerCase();
+        
+        productCards.forEach(card => {
+          const productName = card.dataset.name.toLowerCase();
+          if (productName.includes(searchTerm)) {
+            card.closest('.product-item').style.display = 'block';
+          } else {
+            card.closest('.product-item').style.display = 'none';
+          }
+        });
+      }
+      
+      // Event listeners for product cards
+      document.querySelectorAll('.product-card').forEach(card => {
+        card.addEventListener('click', function() {
+          const product = {
+            id: parseInt(this.dataset.id),
+            name: this.dataset.name,
+            price: parseFloat(this.dataset.price),
+            stock: parseInt(this.dataset.stock)
+          };
+          
+          if (product.stock > 0) {
+            openQuantityModal(product);
+          } else {
+            alert('This product is out of stock');
+          }
+        });
+      });
+      
+      // Event listeners for quantity modal
+      decreaseQtyBtn.addEventListener('click', function() {
+        const currentValue = parseInt(quantityInput.value);
+        if (currentValue > 1) {
+          quantityInput.value = currentValue - 1;
+        }
+      });
+      
+      increaseQtyBtn.addEventListener('click', function() {
+        const currentValue = parseInt(quantityInput.value);
+        const maxValue = parseInt(quantityInput.max);
+        if (currentValue < maxValue) {
+          quantityInput.value = currentValue + 1;
+        }
+      });
+      
+      confirmQuantityBtn.addEventListener('click', function() {
+        const quantity = parseInt(quantityInput.value);
+        
+        if (quantity > currentProductForQuantity.stock) {
+          alert('Quantity exceeds available stock!');
+          return;
+        }
+        
+        if (currentProductForQuantity.editIndex !== null) {
+          updateCartItem(currentProductForQuantity.editIndex, quantity);
+        } else {
+          addToCart(currentProductForQuantity, quantity);
+        }
+        
+        quantityModal.hide();
+      });
+      
+      // Event listener for category buttons
+      categoryButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          categoryButtons.forEach(btn => btn.classList.remove('active'));
+          this.classList.add('active');
+          
+          const category = this.dataset.category;
+          filterProducts(category);
+        });
+      });
+      
+      // Event listener for product search
+      productSearchInput.addEventListener('input', function() {
+        searchProducts(this.value);
+      });
+      
+      // Event listener for payment method buttons
+      paymentMethodButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          paymentMethodButtons.forEach(btn => btn.classList.remove('active'));
+          this.classList.add('active');
+          
+          selectedPaymentMethod = this.dataset.method;
+          
+          if (selectedPaymentMethod === 'cash') {
+            paymentReferenceContainer.style.display = 'none';
+          } else {
+            paymentReferenceContainer.style.display = 'block';
+          }
+        });
+      });
+      
+      // Event listener for apply discount button
+      applyDiscountBtn.addEventListener('click', calculateTotals);
+      
+      // Event listener for clear cart button
+      clearCartBtn.addEventListener('click', function() {
+        if (confirm('Are you sure you want to clear the cart?')) {
+          cart = [];
+          updateCartDisplay();
+        }
+      });
+      
+      // Event listener for complete transaction button
+      completeTransactionBtn.addEventListener('click', function() {
+        if (cart.length === 0) {
+          alert('Cannot create transaction with empty cart');
+          return;
+        }
+        
+        const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+        const discountAmount = parseFloat(discountInput.value) || 0;
+        const taxRate = 0.1; // 10% tax
+        const taxAmount = (subtotal - discountAmount) * taxRate;
+        const grandTotal = subtotal - discountAmount + taxAmount;
+        
+        // Create transaction data
+        const transactionData = {
+          memberId: selectedMember ? selectedMember.id : null,
+          customerName: document.getElementById('customer-name').value,
+          customerPhone: document.getElementById('customer-phone').value,
+          customerEmail: '',
+          subtotal: subtotal,
+          discountAmount: discountAmount,
+          taxAmount: taxAmount,
+          grandTotal: grandTotal,
+          note: document.getElementById('transaction-note').value,
+          paymentMethod: selectedPaymentMethod,
+          paymentReference: document.getElementById('payment-reference').value,
+          items: cart.map(item => ({
+            productId: item.id,
+            productName: item.name,
+            productPrice: item.price,
+            quantity: item.quantity,
+            subtotal: item.price * item.quantity,
+            discountAmount: 0,
+            total: item.price * item.quantity
+          }))
+        };
+        
+        // Submit form
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/transactions';
+        form.style.display = 'none';
+        
+        // Add hidden fields for transaction data
+        for (const key in transactionData) {
+          if (key === 'items') {
+            transactionData.items.forEach((item, index) => {
+              for (const itemKey in item) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = `items[${index}][${itemKey}]`;
+                input.value = item[itemKey];
+                form.appendChild(input);
+              }
+            });
+          } else {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = transactionData[key];
+            form.appendChild(input);
+          }
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
+      });
+      
+      // Initialize with empty cart
+      updateCartDisplay();
+    });
+  </script>
+</body>
+</html>
