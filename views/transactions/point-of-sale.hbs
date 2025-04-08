@@ -31,7 +31,7 @@
           </div>
           <div class="ms-auto d-flex align-items-center">
             <span id="current-time" class="me-3 text-sm d-none d-md-block"></span>
-            <span class="font-weight-bold">Cashier: <%= user.name %></span>
+            <span class="font-weight-bold">Cashier: {{user.name}}</span>
           </div>
         </div>
       </nav>
@@ -59,34 +59,39 @@
               <!-- Categories -->
               <div class="d-flex mb-3" id="categories">
                 <button class="btn btn-sm category-btn me-2 active" data-category="all">All</button>
-                <% const categories = [...new Set(products.map(p => p.category))]; %>
-                <% categories.forEach(category => { %>
-                  <button class="btn btn-sm category-btn me-2" data-category="<%= category %>"><%= category %></button>
-                <% }); %>
+                {{#each categories}}
+                  <button class="btn btn-sm category-btn me-2" data-category="{{this}}">{{this}}</button>
+                {{/each}}
               </div>
               
               <!-- Products Grid -->
               <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-3 product-grid" id="products-container">
-                <% products.forEach(product => { %>
-                  <div class="col product-item" data-category="<%= product.category %>">
-                    <div class="card h-100 product-card" data-id="<%= product.id %>" data-name="<%= product.name %>" data-price="<%= product.price %>" data-stock="<%= product.stock %>">
-                      <div class="card-body p-3">
-                        <% if (product.stock < 5) { %>
-                          <span class="stock-indicator stock-low">Stock: <%= product.stock %></span>
-                        <% } else { %>
-                          <span class="stock-indicator">Stock: <%= product.stock %></span>
-                        <% } %>
-                        <div class="product-image">
-                          <i class="fas fa-box fa-2x text-secondary"></i>
-                        </div>
-                        <h6 class="card-title mb-1 text-truncate"><%= product.name %></h6>
-                        <div class="d-flex justify-content-between align-items-center">
-                          <p class="card-text mb-0 text-dark font-weight-bold">$<%= product.price.toFixed(2) %></p>
+                {{#if products.length}}
+                  {{#each products}}
+                    <div class="col product-item" data-category="{{this.category.name}}">
+                      <div class="card h-100 product-card" data-id="{{this.id}}" data-name="{{this.name}}" data-price="{{this.sellingPrice}}" data-stock="{{this.stock}}">
+                        <div class="card-body p-3">
+                          {{#if (lessThan this.stock 5)}}
+                            <span class="stock-indicator stock-low">Stock: {{this.stock}}</span>
+                          {{else}}
+                            <span class="stock-indicator">Stock: {{this.stock}}</span>
+                          {{/if}}
+                          <div class="product-image">
+                            <i class="fas fa-box fa-2x text-secondary"></i>
+                          </div>
+                          <h6 class="card-title mb-1 text-truncate">{{this.name}}</h6>
+                          <div class="d-flex justify-content-between align-items-center">
+                            <p class="card-text mb-0 text-dark font-weight-bold">${{formatPrice this.sellingPrice}}</p>
+                          </div>
                         </div>
                       </div>
                     </div>
+                  {{/each}}
+                {{else}}
+                  <div class="col-12 text-center py-5">
+                    <p>No products found.</p>
                   </div>
-                <% }); %>
+                {{/if}}
               </div>
             </div>
           </div>
@@ -255,6 +260,23 @@
     document.getElementById('menuToggle').addEventListener('click', function() {
       document.body.classList.toggle('sidebar-collapsed');
     });
+
+    // Initialize current time display
+    function updateTime() {
+      const now = new Date();
+      const options = { 
+        weekday: 'short', 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit', 
+        minute: '2-digit'
+      };
+      document.getElementById('current-time').textContent = now.toLocaleDateString('en-US', options);
+    }
+    
+    updateTime();
+    setInterval(updateTime, 60000); // Update every minute
   </script>
 </body>
 </html>
