@@ -12,115 +12,40 @@
   <link id="pagestyle" href="/css/corporate-ui-dashboard.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <style>
-    .product-card {
-      cursor: pointer;
-      transition: all 0.2s;
-      border-radius: 0.5rem;
-      overflow: hidden;
-    }
-    .product-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    .cart-item {
-      border-bottom: 1px solid #eee;
-      padding: 8px 0;
-    }
-    .product-grid {
-      height: calc(100vh - 230px);
-      overflow-y: auto;
-    }
-    .cart-container {
-      height: calc(100vh - 380px);
-      overflow-y: auto;
-    }
-    .category-btn {
-      white-space: nowrap;
-      border-radius: 0.5rem;
-      padding: 0.5rem 1rem;
-      font-size: 0.75rem;
-    }
-    .category-btn.active {
-      background-color: #252f40;
-      color: #fff;
-    }
-    .quantity-control {
-      width: 35px;
-      text-align: center;
-      border: none;
-      display: inline-block;
-    }
-    #categories {
-      overflow-x: auto;
-      flex-wrap: nowrap;
-      white-space: nowrap;
-      padding-bottom: 0.5rem;
-    }
-    .payment-method-btn {
-      height: 50px;
-      border-radius: 0.5rem;
-    }
-    .payment-method-btn.active {
-      background-color: #252f40;
-      color: white;
-    }
-    .menu-toggle {
-      background: none;
-      border: none;
-      color: #252f40;
-      cursor: pointer;
-      margin-right: 1rem;
-    }
-    .product-image {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 80px;
-      background-color: #f8f9fa;
-      border-radius: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
-  </style>
+  {{> style}}
 </head>
 
 <body class="bg-gray-100">
-  <!-- Sidebar would be included here -->
+  {{> sidebar}}
   
   <!-- Main Content -->
-  <div class="main-content bg-gray-100">
-    <nav class="navbar navbar-expand-lg mb-4 p-3">
-      <div class="container-fluid px-0">
-        <div class="d-flex align-items-center">
-          <button class="menu-toggle" id="menuToggle">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-          </button>
-          <h4 class="font-weight-bold mb-0">Point of Sale</h4>
+  <div class="main-content">
+    <div class="container-fluid px-3 px-md-4">
+      <nav class="navbar navbar-expand-lg mb-4 p-3">
+        <div class="container-fluid px-0">
+          <div class="d-flex align-items-center">
+            <button class="menu-toggle" id="menuToggle">
+              <i class="fas fa-bars"></i>
+            </button>
+            <h4 class="font-weight-bold mb-0">Point of Sale</h4>
+          </div>
+          <div class="ms-auto d-flex align-items-center">
+            <span id="current-time" class="me-3 text-sm d-none d-md-block"></span>
+            <span class="font-weight-bold">Cashier: <%= user.name %></span>
+          </div>
         </div>
-        <div class="ms-auto d-flex align-items-center">
-          <span id="current-time" class="me-3 text-sm"></span>
-          <span class="font-weight-bold">Cashier: <%= user.name %></span>
-        </div>
-      </div>
-    </nav>
+      </nav>
 
-    <!-- Notification would be included here -->
-    
-    <!-- POS Content -->
-    <div class="container-fluid px-4">
-      <div class="row">
+      <!-- POS Content -->
+      <div class="row g-4">
         <!-- Left Side - Product Selection -->
         <div class="col-lg-8">
-          <div class="card border shadow-xs mb-4">
+          <div class="card border shadow-xs mb-4 h-100">
             <div class="card-header border-bottom pb-0">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
+              <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                <div class="mb-3 mb-md-0">
                   <h6 class="font-weight-semibold text-lg mb-0">Products</h6>
-                  <p class="text-sm mb-0">Select products to add to cart</p>
+                  <p class="text-sm text-muted mb-0">Select products to add to cart</p>
                 </div>
                 <div class="input-group input-group-sm" style="max-width: 300px;">
                   <span class="input-group-text bg-white border-end-0">
@@ -146,13 +71,17 @@
                   <div class="col product-item" data-category="<%= product.category %>">
                     <div class="card h-100 product-card" data-id="<%= product.id %>" data-name="<%= product.name %>" data-price="<%= product.price %>" data-stock="<%= product.stock %>">
                       <div class="card-body p-3">
+                        <% if (product.stock < 5) { %>
+                          <span class="stock-indicator stock-low">Stock: <%= product.stock %></span>
+                        <% } else { %>
+                          <span class="stock-indicator">Stock: <%= product.stock %></span>
+                        <% } %>
                         <div class="product-image">
                           <i class="fas fa-box fa-2x text-secondary"></i>
                         </div>
                         <h6 class="card-title mb-1 text-truncate"><%= product.name %></h6>
                         <div class="d-flex justify-content-between align-items-center">
                           <p class="card-text mb-0 text-dark font-weight-bold">$<%= product.price.toFixed(2) %></p>
-                          <small class="text-muted">Stock: <%= product.stock %></small>
                         </div>
                       </div>
                     </div>
@@ -165,7 +94,7 @@
         
         <!-- Right Side - Cart -->
         <div class="col-lg-4">
-          <div class="card border shadow-xs mb-4">
+          <div class="card border shadow-xs mb-4 h-100">
             <div class="card-header border-bottom pb-0">
               <div class="d-flex justify-content-between align-items-center">
                 <h6 class="font-weight-semibold text-lg mb-0">Current Transaction</h6>
@@ -174,11 +103,11 @@
                 </button>
               </div>
             </div>
-            <div class="card-body p-0">
+            <div class="card-body p-0 d-flex flex-column">
               <!-- Customer Info -->
               <div class="p-3 border-bottom">
                 <div class="d-flex align-items-center mb-2">
-                  <button class="btn btn-sm btn-outline-dark me-2" id="member-search-btn" data-bs-toggle="modal" data-bs-target="#memberModal">
+                  <button class="btn btn-sm btn-outline-primary me-2" id="member-search-btn" data-bs-toggle="modal" data-bs-target="#memberModal">
                     <i class="fas fa-user me-1"></i> Select Member
                   </button>
                   <span id="selected-member" class="text-sm">No member selected</span>
@@ -194,7 +123,7 @@
               </div>
               
               <!-- Cart Items -->
-              <div class="cart-container p-0" id="cart-items">
+              <div class="cart-container" id="cart-items">
                 <div class="text-center py-5 text-muted">
                   <i class="fas fa-shopping-cart fa-3x mb-3"></i>
                   <p>Cart is empty</p>
@@ -203,7 +132,7 @@
               </div>
               
               <!-- Totals -->
-              <div class="p-3 border-top">
+              <div class="p-3 border-top mt-auto">
                 <div class="d-flex justify-content-between mb-2">
                   <span class="text-sm">Subtotal:</span>
                   <span id="subtotal" class="text-sm font-weight-bold">$0.00</span>
@@ -216,28 +145,28 @@
                   <span class="text-sm">Discount:</span>
                   <div class="input-group input-group-sm" style="width: 150px;">
                     <input type="number" class="form-control" id="discount-amount" placeholder="0.00" min="0">
-                    <button class="btn btn-outline-dark" id="apply-discount">Apply</button>
+                    <button class="btn btn-outline-primary" id="apply-discount">Apply</button>
                   </div>
                 </div>
                 <div class="d-flex justify-content-between mb-3">
                   <span class="font-weight-bold">TOTAL:</span>
-                  <span class="font-weight-bold fs-5 text-dark" id="grand-total">$0.00</span>
+                  <span class="font-weight-bold fs-5 text-primary" id="grand-total">$0.00</span>
                 </div>
                 
                 <!-- Payment Methods -->
                 <div class="mb-3">
                   <label class="form-label text-sm">Payment Method:</label>
                   <div class="d-flex flex-wrap gap-2">
-                    <button class="btn btn-outline-dark payment-method-btn flex-grow-1 active" data-method="cash">
+                    <button class="btn btn-outline-primary payment-method-btn flex-grow-1 active" data-method="cash">
                       <i class="fas fa-money-bill me-1"></i> Cash
                     </button>
-                    <button class="btn btn-outline-dark payment-method-btn flex-grow-1" data-method="credit_card">
+                    <button class="btn btn-outline-primary payment-method-btn flex-grow-1" data-method="credit_card">
                       <i class="fas fa-credit-card me-1"></i> Credit
                     </button>
-                    <button class="btn btn-outline-dark payment-method-btn flex-grow-1" data-method="debit_card">
+                    <button class="btn btn-outline-primary payment-method-btn flex-grow-1" data-method="debit_card">
                       <i class="fas fa-credit-card me-1"></i> Debit
                     </button>
-                    <button class="btn btn-outline-dark payment-method-btn flex-grow-1" data-method="digital_wallet">
+                    <button class="btn btn-outline-primary payment-method-btn flex-grow-1" data-method="digital_wallet">
                       <i class="fas fa-wallet me-1"></i> Digital
                     </button>
                   </div>
@@ -255,7 +184,7 @@
                 
                 <!-- Complete Transaction Button -->
                 <div class="d-grid">
-                  <button class="btn btn-dark" id="complete-transaction">
+                  <button class="btn btn-primary" id="complete-transaction">
                     <i class="fas fa-check-circle me-2"></i>Complete Transaction
                   </button>
                 </div>
@@ -278,7 +207,7 @@
         <div class="modal-body">
           <div class="input-group mb-3">
             <input type="text" class="form-control" id="member-search" placeholder="Search by name, email or phone...">
-            <button class="btn btn-outline-dark" type="button" id="search-member-btn">Search</button>
+            <button class="btn btn-outline-primary" type="button" id="search-member-btn">Search</button>
           </div>
           <div id="member-search-results" class="list-group">
             <!-- Member search results will be populated here -->
@@ -300,16 +229,16 @@
           <div class="text-center">
             <h6 id="quantity-product-name" class="mb-3"></h6>
             <div class="input-group mb-3">
-              <button class="btn btn-outline-dark" id="decrease-qty">-</button>
+              <button class="btn btn-outline-primary" id="decrease-qty">-</button>
               <input type="number" class="form-control text-center" id="quantity-input" min="1" value="1">
-              <button class="btn btn-outline-dark" id="increase-qty">+</button>
+              <button class="btn btn-outline-primary" id="increase-qty">+</button>
             </div>
             <p class="text-muted mb-0">Available stock: <span id="quantity-stock"></span></p>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-dark" id="confirm-quantity">Confirm</button>
+          <button type="button" class="btn btn-primary" id="confirm-quantity">Confirm</button>
         </div>
       </div>
     </div>
@@ -320,5 +249,12 @@
   <script src="/js/core/bootstrap.min.js"></script>
 
   {{> pos}}
+  
+  <script>
+    // Add JavaScript to toggle the sidebar-collapsed class on body
+    document.getElementById('menuToggle').addEventListener('click', function() {
+      document.body.classList.toggle('sidebar-collapsed');
+    });
+  </script>
 </body>
 </html>
