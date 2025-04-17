@@ -57,6 +57,24 @@ async function bootstrap() {
     });
   });
 
+  hbs.registerHelper('formatNumber', function(number, options) {
+    if (number === undefined || number === null) return '0';
+    
+    const decimals = options && options.hash && options.hash.decimals !== undefined ? 
+                    options.hash.decimals : 2;
+    const thousandSeparator = options && options.hash && options.hash.thousandSeparator !== undefined ? 
+                            options.hash.thousandSeparator : ',';
+    const decimalSeparator = options && options.hash && options.hash.decimalSeparator !== undefined ? 
+                          options.hash.decimalSeparator : '.';
+
+    const parsedNumber = parseFloat(number);
+    if (isNaN(parsedNumber)) return '0';
+    const parts = parsedNumber.toFixed(decimals).split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator);
+
+    return parts.join(decimalSeparator);
+  });
+
   hbs.registerHelper('jsonStringify', function(obj) {
     if (!obj) return '';
     return JSON.stringify(obj);
