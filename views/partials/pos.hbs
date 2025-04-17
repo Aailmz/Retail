@@ -175,7 +175,15 @@
         alert('Cannot complete transaction with empty cart.');
         return;
       }
-      
+
+      // Validasi stok
+      for (const item of cart) {
+        if (item.quantity > item.maxStock) {
+          alert(`Stock for ${item.name} is insufficient. Available: ${item.maxStock}, Requested: ${item.quantity}`);
+          return;
+        }
+      }
+
       // Gather transaction data
       const customerName = document.getElementById('customer-name').value;
       const customerPhone = document.getElementById('customer-phone').value;
@@ -185,7 +193,7 @@
       const tax = subtotal * 0.1; // 10% tax
       const total = subtotal + tax - discount;
       let paymentReference = null;
-      
+
       if (selectedPaymentMethod !== 'cash') {
         paymentReference = document.getElementById('payment-reference').value;
         if (!paymentReference) {
@@ -193,37 +201,47 @@
           return;
         }
       }
-      
-      // Prepare transaction data to send to server
+
+      // Prepare transaction data
       const transactionData = {
         items: cart.map(item => ({
           productId: item.id,
           quantity: item.quantity,
           price: item.price
         })),
-        customerId: selectedMemberId,
-        customerName,
-        customerPhone,
+        customerId: selectedMemberId || null,
+        customerName: customerName || null,
+        customerPhone: customerPhone || null,
         paymentMethod: selectedPaymentMethod,
-        paymentReference,
-        subtotal,
-        tax,
-        discount,
-        total,
-        note
+        paymentReference: selectedPaymentMethod !== 'cash' ? paymentReference : null,
+        subtotal: subtotal,
+        tax: tax,
+        discount: discount,
+        total: total,
+        note: note || null
       };
-      
-      // Example of sending to server - replace with your actual endpoint
-      fetch('/api/transactions', {
+
+      // Send to server
+      fetch('/transactions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         },
         body: JSON.stringify(transactionData)
       })
       .then(response => {
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          if (response.status === 401) {
+            alert('Unauthorized: Please log in again.');
+            window.location.href = '/login';
+          } else if (response.status === 400) {
+            return response.json().then(data => {
+              throw new Error(data.message || 'Invalid transaction data');
+            });
+          } else {
+            throw new Error('Network response was not ok');
+          }
         }
         return response.json();
       })
@@ -238,10 +256,12 @@
         document.getElementById('discount-amount').value = '';
         document.getElementById('selected-member').textContent = 'No member selected';
         selectedMemberId = null;
+        // Redirect ke halaman detail transaksi
+        window.location.href = `/transactions/${data.id}`;
       })
       .catch(error => {
         console.error('Error completing transaction:', error);
-        alert('Error completing transaction. Please try again.');
+        alert('Error completing transaction: ' + error.message);
       });
     });
     
