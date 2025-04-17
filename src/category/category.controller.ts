@@ -75,7 +75,7 @@ export class CategoryController {
 
   @Get(':id')
   @Render('categories/show')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string, @Req() req: Request) {
     const category = await this.categoryService.findOne(+id);
     return { 
       title: 'Category Details',
