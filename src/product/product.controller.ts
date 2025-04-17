@@ -60,7 +60,7 @@ export class ProductController {
     return { 
       title: 'Create Product',
       categories: categories,
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: { products: true },
       notification: notification
     };
@@ -87,7 +87,7 @@ export class ProductController {
     return { 
       title: 'Product Details',
       product: product,
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: { products: true }
     };
   }
@@ -111,7 +111,7 @@ export class ProductController {
       title: 'Edit Product',
       product: product,
       categories: categories,
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: { products: true },
       notification: notification
     };
