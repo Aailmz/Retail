@@ -37,7 +37,7 @@ export class PromotionController {
     return { 
       title: 'Promotion List',
       promotions: promotions,
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: { promotions: true },
       notification: notification
     };
@@ -60,7 +60,7 @@ export class PromotionController {
     
     return { 
       title: 'Create Promotion',
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: { promotions: true },
       notification: notification,
       promotionTypes: ['buy_x_get_y', 'discount_percentage', 'bundle'],
@@ -101,7 +101,7 @@ export class PromotionController {
     return { 
       title: 'Promotion Details',
       promotion: promotion,
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: { promotions: true }
     };
   }
