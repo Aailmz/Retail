@@ -48,6 +48,15 @@ async function bootstrap() {
     return d.toISOString().slice(0, 16);
   });
 
+  hbs.registerHelper('formatTime', function(date) {
+    if (!date) return '';
+    const d = new Date(date);
+    return d.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  });
+
   hbs.registerHelper('jsonStringify', function(obj) {
     if (!obj) return '';
     return JSON.stringify(obj);
