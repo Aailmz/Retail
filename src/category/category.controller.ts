@@ -33,7 +33,7 @@ export class CategoryController {
     return { 
       title: 'Category List',
       categories: categories,
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: { categories: true },
       notification: notification
     };
@@ -53,7 +53,7 @@ export class CategoryController {
     
     return { 
       title: 'Create Category',
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: { categories: true },
       notification: notification
     };
@@ -80,7 +80,7 @@ export class CategoryController {
     return { 
       title: 'Category Details',
       category: category,
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: { categories: true }
     };
   }
