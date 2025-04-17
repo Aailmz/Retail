@@ -125,7 +125,7 @@ export class PromotionController {
       title: 'Edit Promotion',
       promotion: promotion,
       products: products,
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: { promotions: true },
       notification: notification,
       promotionTypes: ['buy_x_get_y', 'discount_percentage', 'bundle'],
