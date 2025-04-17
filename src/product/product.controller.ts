@@ -82,7 +82,7 @@ export class ProductController {
 
   @Get(':id')
   @Render('products/show')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string, @Req() req: Request) {
     const product = await this.productService.findOne(+id);
     return { 
       title: 'Product Details',
