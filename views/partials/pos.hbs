@@ -188,10 +188,6 @@
       const customerName = document.getElementById('customer-name').value;
       const customerPhone = document.getElementById('customer-phone').value;
       const note = document.getElementById('transaction-note').value;
-      const discount = parseFloat(document.getElementById('discount-amount').value) || 0;
-      const subtotal = calculateSubtotal();
-      const tax = subtotal * 0.1; // 10% tax
-      const total = subtotal + tax - discount;
       let paymentReference = null;
 
       if (selectedPaymentMethod !== 'cash') {
@@ -202,26 +198,25 @@
         }
       }
 
-      // Prepare transaction data
+      // Prepare transaction data according to CreateTransactionDto
       const transactionData = {
+        // If memberId is used as userId in your backend
+        userId: selectedMemberId || undefined,
+        customerName: customerName || undefined,
+        customerPhone: customerPhone || undefined,
         items: cart.map(item => ({
-          productId: item.id,
-          quantity: item.quantity,
-          price: item.price
+          productId: parseInt(item.id),  // Ensure it's a number
+          quantity: item.quantity
+          // No need to send price as it seems your DTO doesn't expect it
         })),
-        customerId: selectedMemberId || null,
-        customerName: customerName || null,
-        customerPhone: customerPhone || null,
         paymentMethod: selectedPaymentMethod,
-        paymentReference: selectedPaymentMethod !== 'cash' ? paymentReference : null,
-        subtotal: subtotal,
-        tax: tax,
-        discount: discount,
-        total: total,
-        note: note || null
+        paymentReference: selectedPaymentMethod !== 'cash' ? paymentReference : undefined,
+        note: note || undefined
       };
 
-      // Send to server
+      console.log('Sending transaction data:', transactionData);
+
+      // Send to server - try with the correct endpoint path
       fetch('/transactions', {
         method: 'POST',
         headers: {
@@ -231,16 +226,33 @@
         body: JSON.stringify(transactionData)
       })
       .then(response => {
+        console.log('Response status:', response.status);
+        
+        // Clone the response for debugging
+        const responseClone = response.clone();
+        
         if (!response.ok) {
           if (response.status === 401) {
             alert('Unauthorized: Please log in again.');
             window.location.href = '/login';
-          } else if (response.status === 400) {
-            return response.json().then(data => {
-              throw new Error(data.message || 'Invalid transaction data');
-            });
+            throw new Error('Unauthorized');
           } else {
-            throw new Error('Network response was not ok');
+            // Try to get JSON error first
+            return response.json()
+              .catch(() => {
+                // If not JSON, get text
+                return responseClone.text().then(text => {
+                  console.error('Non-JSON response:', text.substring(0, 500));
+                  throw new Error(`Server error: ${response.status}`);
+                });
+              })
+              .then(errorData => {
+                if (errorData && errorData.message) {
+                  throw new Error(errorData.message);
+                } else {
+                  throw new Error('Unknown server error');
+                }
+              });
           }
         }
         return response.json();

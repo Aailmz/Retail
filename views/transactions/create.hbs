@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+</head>
+<body>
+  <h1>Create Transaction</h1>
+  <% if (notification) { %>
+    <div class="alert alert-<%= notification.type %>">
+      <%= notification.message %>
+    </div>
+  <% } %>
+  <!-- Form untuk membuat transaksi -->
+  <form action="/transactions" method="POST">
+    <label for="customer-name">Customer Name:</label>
+    <input type="text" id="customer-name" name="customerName">
+    <!-- Tambahkan field lain sesuai kebutuhan -->
+    <button type="submit">Create Transaction</button>
+  </form>
+</body>
+</html>
