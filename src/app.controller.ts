@@ -116,13 +116,14 @@ export class AppController {
   @Get('pos')
   @UseGuards(JwtAuthGuard)
   @Render('transactions/point-of-sale')
-  async showPOS(@Req() req: Request) {
+  async showPOS(@Request() req) {
     const products = await this.productService.findAll();
     
     return { 
       title: 'Point of Sale',
       products: products,
-      //user: req.user,
+      isActivePage: { pos: true },
+      user: req.user,
     };
   }
 
