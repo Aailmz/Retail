@@ -37,7 +37,7 @@ export class ProductController {
     return { 
       title: 'Product List',
       products: products,
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: { products: true },
       notification: notification
     };
