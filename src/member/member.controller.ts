@@ -55,7 +55,7 @@ export class MemberController {
     
     return { 
       title: 'Create Member',
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: { members: true },
       notification: notification
     };
