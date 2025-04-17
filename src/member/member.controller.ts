@@ -35,7 +35,7 @@ export class MemberController {
     return { 
       title: 'Member List',
       members: members,
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: { members: true },
       notification: notification
     };
@@ -77,12 +77,12 @@ export class MemberController {
 
   @Get(':id')
   @Render('members/show')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string, @Req() req: Request) {
     const member = await this.memberService.findOne(+id);
     return { 
       title: 'Member Details',
       member: member,
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: { members: true }
     };
   }
@@ -104,7 +104,7 @@ export class MemberController {
     return { 
       title: 'Edit Member',
       member: member,
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: { members: true },
       notification: notification
     };
