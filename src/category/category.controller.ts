@@ -102,7 +102,7 @@ export class CategoryController {
     return { 
       title: 'Edit Category',
       category: category,
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: { categories: true },
       notification: notification
     };
