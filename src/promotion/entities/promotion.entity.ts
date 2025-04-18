@@ -23,7 +23,7 @@ export class Promotion {
   @Column()
   endDate: Date;
   
-  @Column('simple-json')
+  @Column('json')
   rules: {
     eligible_products: number[];
     min_purchase?: number;
@@ -32,7 +32,7 @@ export class Promotion {
     voucher_code?: string;
   };
   
-  @Column('simple-json')
+  @Column('json')
   configuration: any;
   
   @CreateDateColumn()

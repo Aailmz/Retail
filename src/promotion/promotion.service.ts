@@ -45,14 +45,19 @@ export class PromotionService {
     return markup;
   }
   async findActive(): Promise<Promotion[]> {
-    const today = new Date();
-    return this.promotionRepository.find({
-      where: {
-        status: 'active',
-        startDate: LessThanOrEqual(today),
-        endDate: MoreThanOrEqual(today)
-      }
-    });
+    try {
+      const today = new Date();
+      console.log('Finding active promotions for date:', today);
+      
+      return this.promotionRepository.find({
+        where: {
+          status: 'active',
+        }
+      });
+    } catch (error) {
+      console.error('Error finding active promotions:', error);
+      return [];
+    }
   }
 
   async findByVoucherCode(code: string): Promise<Promotion> {
