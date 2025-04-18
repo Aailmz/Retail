@@ -350,18 +350,21 @@
 
       // Prepare transaction data according to CreateTransactionDto
       const transactionData = {
-        // If memberId is used as userId in your backend
         userId: selectedMemberId || undefined,
         customerName: customerName || undefined,
         customerPhone: customerPhone || undefined,
         items: cart.map(item => ({
-          productId: parseInt(item.id),  // Ensure it's a number
+          productId: parseInt(item.id),
           quantity: item.quantity
-          // No need to send price as it seems your DTO doesn't expect it
         })),
         paymentMethod: selectedPaymentMethod,
         paymentReference: selectedPaymentMethod !== 'cash' ? paymentReference : undefined,
-        note: note || undefined
+        note: note || undefined,
+        // Add promotion ID if selected
+        promotionId: selectedPromotion ? selectedPromotion.id || selectedPromotion : undefined,
+        // Add voucher code if applicable
+        voucherCode: selectedPromotion && selectedPromotion.rules && selectedPromotion.rules.voucher_code ? 
+                    selectedPromotion.rules.voucher_code : undefined
       };
 
       console.log('Sending transaction data:', transactionData);
