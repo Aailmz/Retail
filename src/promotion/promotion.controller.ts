@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Render, Res, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Render, Res, Req, NotFoundException } from '@nestjs/common';
 import { PromotionService } from './promotion.service';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
 import { UpdatePromotionDto } from './dto/update-promotion.dto';
@@ -91,11 +91,30 @@ export class PromotionController {
     }
   }
 
+  @Get('active')
+  async findActive(@Res() res: Response) {
+    try {
+      const activePromotions = await this.promotionService.findAll();
+      return res.status(200).json({
+        success: true,
+        data: activePromotions
+      });
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Render('promotions/show')
   async findOne(@Param('id') id: string, @Req() req: Request) {
+    if (isNaN(+id)) {
+      throw new NotFoundException('Invalid promotion ID');
+    }
     const promotion = await this.promotionService.findOne(+id);
     
     return { 
@@ -179,15 +198,5 @@ export class PromotionController {
     } catch (error) {
       return res.status(400).json({ success: false, error: error.message });
     }
-  }
-
-  @Get('active')
-  findActive() {
-    return this.promotionService.findActive();
-  }
-
-  @Get('voucher/:code')
-  findByVoucherCode(@Param('code') code: string) {
-    return this.promotionService.findByVoucherCode(code);
   }
 }

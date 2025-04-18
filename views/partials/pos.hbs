@@ -3,7 +3,6 @@
     let cart = [];
     let selectedPaymentMethod = 'cash';
     let selectedMemberId = null;
-    let selectedPromotion = null;
     let tempProductId = null;
     let tempQuantity = 1;
     
@@ -141,170 +140,282 @@
       }
     });
 
-    // Load promotions when modal is shown
+    // Fetch and display promotions in the modal
+    function loadPromotions() {
+      const promotionsList = document.getElementById('promotions-list');
+      
+      // Show loading spinner
+      promotionsList.innerHTML = `
+        <div class="text-center py-3">
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <span class="ms-2">Loading promotions...</span>
+        </div>
+      `;
+      
+      // Fetch active promotions from API
+      fetch('/promotions/active', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Unauthorized: Please log in again.');
+          }
+          throw new Error(`Failed to fetch promotions: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(responseData => {
+        // Check if data exists and has the expected structure
+        if (!responseData || !responseData.data) {
+          throw new Error('Invalid response format from server');
+        }
+        
+        const promotions = responseData.data || [];
+        
+        if (promotions.length === 0) {
+          promotionsList.innerHTML = `
+            <div class="text-center py-3 text-muted">
+              <i class="fas fa-tags fa-2x mb-2"></i>
+              <p>No active promotions available</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // Display promotions
+        let promotionsHTML = '';
+        
+        promotions.forEach(promotion => {
+          // Check if discountValue exists and is a number
+          const discountValue = promotion.discountType === 'percentage' 
+            ? `${Number(promotion.discountValue || 0)}%` 
+            : `$${(Number(promotion.discountValue || 0)).toFixed(2)}`;
+          
+          const validUntil = promotion.endDate 
+            ? new Date(promotion.endDate).toLocaleDateString() 
+            : 'No end date';
+          
+          promotionsHTML += `
+            <div class="list-group-item list-group-item-action promotion-item" 
+                data-id="${promotion.id || ''}" 
+                data-value="${Number(promotion.discountValue || 0)}" 
+                data-type="${promotion.discountType || 'fixed'}">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="mb-0">${promotion.name || 'Unnamed Promotion'}</h6>
+                  <p class="text-sm text-muted mb-0">${promotion.description || 'No description'}</p>
+                  <span class="badge bg-primary mt-1">${discountValue} off</span>
+                  <span class="badge bg-secondary mt-1">Valid until: ${validUntil}</span>
+                </div>
+                <button class="btn btn-sm btn-outline-primary select-promotion-btn">
+                  Select
+                </button>
+              </div>
+            </div>
+          `;
+        });
+        
+        promotionsList.innerHTML = promotionsHTML;
+        
+        // Add event listeners to select promotion buttons
+        document.querySelectorAll('.select-promotion-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const promotionItem = this.closest('.promotion-item');
+            const promotionId = promotionItem.getAttribute('data-id');
+            const promotionValue = parseFloat(promotionItem.getAttribute('data-value') || 0);
+            const promotionType = promotionItem.getAttribute('data-type');
+            const promotionName = promotionItem.querySelector('h6').textContent;
+            
+            // Store selected promotion
+            selectedPromotion = {
+              id: promotionId,
+              name: promotionName,
+              value: promotionValue,
+              type: promotionType
+            };
+            
+            // Update UI
+            document.getElementById('selected-promotion').textContent = promotionName;
+            
+            // Calculate discount
+            const subtotal = calculateSubtotal();
+            let discountAmount = 0;
+            
+            if (promotionType === 'percentage') {
+              discountAmount = subtotal * (promotionValue / 100);
+            } else {
+              discountAmount = promotionValue;
+            }
+            
+            // Ensure we have a valid number before calling toFixed
+            if (typeof discountAmount === 'number' && !isNaN(discountAmount)) {
+              document.getElementById('discount-amount').value = discountAmount.toFixed(2);
+            } else {
+              document.getElementById('discount-amount').value = '0.00';
+            }
+            
+            updateTotals();
+            
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('promotionModal')).hide();
+          });
+        });
+      })
+      .catch(error => {
+        console.error('Error loading promotions:', error);
+        promotionsList.innerHTML = `
+          <div class="alert alert-danger">
+            Error loading promotions: ${error.message}
+          </div>
+        `;
+      });
+    }
+
+    // Load promotions when modal is opened
     document.getElementById('promotionModal').addEventListener('show.bs.modal', function() {
-      loadAvailablePromotions();
+      loadPromotions();
     });
 
-    // Function to load available promotions
-    function loadAvailablePromotions() {
-      const promotionsList = document.getElementById('promotions-list');
-      promotionsList.innerHTML = '<div class="text-center py-3"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ms-2">Loading promotions...</span></div>';
+    // Safe version of calculateSubtotal function if not already defined
+    function calculateSubtotal() {
+      if (typeof cart === 'undefined' || !Array.isArray(cart)) {
+        console.error('Cart is not defined or not an array');
+        return 0;
+      }
       
-      fetch('/promotions/active')
-        .then(response => response.json())
-        .then(data => {
-          // Log the actual response to understand its structure
-          console.log('Promotions response:', data);
-          
-          // Extract the array of promotions
-          let promotions = data;
-          
-          // Handle case where response might be wrapped in a data property
-          if (data && data.data && Array.isArray(data.data)) {
-            promotions = data.data;
-          }
-          
-          // Ensure promotions is an array
-          if (!Array.isArray(promotions)) {
-            // If it's a single object, convert to array
-            promotions = data ? [data] : [];
-          }
-          
-          if (promotions.length === 0) {
-            promotionsList.innerHTML = '<div class="list-group-item">No active promotions available</div>';
-            return;
-          }
-          
-          let html = '';
-          promotions.forEach(promotion => {
-            // Format date for display
-            const startDate = new Date(promotion.startDate).toLocaleDateString();
-            const endDate = new Date(promotion.endDate).toLocaleDateString();
-            
-            html += `
-              <button class="list-group-item list-group-item-action promotion-item" data-id="${promotion.id}">
-                <div class="d-flex justify-content-between align-items-start">
-                  <div>
-                    <h6 class="mb-1">${promotion.name}</h6>
-                    <p class="text-sm mb-1">${promotion.description || 'No description'}</p>
-                    <span class="badge bg-primary me-1">${getPromotionTypeLabel(promotion.type)}</span>
-                    <small class="text-muted">Valid: ${startDate} - ${endDate}</small>
-                  </div>
-                  ${promotion.rules && promotion.rules.voucher_code ? 
-                    `<span class="badge bg-secondary">Code: ${promotion.rules.voucher_code}</span>` : ''}
-                </div>
-              </button>
-            `;
-          });
-          
-          promotionsList.innerHTML = html;
-          
-          // Add click event to promotions
-          document.querySelectorAll('.promotion-item').forEach(item => {
-            item.addEventListener('click', function() {
-              const promotionId = parseInt(this.getAttribute('data-id'));
-              const promotionName = this.querySelector('h6').textContent;
-              
-              selectPromotion(promotionId, promotionName);
-              bootstrap.Modal.getInstance(document.getElementById('promotionModal')).hide();
-            });
-          });
-        })
-        .catch(error => {
-          console.error('Error loading promotions:', error);
-          promotionsList.innerHTML = '<div class="list-group-item text-danger">Error loading promotions. Please try again.</div>';
-        });
+      return cart.reduce((total, item) => {
+        const price = Number(item.price) || 0;
+        const quantity = Number(item.quantity) || 0;
+        return total + (price * quantity);
+      }, 0);
     }
 
-    // Function to get readable promotion type
-    function getPromotionTypeLabel(type) {
-      switch (type) {
-        case 'percentage_discount':
-          return 'Percentage Off';
-        case 'fixed_amount':
-          return 'Fixed Amount';
-        case 'buy_x_get_y':
-          return 'Buy X Get Y';
-        default:
-          return type.replace('_', ' ');
+    // Safe version of updateTotals function
+    function updateTotals() {
+      const subtotal = calculateSubtotal();
+      const tax = subtotal * 0.1; // 10% tax
+      
+      // Safely get discount amount, defaulting to 0 if undefined or NaN
+      let discountValue = document.getElementById('discount-amount')?.value;
+      const discountAmount = parseFloat(discountValue) || 0;
+      
+      const grandTotal = Math.max(0, subtotal + tax - discountAmount);
+      
+      // Safely update UI elements
+      if (document.getElementById('subtotal')) {
+        document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+      }
+      
+      if (document.getElementById('tax-amount')) {
+        document.getElementById('tax-amount').textContent = '$' + tax.toFixed(2);
+      }
+      
+      if (document.getElementById('grand-total')) {
+        document.getElementById('grand-total').textContent = '$' + grandTotal.toFixed(2);
       }
     }
+
+    // Make sure the discount-amount input exists
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!document.getElementById('discount-amount')) {
+        // If the discount amount input doesn't exist, create it
+        const discountElement = document.createElement('input');
+        discountElement.type = 'hidden';
+        discountElement.id = 'discount-amount';
+        discountElement.value = '0';
+        document.body.appendChild(discountElement);
+        console.log('Created missing discount-amount input');
+      }
+    });
 
     // Apply voucher code
     document.getElementById('apply-voucher-btn').addEventListener('click', function() {
       const voucherCode = document.getElementById('voucher-code').value.trim();
       
       if (!voucherCode) {
-        alert('Please enter a voucher code');
+        alert('Please enter voucher code');
         return;
       }
       
-      fetch(`/promotions/voucher/${encodeURIComponent(voucherCode)}`)
-        .then(response => {
-          if (!response.ok) {
+      // Fetch voucher details from API
+      fetch(`/api/promotions/voucher/${voucherCode}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 404) {
             throw new Error('Invalid voucher code');
           }
-          return response.json();
-        })
-        .then(promotion => {
-          selectPromotion(promotion.id, promotion.name);
-          bootstrap.Modal.getInstance(document.getElementById('promotionModal')).hide();
-        })
-        .catch(error => {
-          console.error('Error applying voucher:', error);
-          alert('Invalid voucher code. Please try again.');
-        });
+          throw new Error(`Failed to validate voucher: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        const voucher = data.data;
+        
+        // Store selected promotion
+        selectedPromotion = {
+          id: voucher.id,
+          name: voucher.name || `Voucher: ${voucherCode}`,
+          value: voucher.discountValue,
+          type: voucher.discountType
+        };
+        
+        // Update UI
+        document.getElementById('selected-promotion').textContent = selectedPromotion.name;
+        
+        // Calculate discount
+        const subtotal = calculateSubtotal();
+        let discountAmount = 0;
+        
+        if (voucher.discountType === 'percentage') {
+          discountAmount = subtotal * (voucher.discountValue / 100);
+        } else {
+          discountAmount = voucher.discountValue;
+        }
+        
+        // Update discount and totals
+        document.getElementById('discount-amount').value = discountAmount.toFixed(2);
+        updateTotals();
+        
+        // Close modal
+        bootstrap.Modal.getInstance(document.getElementById('promotionModal')).hide();
+        
+        alert('Voucher applied successfully!');
+      })
+      .catch(error => {
+        console.error('Error applying voucher:', error);
+        alert(error.message);
+      });
     });
 
-    // Function to select a promotion
-    function selectPromotion(id, name) {
-      selectedPromotion = id;
-      document.getElementById('selected-promotion').textContent = name;
-      // Recalculate totals with promotion
-      fetchPromotionDetails(id);
-    }
+    // Initialize selected promotion variable
+    let selectedPromotion = null;
 
-    // Function to fetch promotion details and apply to cart
-    function fetchPromotionDetails(promotionId) {
-      fetch(`/promotions/${promotionId}`)
-        .then(response => response.json())
-        .then(promotion => {
-          // Store full promotion details if needed
-          selectedPromotion = promotion;
-          
-          // Apply promotion rules - this is a simplified version
-          // In a real application, you might want to calculate this server-side
-          applyPromotionToCart(promotion);
-        })
-        .catch(error => {
-          console.error('Error fetching promotion details:', error);
-        });
-    }
+    // Load promotions when modal is opened
+    document.getElementById('promotionModal').addEventListener('show.bs.modal', function() {
+      loadPromotions();
+    });
 
-    // Function to apply promotion to cart
-    function applyPromotionToCart(promotion) {
-      // Reset any previous discount
-      document.getElementById('discount-amount').value = '';
+    // Update the existing updateTotals function to include discounts
+    function updateTotals() {
+      const subtotal = calculateSubtotal();
+      const tax = subtotal * 0.1; // 10% tax
+      const discountAmount = parseFloat(document.getElementById('discount-amount').value) || 0;
+      const grandTotal = Math.max(0, subtotal + tax - discountAmount);
       
-      // Apply promotion based on type
-      if (promotion.type === 'percentage_discount') {
-        const percentage = promotion.configuration.percentage || 0;
-        const subtotal = calculateSubtotal();
-        const discount = subtotal * (percentage / 100);
-        document.getElementById('discount-amount').value = discount.toFixed(2);
-      } 
-      else if (promotion.type === 'fixed_amount') {
-        const amount = promotion.configuration.amount || 0;
-        document.getElementById('discount-amount').value = amount.toFixed(2);
-      }
-      else if (promotion.type === 'buy_x_get_y') {
-        // This would be more complex to calculate in the frontend
-        // For now, we'll just display a message
-        alert('Buy X Get Y promotion applied. Final discount will be calculated at checkout.');
-      }
-      
-      updateTotals();
+      document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+      document.getElementById('tax-amount').textContent = '$' + tax.toFixed(2);
+      document.getElementById('grand-total').textContent = '$' + grandTotal.toFixed(2);
     }
     
     // Payment method selection
@@ -367,21 +478,18 @@
 
       // Prepare transaction data according to CreateTransactionDto
       const transactionData = {
+        // If memberId is used as userId in your backend
         userId: selectedMemberId || undefined,
         customerName: customerName || undefined,
         customerPhone: customerPhone || undefined,
         items: cart.map(item => ({
-          productId: parseInt(item.id),
+          productId: parseInt(item.id),  // Ensure it's a number
           quantity: item.quantity
+          // No need to send price as it seems your DTO doesn't expect it
         })),
         paymentMethod: selectedPaymentMethod,
         paymentReference: selectedPaymentMethod !== 'cash' ? paymentReference : undefined,
-        note: note || undefined,
-        // Add promotion ID if selected
-        promotionId: selectedPromotion ? selectedPromotion.id || selectedPromotion : undefined,
-        // Add voucher code if applicable
-        voucherCode: selectedPromotion && selectedPromotion.rules && selectedPromotion.rules.voucher_code ? 
-                    selectedPromotion.rules.voucher_code : undefined
+        note: note || undefined
       };
 
       console.log('Sending transaction data:', transactionData);
@@ -457,7 +565,7 @@
       }
       
       // Fetch members from server
-      fetch(`/members/search?q=${encodeURIComponent(searchValue)}`)
+      fetch(`/api/members/search?q=${encodeURIComponent(searchValue)}`)
         .then(response => response.json())
         .then(data => {
           const resultsContainer = document.getElementById('member-search-results');

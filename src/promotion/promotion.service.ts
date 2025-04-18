@@ -44,37 +44,12 @@ export class PromotionService {
     const markup = (discountRate / (100 - discountRate)) * 100;
     return markup;
   }
+
   async findActive(): Promise<Promotion[]> {
-    try {
-      const today = new Date();
-      console.log('Finding active promotions for date:', today);
-      
-      return this.promotionRepository.find({
-        where: {
-          status: 'active',
-        }
-      });
-    } catch (error) {
-      console.error('Error finding active promotions:', error);
-      return [];
-    }
+    return this.promotionRepository.find({
+      where: { status: 'active' },
+      order: { createdAt: 'DESC' }
+    });
   }
 
-  async findByVoucherCode(code: string): Promise<Promotion> {
-    const today = new Date();
-    const promotion = await this.promotionRepository.findOne({
-      where: {
-        status: 'active',
-        startDate: LessThanOrEqual(today),
-        endDate: MoreThanOrEqual(today),
-        rules: Raw(rules => `${rules}->>'voucher_code' = :code`, { code })
-      }
-    });
-    
-    if (!promotion) {
-      throw new NotFoundException(`Promotion with voucher code ${code} not found`);
-    }
-    
-    return promotion;
-  }
 }
