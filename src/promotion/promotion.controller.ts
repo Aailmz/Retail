@@ -180,4 +180,14 @@ export class PromotionController {
       return res.status(400).json({ success: false, error: error.message });
     }
   }
+
+  @Get('active')
+  findActive() {
+    return this.promotionService.findActive();
+  }
+
+  @Get('voucher/:code')
+  findByVoucherCode(@Param('code') code: string) {
+    return this.promotionService.findByVoucherCode(code);
+  }
 }
