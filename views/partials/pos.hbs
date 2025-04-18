@@ -153,7 +153,24 @@
       
       fetch('/promotions/active')
         .then(response => response.json())
-        .then(promotions => {
+        .then(data => {
+          // Log the actual response to understand its structure
+          console.log('Promotions response:', data);
+          
+          // Extract the array of promotions
+          let promotions = data;
+          
+          // Handle case where response might be wrapped in a data property
+          if (data && data.data && Array.isArray(data.data)) {
+            promotions = data.data;
+          }
+          
+          // Ensure promotions is an array
+          if (!Array.isArray(promotions)) {
+            // If it's a single object, convert to array
+            promotions = data ? [data] : [];
+          }
+          
           if (promotions.length === 0) {
             promotionsList.innerHTML = '<div class="list-group-item">No active promotions available</div>';
             return;
@@ -174,7 +191,7 @@
                     <span class="badge bg-primary me-1">${getPromotionTypeLabel(promotion.type)}</span>
                     <small class="text-muted">Valid: ${startDate} - ${endDate}</small>
                   </div>
-                  ${promotion.rules.voucher_code ? 
+                  ${promotion.rules && promotion.rules.voucher_code ? 
                     `<span class="badge bg-secondary">Code: ${promotion.rules.voucher_code}</span>` : ''}
                 </div>
               </button>
