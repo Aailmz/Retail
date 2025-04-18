@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, LessThanOrEqual, MoreThanOrEqual, Raw } from 'typeorm';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
 import { UpdatePromotionDto } from './dto/update-promotion.dto';
 import { Promotion } from './entities/promotion.entity';
@@ -43,5 +43,33 @@ export class PromotionService {
     
     const markup = (discountRate / (100 - discountRate)) * 100;
     return markup;
+  }
+  async findActive(): Promise<Promotion[]> {
+    const today = new Date();
+    return this.promotionRepository.find({
+      where: {
+        status: 'active',
+        startDate: LessThanOrEqual(today),
+        endDate: MoreThanOrEqual(today)
+      }
+    });
+  }
+
+  async findByVoucherCode(code: string): Promise<Promotion> {
+    const today = new Date();
+    const promotion = await this.promotionRepository.findOne({
+      where: {
+        status: 'active',
+        startDate: LessThanOrEqual(today),
+        endDate: MoreThanOrEqual(today),
+        rules: Raw(rules => `${rules}->>'voucher_code' = :code`, { code })
+      }
+    });
+    
+    if (!promotion) {
+      throw new NotFoundException(`Promotion with voucher code ${code} not found`);
+    }
+    
+    return promotion;
   }
 }
