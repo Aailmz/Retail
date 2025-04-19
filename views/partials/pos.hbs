@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   }
 
-  // Category filtering (unchanged)
+  // Category filtering
   document.querySelectorAll('.category-btn').forEach(button => {
     button.addEventListener('click', function() {
       const category = this.getAttribute('data-category');
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Product search functionality (unchanged)
+  // Product search functionality
   document.getElementById('product-search').addEventListener('input', function() {
     const searchTerm = this.value.toLowerCase();
     const productItems = document.querySelectorAll('.product-item');
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Product selection (unchanged)
+  // Product selection
   document.querySelectorAll('.product-card').forEach(card => {
     card.addEventListener('click', function() {
       const productId = this.getAttribute('data-id');
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 300);
   }
 
-  // Quantity controls (unchanged)
+  // Quantity controls
   document.getElementById('decrease-qty').addEventListener('click', function() {
     const input = document.getElementById('quantity-input');
     const currentValue = parseInt(input.value);
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (selectedPromotion) {
         promotionId = selectedPromotion.id;
         promotionName = selectedPromotion.name;
-        markupPercentage = selectedPromotion.applied_markup_value || 0;
+        markupPercentage = selectedPromotion.configuration?.applied_markup_value || 0;
         markedUpPrice = originalPrice * (1 + markupPercentage / 100);
 
         if (selectedPromotion.type === 'discount_percentage') {
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
           discountedPrice = markedUpPrice - discountAmount;
           if (discountedPrice < 0) discountedPrice = 0;
         } else if (selectedPromotion.type === 'buy_x_get_y_free' || selectedPromotion.type === 'buy_x_get_y') {
-          discountedPrice = markedUpPrice;
+          discountedPrice = markedUpPrice; // Paid product price remains marked up
         }
       } else {
         discountedPrice = markedUpPrice;
@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Clear cart (unchanged)
+  // Clear cart
   document.getElementById('clear-cart').addEventListener('click', function() {
     if (confirm('Are you sure you want to clear the cart?')) {
       cart = [];
@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Payment method selection (unchanged)
+  // Payment method selection
   document.querySelectorAll('.payment-method-btn').forEach(button => {
     button.addEventListener('click', function() {
       document.querySelectorAll('.payment-method-btn').forEach(btn => {
@@ -334,12 +334,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Apply discount (unchanged)
+  // Apply discount
   document.getElementById('apply-discount').addEventListener('click', function() {
     updateTotals();
   });
 
-  // Complete transaction (unchanged)
+  // Complete transaction
   document.getElementById('complete-transaction').addEventListener('click', function() {
     if (cart.length === 0) {
       alert('Cannot complete transaction with empty cart.');
@@ -454,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   });
 
-  // Search members (unchanged)
+  // Search members
   document.getElementById('search-member-btn').addEventListener('click', function() {
     const searchValue = document.getElementById('member-search').value;
     if (!searchValue) {
@@ -722,7 +722,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="text-muted small">Original price: $${item.originalPrice.toFixed(2)}</div>
             <div class="text-muted small">With markup: $${markedUpPrice.toFixed(2)} (${markupPercentage}% markup)</div>
             <div class="text-success small">
-              ${discountAmount > 0 ? `Final price: $${discountedPrice.toFixed(2)} (Save $${discountAmount.toFixed(2)})` : ''}
+              ${discountAmount > 0 ? `Savings: $${discountAmount.toFixed(2)}` : ''}
             </div>
           </label>
         </div>
