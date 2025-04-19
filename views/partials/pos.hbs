@@ -219,81 +219,97 @@
           selectedPromotion = promotionsArray.find(p => p.id === promoId);
         }
         
-        // Calculate discounted price if promotion applies
-        let discountedPrice = productPrice;
+        // Calculate marked-up price and then apply discount if promotion applies
+        let originalPrice = productPrice;
+        let markedUpPrice = originalPrice;
+        let discountedPrice = originalPrice;
         let discountAmount = 0;
         let promotionId = null;
         let promotionName = null;
-        
+        let markupPercentage = 0;
+
         if (selectedPromotion) {
           promotionId = selectedPromotion.id;
           promotionName = selectedPromotion.name;
+          markupPercentage = selectedPromotion.configuration?.applied_markup_value;
+          markedUpPrice = originalPrice * (1 + markupPercentage / 100);
           
           if (selectedPromotion.type === 'discount_percentage') {
-            // Use the actual discount rate from configuration
+
             const discountPercentage = selectedPromotion.configuration?.discount_rate || 0;
-            discountAmount = (productPrice * discountPercentage / 100);
-            discountedPrice = productPrice - discountAmount;
+
+            discountAmount = (markedUpPrice * discountPercentage / 100);
+            discountedPrice = markedUpPrice - discountAmount;
           } 
           else if (selectedPromotion.type === 'fixed_amount_discount') {
             discountAmount = selectedPromotion.configuration?.discount_amount || 0;
-            discountedPrice = productPrice - discountAmount;
+            discountedPrice = markedUpPrice - discountAmount;
             if (discountedPrice < 0) discountedPrice = 0;
           }
           else if (selectedPromotion.type === 'buy_x_get_y_free' || selectedPromotion.type === 'buy_x_get_y') {
-            // For buy X get Y free, we'll adjust quantity but keep the price the same
-            // We'll handle this in the cart UI
-          }
-        }
-      
-      // Check if the product is already in cart
-      const existingItemIndex = cart.findIndex(item => item.id === productId);
-      
-      if (existingItemIndex !== -1) {
-        // Update quantity if already in cart
-        const newQuantity = cart[existingItemIndex].quantity + quantity;
-        
-        if (newQuantity <= productStock) {
-          cart[existingItemIndex].quantity = newQuantity;
-          // Update promotion details too
-          if (selectedPromotion) {
-            cart[existingItemIndex].promotionId = promotionId;
-            cart[existingItemIndex].promotionName = promotionName;
-            cart[existingItemIndex].discountedPrice = discountedPrice;
-            cart[existingItemIndex].discountAmount = discountAmount;
-          } else {
-            // If no promotion is selected, remove any existing promotion
-            cart[existingItemIndex].promotionId = null;
-            cart[existingItemIndex].promotionName = null;
-            cart[existingItemIndex].discountedPrice = productPrice;
-            cart[existingItemIndex].discountAmount = 0;
+            discountedPrice = markedUpPrice;
           }
         } else {
-          alert(`Cannot add more than available stock (${productStock})`);
-          return;
+          discountedPrice = markedUpPrice;
         }
-      } else {
-        // Add new item to cart
-        cart.push({
-          id: productId,
-          name: productName,
-          price: productPrice,
-          quantity: quantity,
-          maxStock: productStock,
-          promotionId: promotionId,
-          promotionName: promotionName,
-          discountedPrice: discountedPrice,
-          discountAmount: discountAmount
-        });
+        
+        // Check if the product is already in cart
+        const existingItemIndex = cart.findIndex(item => item.id === productId);
+        
+        if (existingItemIndex !== -1) {
+          // Update quantity if already in cart
+          const newQuantity = cart[existingItemIndex].quantity + quantity;
+          
+          if (newQuantity <= productStock) {
+            cart[existingItemIndex].quantity = newQuantity;
+            // Update promotion details too
+            if (selectedPromotion) {
+              cart[existingItemIndex].promotionId = promotionId;
+              cart[existingItemIndex].promotionName = promotionName;
+              cart[existingItemIndex].originalPrice = originalPrice;
+              cart[existingItemIndex].markedUpPrice = markedUpPrice;
+              cart[existingItemIndex].markupPercentage = markupPercentage;
+              cart[existingItemIndex].discountedPrice = discountedPrice;
+              cart[existingItemIndex].discountAmount = discountAmount;
+            } else {
+              // If no promotion is selected, remove any existing promotion
+              cart[existingItemIndex].promotionId = null;
+              cart[existingItemIndex].promotionName = null;
+              cart[existingItemIndex].originalPrice = originalPrice;
+              cart[existingItemIndex].markedUpPrice = markedUpPrice;
+              cart[existingItemIndex].markupPercentage = markupPercentage;
+              cart[existingItemIndex].discountedPrice = markedUpPrice; // No discount
+              cart[existingItemIndex].discountAmount = 0;
+            }
+          } else {
+            alert(`Cannot add more than available stock (${productStock})`);
+            return;
+          }
+        } else {
+          // Add new item to cart
+          cart.push({
+            id: productId,
+            name: productName,
+            price: originalPrice,
+            originalPrice: originalPrice,
+            markedUpPrice: markedUpPrice,
+            markupPercentage: markupPercentage,
+            quantity: quantity,
+            maxStock: productStock,
+            promotionId: promotionId,
+            promotionName: promotionName,
+            discountedPrice: discountedPrice,
+            discountAmount: discountAmount
+          });
+        }
+        
+        // Update cart UI
+        updateCartUI();
+        
+        // Close the modal
+        bootstrap.Modal.getInstance(document.getElementById('quantityModal')).hide();
       }
-      
-      // Update cart UI
-      updateCartUI();
-      
-      // Close the modal
-      bootstrap.Modal.getInstance(document.getElementById('quantityModal')).hide();
-    }
-  });
+    });
     
     // Clear cart
     document.getElementById('clear-cart').addEventListener('click', function() {
@@ -371,7 +387,12 @@
           quantity: item.quantity,
           // Include promotion information
           promotionId: item.promotionId || undefined,
-          discountAmount: item.discountAmount || 0
+          discountAmount: item.discountAmount || 0,
+          // Add the following price fields
+          originalPrice: item.originalPrice,
+          markedUpPrice: item.markedUpPrice,
+          discountedPrice: item.discountedPrice,
+          markupPercentage: item.markupPercentage || 0
         })),
         paymentMethod: selectedPaymentMethod,
         paymentReference: selectedPaymentMethod !== 'cash' ? 
@@ -393,8 +414,8 @@
       .then(response => {
         console.log('Response status:', response.status);
         
-        // Clone the response for debugging
-        const responseClone = response.clone();
+        // Check if the response has content
+        const contentType = response.headers.get('content-type');
         
         if (!response.ok) {
           if (response.status === 401) {
@@ -402,25 +423,37 @@
             window.location.href = '/login';
             throw new Error('Unauthorized');
           } else {
-            // Try to get JSON error first
-            return response.json()
-              .catch(() => {
-                // If not JSON, get text
-                return responseClone.text().then(text => {
-                  console.error('Non-JSON response:', text.substring(0, 500));
-                  throw new Error(`Server error: ${response.status}`);
-                });
-              })
-              .then(errorData => {
-                if (errorData && errorData.message) {
-                  throw new Error(errorData.message);
-                } else {
-                  throw new Error('Unknown server error');
-                }
+            // Handle different response types
+            if (contentType && contentType.includes('application/json')) {
+              return response.json().then(errorData => {
+                throw new Error(errorData.message || 'Unknown server error');
               });
+            } else {
+              return response.text().then(text => {
+                console.error('Non-JSON response:', text.substring(0, 500));
+                throw new Error(`Server error: ${response.status}`);
+              });
+            }
           }
         }
-        return response.json();
+        
+        // Only try to parse JSON if we have a JSON content type
+        if (contentType && contentType.includes('application/json')) {
+          return response.json();
+        } else if (response.status === 204) {
+          // No content
+          return { success: true };
+        } else {
+          // Try to parse as JSON anyway, but be prepared for failure
+          return response.text().then(text => {
+            try {
+              return JSON.parse(text);
+            } catch (e) {
+              console.log('Response is not JSON:', text.substring(0, 500));
+              return { success: true };
+            }
+          });
+        }
       })
       .then(data => {
         alert('Transaction completed successfully!');
@@ -434,7 +467,7 @@
         document.getElementById('selected-member').textContent = 'No member selected';
         selectedMemberId = null;
         // Redirect ke halaman detail transaksi
-        window.location.href = `/transactions/${data.id}`;
+        window.location.href = `/pos`;
       })
       .catch(error => {
         console.error('Error completing transaction:', error);
@@ -496,125 +529,132 @@
     
     // Update Cart UI
     function updateCartUI() {
-    const cartContainer = document.getElementById('cart-items');
-    
-    if (cart.length === 0) {
-      cartContainer.innerHTML = `
-        <div class="text-center py-5 text-muted">
-          <i class="fas fa-shopping-cart fa-3x mb-3"></i>
-          <p>Cart is empty</p>
-          <p class="text-sm">Add products by clicking on items from the left panel</p>
-        </div>
-      `;
-    } else {
-      let cartHTML = '';
+      const cartContainer = document.getElementById('cart-items');
       
-      cart.forEach((item, index) => {
-        // Calculate item total using discounted price if available
-        const priceToUse = item.discountedPrice !== undefined ? item.discountedPrice : item.price;
-        const itemTotal = priceToUse * item.quantity;
+      if (cart.length === 0) {
+        cartContainer.innerHTML = `
+          <div class="text-center py-5 text-muted">
+            <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+            <p>Cart is empty</p>
+            <p class="text-sm">Add products by clicking on items from the left panel</p>
+          </div>
+        `;
+      } else {
+        let cartHTML = '';
         
-        const promotionBadge = item.promotionName 
-          ? `<span class="badge bg-success text-white ms-2">${item.promotionName}</span>` 
-          : '';
-        
-        const originalPriceDisplay = item.discountAmount > 0
-          ? `<span class="text-sm text-muted text-decoration-line-through me-1">$${item.price.toFixed(2)}</span>`
-          : '';
-        
-        cartHTML += `
-          <div class="cart-item p-3 border-bottom">
-            <div class="d-flex justify-content-between mb-2">
-              <div>
-                <h6 class="mb-0 d-flex align-items-center">
-                  ${item.name}
-                  ${promotionBadge}
-                </h6>
-                <div class="d-flex align-items-center">
-                  ${originalPriceDisplay}
-                  <span class="text-sm ${item.discountAmount > 0 ? 'text-success font-weight-bold' : 'text-muted'}">
-                    $${priceToUse.toFixed(2)} × ${item.quantity}
-                  </span>
+        cart.forEach((item, index) => {
+          // Use discounted price (which includes markup and discount)
+          const priceToUse = item.discountedPrice !== undefined ? item.discountedPrice : item.markedUpPrice;
+          const itemTotal = priceToUse * item.quantity;
+          
+          const promotionBadge = item.promotionName 
+            ? `<span class="badge bg-success text-white ms-2">${item.promotionName}</span>` 
+            : '';
+          
+          // Show original price if there's markup or discount
+          const originalPriceDisplay = (item.markupPercentage > 0 || item.discountAmount > 0)
+            ? `<span class="text-sm text-muted text-decoration-line-through me-1">$${item.originalPrice.toFixed(2)}</span>`
+            : '';
+          
+          // Show marked-up price if there's a discount
+          const markedUpPriceDisplay = (item.markupPercentage > 0 && item.discountAmount > 0)
+            ? `<span class="text-sm text-muted text-decoration-line-through me-1">$${item.markedUpPrice.toFixed(2)}</span>`
+            : '';
+          
+          cartHTML += `
+            <div class="cart-item p-3 border-bottom">
+              <div class="d-flex justify-content-between mb-2">
+                <div>
+                  <h6 class="mb-0 d-flex align-items-center">
+                    ${item.name}
+                    ${promotionBadge}
+                  </h6>
+                  <div class="d-flex align-items-center">
+                    ${originalPriceDisplay}
+                    ${markedUpPriceDisplay}
+                    <span class="text-sm ${item.discountAmount > 0 ? 'text-success font-weight-bold' : 'text-muted'}">
+                      $${priceToUse.toFixed(2)} × ${item.quantity}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div class="text-end">
-                <span class="font-weight-bold">$${itemTotal.toFixed(2)}</span>
-                <div class="d-flex gap-1 mt-1">
-                  <button class="btn btn-sm btn-outline-success promotion-btn" data-index="${index}">
-                    <i class="fas fa-tag"></i>
-                  </button>
-                  <button class="btn btn-sm btn-outline-primary edit-qty-btn" data-index="${index}">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button class="btn btn-sm btn-outline-danger remove-item-btn" data-index="${index}">
-                    <i class="fas fa-trash"></i>
-                  </button>
+                <div class="text-end">
+                  <span class="font-weight-bold">$${itemTotal.toFixed(2)}</span>
+                  <div class="d-flex gap-1 mt-1">
+                    <button class="btn btn-sm btn-outline-success promotion-btn" data-index="${index}">
+                      <i class="fas fa-tag"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary edit-qty-btn" data-index="${index}">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger remove-item-btn" data-index="${index}">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        `;
-      });
-      
-      cartContainer.innerHTML = cartHTML;
-      
-      // Add event listeners for cart actions
-      document.querySelectorAll('.edit-qty-btn').forEach(button => {
-        button.addEventListener('click', function() {
-          const index = parseInt(this.getAttribute('data-index'));
-          const item = cart[index];
-          
-          if (item) {
-            tempProductId = item.id;
-            document.getElementById('quantity-product-name').textContent = item.name;
-            document.getElementById('quantity-stock').textContent = item.maxStock;
-            document.getElementById('quantity-input').value = item.quantity;
-            document.getElementById('quantity-input').max = item.maxStock;
-            
-            // Hide promotion section when editing quantity
-            document.querySelector('.promotions-section').style.display = 'none';
-            
-            // When confirming quantity, update the item
-            const originalConfirmHandler = document.getElementById('confirm-quantity').onclick;
-            document.getElementById('confirm-quantity').onclick = function() {
-              const newQuantity = parseInt(document.getElementById('quantity-input').value);
-              cart[index].quantity = newQuantity;
-              updateCartUI();
-              bootstrap.Modal.getInstance(document.getElementById('quantityModal')).hide();
-              document.getElementById('confirm-quantity').onclick = originalConfirmHandler;
-              // Restore promotion section display
-              document.querySelector('.promotions-section').style.display = 'block';
-            };
-            
-            const quantityModal = new bootstrap.Modal(document.getElementById('quantityModal'));
-            quantityModal.show();
-          }
+          `;
         });
-      });
-      
-      document.querySelectorAll('.promotion-btn').forEach(button => {
-        button.addEventListener('click', function() {
-          const index = parseInt(this.getAttribute('data-index'));
-          const item = cart[index];
-          
-          if (item) {
-            // Show promotions modal for this product
-            showProductPromotionsModal(item, index);
-          }
+        
+        cartContainer.innerHTML = cartHTML;
+        
+        // Add event listeners for cart actions
+        document.querySelectorAll('.edit-qty-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'));
+            const item = cart[index];
+            
+            if (item) {
+              tempProductId = item.id;
+              document.getElementById('quantity-product-name').textContent = item.name;
+              document.getElementById('quantity-stock').textContent = item.maxStock;
+              document.getElementById('quantity-input').value = item.quantity;
+              document.getElementById('quantity-input').max = item.maxStock;
+              
+              // Hide promotion section when editing quantity
+              document.querySelector('.promotions-section').style.display = 'none';
+              
+              // When confirming quantity, update the item
+              const originalConfirmHandler = document.getElementById('confirm-quantity').onclick;
+              document.getElementById('confirm-quantity').onclick = function() {
+                const newQuantity = parseInt(document.getElementById('quantity-input').value);
+                cart[index].quantity = newQuantity;
+                updateCartUI();
+                bootstrap.Modal.getInstance(document.getElementById('quantityModal')).hide();
+                document.getElementById('confirm-quantity').onclick = originalConfirmHandler;
+                // Restore promotion section display
+                document.querySelector('.promotions-section').style.display = 'block';
+              };
+              
+              const quantityModal = new bootstrap.Modal(document.getElementById('quantityModal'));
+              quantityModal.show();
+            }
+          });
         });
-      });
-      
-      document.querySelectorAll('.remove-item-btn').forEach(button => {
-        button.addEventListener('click', function() {
-          const index = parseInt(this.getAttribute('data-index'));
-          cart.splice(index, 1);
-          updateCartUI();
+        
+        document.querySelectorAll('.promotion-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'));
+            const item = cart[index];
+            
+            if (item) {
+              // Show promotions modal for this product
+              showProductPromotionsModal(item, index);
+            }
+          });
         });
-      });
+        
+        document.querySelectorAll('.remove-item-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'));
+            cart.splice(index, 1);
+            updateCartUI();
+          });
+        });
+      }
+      
+      updateTotals();
     }
-    
-    updateTotals();
-  }
 
   function showProductPromotionsModal(item, cartIndex) {
     const modal = document.getElementById('productPromotionModal') || createProductPromotionModal();
@@ -656,7 +696,8 @@
               id="item-promo-none" value="none" ${!item.promotionId ? 'checked' : ''}>
         <label class="form-check-label w-100" for="item-promo-none">
           <strong>No Promotion</strong>
-          <div class="text-muted small">Regular price: $${item.price.toFixed(2)}</div>
+          <div class="text-muted small">Original price: $${item.originalPrice.toFixed(2)}</div>
+          ${item.markupPercentage > 0 ? `<div class="text-muted small">Marked-up price: $${item.markedUpPrice.toFixed(2)} (${item.markupPercentage}% markup)</div>` : ''}
         </label>
       </div>
     `;
@@ -668,17 +709,19 @@
       promoDiv.className = 'list-group-item';
 
       let promoDescription = '';
-      let discountedPrice = item.price;
+      let markupPercentage = promo.applied_markup_value || 0;
+      let markedUpPrice = item.originalPrice * (1 + markupPercentage / 100);
+      let discountedPrice = markedUpPrice;
       let discountAmount = 0;
 
       if (promo.type === 'discount_percentage') {
         const discountPercentage = promo.configuration.discount_rate;
-        discountAmount = (item.price * discountPercentage / 100);
-        discountedPrice = item.price - discountAmount;
+        discountAmount = (markedUpPrice * discountPercentage / 100);
+        discountedPrice = markedUpPrice - discountAmount;
         promoDescription = `${discountPercentage}% off`;
       } else if (promo.type === 'fixed_amount_discount') {
         discountAmount = promo.configuration.discount_amount;
-        discountedPrice = item.price - discountAmount;
+        discountedPrice = markedUpPrice - discountAmount;
         if (discountedPrice < 0) discountedPrice = 0;
         promoDescription = `$${discountAmount.toFixed(2)} off`;
       } else if (promo.type === 'buy_x_get_y_free' || promo.type === 'buy_x_get_y') {
@@ -690,6 +733,8 @@
           <input class="form-check-input" type="radio" name="itemPromotion" 
                 id="item-promo-${promo.id}" value="${promo.id}" 
                 data-price="${discountedPrice.toFixed(2)}"
+                data-marked-up="${markedUpPrice.toFixed(2)}"
+                data-markup="${markupPercentage}"
                 data-discount="${discountAmount.toFixed(2)}"
                 data-type="${promo.type}"
                 data-name="${promo.name}"
@@ -697,8 +742,10 @@
           <label class="form-check-label w-100" for="item-promo-${promo.id}">
             <strong>${promo.name}</strong> - ${promoDescription}
             <div class="text-muted small">${promo.description || ''}</div>
+            <div class="text-muted small">Original price: $${item.originalPrice.toFixed(2)}</div>
+            <div class="text-muted small">With markup: $${markedUpPrice.toFixed(2)} (${markupPercentage}% markup)</div>
             <div class="text-success small">
-              ${discountAmount > 0 ? `New price: $${discountedPrice.toFixed(2)} (Save $${discountAmount.toFixed(2)})` : ''}
+              ${discountAmount > 0 ? `Final price: $${discountedPrice.toFixed(2)} (Save $${discountAmount.toFixed(2)})` : ''}
             </div>
           </label>
         </div>
@@ -712,20 +759,24 @@
       const selectedPromo = document.querySelector('input[name="itemPromotion"]:checked');
 
       if (selectedPromo.value === 'none') {
-        // Remove promotion
+        // Remove promotion but keep any markup
         cart[cartIndex].promotionId = null;
         cart[cartIndex].promotionName = null;
-        cart[cartIndex].discountedPrice = cart[cartIndex].price;
+        cart[cartIndex].discountedPrice = cart[cartIndex].markedUpPrice;
         cart[cartIndex].discountAmount = 0;
       } else {
         // Apply selected promotion
         const promoId = parseInt(selectedPromo.value);
         const discountedPrice = parseFloat(selectedPromo.getAttribute('data-price'));
+        const markedUpPrice = parseFloat(selectedPromo.getAttribute('data-marked-up'));
+        const markupPercentage = parseFloat(selectedPromo.getAttribute('data-markup'));
         const discountAmount = parseFloat(selectedPromo.getAttribute('data-discount'));
         const promoName = selectedPromo.getAttribute('data-name');
 
         cart[cartIndex].promotionId = promoId;
         cart[cartIndex].promotionName = promoName;
+        cart[cartIndex].markedUpPrice = markedUpPrice;
+        cart[cartIndex].markupPercentage = markupPercentage;
         cart[cartIndex].discountedPrice = discountedPrice;
         cart[cartIndex].discountAmount = discountAmount;
       }
@@ -775,7 +826,10 @@
     
     // Calculate subtotal
     function calculateSubtotal() {
-      return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+      return cart.reduce((total, item) => {
+        const priceToUse = item.discountedPrice !== undefined ? item.discountedPrice : item.markedUpPrice;
+        return total + (priceToUse * item.quantity);
+      }, 0);
     }
     
     // Update totals

@@ -118,6 +118,9 @@
       // Calculate final price with the markup
       const finalPrice = paidProductPrice * (1 + (recommendedMarkup / 100));
       
+      // Store normal price before discount (this is the marked up price)
+      const normalPriceWithMarkup = finalPrice;
+      
       return {
         minimumMarkup: minimumMarkup.toFixed(2),
         recommendedMarkup: recommendedMarkup,
@@ -125,7 +128,8 @@
         paidCost,
         breakEvenPrice: (totalCost / buyCount).toFixed(2),
         finalPrice: finalPrice.toFixed(2),
-        useMinimumMarkup: useMinimumMarkup
+        useMinimumMarkup: useMinimumMarkup,
+        normalPriceWithMarkup: normalPriceWithMarkup.toFixed(2) // New field for normal price with markup
       };
     }
 
@@ -163,6 +167,10 @@
       // Calculate price after recommended/custom markup
       const priceWithRecommendedMarkup = discountedPrice * (1 + (recommendedMarkup / 100));
       
+      // Calculate normal price with markup (before discount is applied)
+      const normalPriceWithMinMarkup = originalPrice * (1 + (minimumMarkup / 100));
+      const normalPriceWithRecommendedMarkup = originalPrice * (1 + (recommendedMarkup / 100));
+      
       return {
         originalPrice,
         discountRate,
@@ -176,7 +184,9 @@
         breakEvenPrice: discountedPrice.toFixed(2),
         priceWithMinMarkup: priceWithMinMarkup.toFixed(2),
         priceWithRecommendedMarkup: priceWithRecommendedMarkup.toFixed(2),
-        useMinimumMarkup: useMinimumMarkup
+        useMinimumMarkup: useMinimumMarkup,
+        normalPriceWithMinMarkup: normalPriceWithMinMarkup.toFixed(2), // New field for normal price with min markup
+        normalPriceWithRecommendedMarkup: normalPriceWithRecommendedMarkup.toFixed(2) // New field for normal price with recommended markup
       };
     }
 
@@ -244,6 +254,7 @@
           <div class="col-12">
             <div class="alert alert-success">
               <strong>Harga Jual Dengan Markup ${markupCalculation.recommendedMarkup.toFixed(2)}%:</strong> Rp${markupCalculation.finalPrice}
+              <strong class="d-block mt-2">Harga Normal (Dengan Markup):</strong> Rp${markupCalculation.normalPriceWithMarkup}
             </div>
           </div>
         </div>
@@ -276,7 +287,7 @@
         useMinimumMarkup
       );
       
-      // Format recommendation with quantity details and markup prices
+      // Format recommendation with quantity details and markup prices, including normal prices
       discountMarkupRecommendation.innerHTML = `
         <div class="row">
           <div class="col-md-6">
@@ -313,15 +324,17 @@
         <div class="row mt-2">
           <div class="col-12">
             <div class="alert alert-success">
-              <strong>Suggested Selling Price (after markup):</strong>
+              <strong>Pricing Details:</strong>
               <div class="row mt-2">
                 <div class="col-md-6">
                   <strong>With Minimum Markup (${markupCalculation.minimumMarkup}%):</strong><br>
-                  Rp${markupCalculation.priceWithMinMarkup}
+                  <span class="d-block">Normal Price (Before Discount): Rp${markupCalculation.normalPriceWithMinMarkup}</span>
+                  <span class="d-block">Discounted Price: Rp${markupCalculation.priceWithMinMarkup}</span>
                 </div>
                 <div class="col-md-6">
                   <strong>With Applied Markup (${markupCalculation.recommendedMarkup.toFixed(2)}%):</strong><br>
-                  Rp${markupCalculation.priceWithRecommendedMarkup}
+                  <span class="d-block">Normal Price (Before Discount): Rp${markupCalculation.normalPriceWithRecommendedMarkup}</span>
+                  <span class="d-block">Discounted Price: Rp${markupCalculation.priceWithRecommendedMarkup}</span>
                 </div>
               </div>
             </div>
@@ -402,7 +415,8 @@
           custom_markup: customMarkup !== "" ? parseFloat(customMarkup) : null,
           selected_markup: useMinimumMarkup ? "minimum" : "recommended",
           applied_markup_value: markupCalculation.recommendedMarkup,
-          is_minimum_markup: useMinimumMarkup
+          is_minimum_markup: useMinimumMarkup,
+          normal_price_with_markup: markupCalculation.normalPriceWithMarkup // Store the normal price with markup
         };
       }
 
@@ -432,7 +446,7 @@
           useMinimumMarkup
         );
         
-        // Make sure the entire markupCalculation object is stored, including markup prices
+        // Make sure the entire markupCalculation object is stored, including markup prices and normal prices
         configuration = {
           product_id: parseInt(selectedProduct.value),
           discount_rate: discountRate,
@@ -445,7 +459,9 @@
           applied_markup_value: markupCalculation.recommendedMarkup,
           is_minimum_markup: useMinimumMarkup,
           price_with_min_markup: markupCalculation.priceWithMinMarkup,
-          price_with_recommended_markup: markupCalculation.priceWithRecommendedMarkup
+          price_with_recommended_markup: markupCalculation.priceWithRecommendedMarkup,
+          normal_price_with_min_markup: markupCalculation.normalPriceWithMinMarkup, // Store normal price with min markup
+          normal_price_with_recommended_markup: markupCalculation.normalPriceWithRecommendedMarkup // Store normal price with recommended markup
         };
       }
       
