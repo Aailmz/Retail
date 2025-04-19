@@ -89,12 +89,9 @@ export class TransactionService {
         });
       }
       
-      // 3. Calculate tax (example: 10% tax)
-      const taxRate = 0.1; // This could be configurable
+      const taxRate = 0.1; 
       const taxAmount = parseFloat((subtotal * taxRate).toFixed(2));
-
       const transactionDiscount = createTransactionDto.discountAmount || 0;
-
       const grandTotal = parseFloat((subtotal + taxAmount - transactionDiscount).toFixed(2));
 
       const transaction = manager.create(Transaction, {
