@@ -72,17 +72,46 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('quantity-stock').textContent = productStock;
       document.getElementById('quantity-input').value = 1;
       document.getElementById('quantity-input').max = productStock;
-      populateApplicablePromotions(parseInt(productId));
+      tempQuantity = 1; // Set initial tempQuantity
+      populateApplicablePromotions(parseInt(productId), tempQuantity);
       const quantityModal = new bootstrap.Modal(document.getElementById('quantityModal'));
       quantityModal.show();
     });
   });
 
-  function populateApplicablePromotions(productId) {
+  // Update quantity input listener to refresh promotions
+  document.getElementById('quantity-input').addEventListener('input', function() {
+    tempQuantity = parseInt(this.value) || 1;
+    populateApplicablePromotions(parseInt(tempProductId), tempQuantity);
+  });
+
+  // Update quantity controls to refresh promotions
+  document.getElementById('decrease-qty').addEventListener('click', function() {
+    const input = document.getElementById('quantity-input');
+    const currentValue = parseInt(input.value);
+    if (currentValue > 1) {
+      input.value = currentValue - 1;
+      tempQuantity = currentValue - 1;
+      populateApplicablePromotions(parseInt(tempProductId), tempQuantity);
+    }
+  });
+
+  document.getElementById('increase-qty').addEventListener('click', function() {
+    const input = document.getElementById('quantity-input');
+    const currentValue = parseInt(input.value);
+    const maxValue = parseInt(input.max);
+    if (currentValue < maxValue) {
+      input.value = currentValue + 1;
+      tempQuantity = currentValue + 1;
+      populateApplicablePromotions(parseInt(tempProductId), tempQuantity);
+    }
+  });
+
+  function populateApplicablePromotions(productId, quantity) {
     const promotionsContainer = document.getElementById('applicable-promotions');
     promotionsContainer.innerHTML = '<div class="text-center py-2"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="ms-2">Loading promotions...</span></div>';
 
-    console.log('Populating promotions for product ID:', productId);
+    console.log('Populating promotions for product ID:', productId, 'with quantity:', quantity);
     console.log('Available promotions:', availablePromotions);
 
     setTimeout(() => {
@@ -95,7 +124,11 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       const applicable = promotionsArray.filter(promo => {
-        return promo.rules && promo.rules.buy_product_id === productId;
+        if (promo.rules && promo.rules.buy_product_id === productId) {
+          const minQuantity = promo.rules.min_quantity || 1;
+          return quantity >= minQuantity;
+        }
+        return false;
       });
 
       console.log('Applicable promotions found:', applicable.length);
@@ -143,24 +176,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }, 300);
   }
-
-  // Quantity controls
-  document.getElementById('decrease-qty').addEventListener('click', function() {
-    const input = document.getElementById('quantity-input');
-    const currentValue = parseInt(input.value);
-    if (currentValue > 1) {
-      input.value = currentValue - 1;
-    }
-  });
-
-  document.getElementById('increase-qty').addEventListener('click', function() {
-    const input = document.getElementById('quantity-input');
-    const currentValue = parseInt(input.value);
-    const maxValue = parseInt(input.max);
-    if (currentValue < maxValue) {
-      input.value = currentValue + 1;
-    }
-  });
 
   // Confirm quantity
   document.getElementById('confirm-quantity').addEventListener('click', function() {
@@ -571,6 +586,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('quantity-stock').textContent = item.maxStock;
             document.getElementById('quantity-input').value = item.quantity;
             document.getElementById('quantity-input').max = item.maxStock;
+            tempQuantity = item.quantity; // Set tempQuantity for editing
             document.querySelector('.promotions-section').style.display = 'none';
             const originalConfirmHandler = document.getElementById('confirm-quantity').onclick;
             document.getElementById('confirm-quantity').onclick = function() {
@@ -655,7 +671,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (promo.rules.member_only && !selectedMemberId) {
           return false;
         }
-        return true;
+        const minQuantity = promo.rules.min_quantity || 1;
+        return item.quantity >= minQuantity;
       }
       return false;
     });
