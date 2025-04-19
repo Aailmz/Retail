@@ -35,10 +35,22 @@ export class Transaction {
   customerEmail: string;
 
   @Column('decimal', { precision: 10, scale: 2 })
-  subtotal: number;
+  originalPrice: number;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  markedUpPrice: number;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  unitPrice: number;
+
+  @Column('decimal', { precision: 5, scale: 2, default: 0 })
+  markupPercentage: number;
 
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
   discountAmount: number;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  total: number;
 
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
   taxAmount: number;
