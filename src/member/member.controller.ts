@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Render, Res, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Render, Res, Req, Query } from '@nestjs/common';
 import { MemberService } from './member.service';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
@@ -39,6 +39,17 @@ export class MemberController {
       isActivePage: { members: true },
       notification: notification
     };
+  }
+
+  @Get('search')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async searchMembers(@Query('q') query: string, @Req() req: Request) {
+    if (!query) {
+      return [];
+    }
+    const members = await this.memberService.searchMembers(query);
+    return members;
   }
 
   @Get('create')

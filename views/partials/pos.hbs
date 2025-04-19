@@ -476,7 +476,7 @@ document.addEventListener('DOMContentLoaded', function() {
       alert('Please enter search term');
       return;
     }
-    fetch(`/api/members/search?q=${encodeURIComponent(searchValue)}`)
+    fetch(`/members/search?q=${encodeURIComponent(searchValue)}`)
       .then(response => response.json())
       .then(data => {
         const resultsContainer = document.getElementById('member-search-results');

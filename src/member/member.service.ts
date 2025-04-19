@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 import { Member } from './entities/member.entity';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
@@ -42,5 +42,16 @@ export class MemberService {
   async remove(id: number): Promise<void> {
     const member = await this.findOne(id);
     await this.memberRepository.remove(member);
+  }
+
+  async searchMembers(query: string): Promise<Member[]> {
+    return this.memberRepository.find({
+      where: [
+        { name: Like(`%${query}%`) },
+        { email: Like(`%${query}%`) },
+        { phone: Like(`%${query}%`) },
+      ],
+      select: ['id', 'name', 'email', 'phone'], // Hanya ambil field yang diperlukan
+    });
   }
 }
