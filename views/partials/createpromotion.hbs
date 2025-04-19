@@ -375,8 +375,11 @@
       
       if (promotionType === 'buy_x_get_y') {
         const buyProduct = buyProductSelect.options[buyProductSelect.selectedIndex];
+        const buyCount = parseInt(document.getElementById('buyCount').value);
+        
         rules = {
-          buy_product_id: parseInt(buyProduct.value)
+          buy_product_id: parseInt(buyProduct.value),
+          min_quantity: buyCount  // Added this line to store buy_count as min_quantity
         };
       }
       
