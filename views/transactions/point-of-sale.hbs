@@ -233,26 +233,38 @@
   
   <!-- Quantity Modal -->
   <div class="modal fade" id="quantityModal" tabindex="-1">
-    <div class="modal-dialog modal-sm">
+    <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Update Quantity</h5>
+          <h5 class="modal-title">Add to Cart</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <div class="text-center">
+          <div class="text-center mb-4">
             <h6 id="quantity-product-name" class="mb-3"></h6>
-            <div class="input-group mb-3">
+            <div class="input-group mb-3 justify-content-center">
               <button class="btn btn-outline-primary" id="decrease-qty">-</button>
-              <input type="number" class="form-control text-center" id="quantity-input" min="1" value="1">
+              <input type="number" class="form-control text-center" id="quantity-input" min="1" value="1" style="max-width: 100px;">
               <button class="btn btn-outline-primary" id="increase-qty">+</button>
             </div>
             <p class="text-muted mb-0">Available stock: <span id="quantity-stock"></span></p>
           </div>
+          
+          <!-- Promotions section -->
+          <div class="promotions-section mt-4">
+            <h6 class="mb-3">Available Promotions</h6>
+            <div id="applicable-promotions" class="list-group">
+              <!-- Promotions will be loaded here -->
+              <div class="text-center py-2">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span class="ms-2">Loading promotions...</span>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" id="confirm-quantity">Confirm</button>
+          <button type="button" class="btn btn-primary" id="confirm-quantity">Add to Cart</button>
         </div>
       </div>
     </div>

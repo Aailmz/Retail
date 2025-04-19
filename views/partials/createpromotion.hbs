@@ -30,7 +30,68 @@
       }
     });
     
-    function recommendMarkup(buyCount, getCount, paidProductPrice, freeProductPrice, customMarkup = null) {
+    // Function to add markup selection radio buttons to both promotion types
+    function addMarkupSelectionUI() {
+      // For Buy X Get Y
+      const buyXMarkupArea = document.querySelector('#buy_x_get_y_fields .row:nth-of-type(3)');
+      const buyXMarkupSelection = document.createElement('div');
+      buyXMarkupSelection.className = 'col-md-8';
+      buyXMarkupSelection.innerHTML = `
+        <div class="form-group mb-3">
+          <label class="form-label">Markup Type</label>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="markupTypeBuyX" id="recommendedMarkupBuyX" value="recommended" checked>
+            <label class="form-check-label" for="recommendedMarkupBuyX">
+              Use recommended markup (with safety margin)
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="markupTypeBuyX" id="minimumMarkupBuyX" value="minimum">
+            <label class="form-check-label" for="minimumMarkupBuyX">
+              Use minimum markup (break-even)
+            </label>
+          </div>
+        </div>
+      `;
+      buyXMarkupArea.appendChild(buyXMarkupSelection);
+      
+      // For Discount Percentage
+      const discountMarkupArea = document.querySelector('#discount_percentage_fields .row:nth-of-type(3)');
+      const discountMarkupSelection = document.createElement('div');
+      discountMarkupSelection.className = 'col-md-6';
+      discountMarkupSelection.innerHTML = `
+        <div class="form-group mb-3">
+          <label class="form-label">Markup Type</label>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="markupTypeDiscount" id="recommendedMarkupTypeDiscount" value="recommended" checked>
+            <label class="form-check-label" for="recommendedMarkupTypeDiscount">
+              Use recommended markup (with safety margin)
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="markupTypeDiscount" id="minimumMarkupTypeDiscount" value="minimum">
+            <label class="form-check-label" for="minimumMarkupTypeDiscount">
+              Use minimum markup (break-even)
+            </label>
+          </div>
+        </div>
+      `;
+      discountMarkupArea.appendChild(discountMarkupSelection);
+      
+      // Add event listeners for radio buttons
+      document.querySelectorAll('input[name="markupTypeBuyX"]').forEach(radio => {
+        radio.addEventListener('change', updateMarkupRecommendation);
+      });
+      
+      document.querySelectorAll('input[name="markupTypeDiscount"]').forEach(radio => {
+        radio.addEventListener('change', updateDiscountMarkupRecommendation);
+      });
+    }
+    
+    // Add markup selection UI
+    addMarkupSelectionUI();
+    
+    function recommendMarkup(buyCount, getCount, paidProductPrice, freeProductPrice, customMarkup = null, useMinimumMarkup = false) {
       // Total produk dalam promosi
       const totalCount = buyCount + getCount;
       
@@ -44,7 +105,15 @@
       const minimumMarkup = ((totalCost / paidCost) - 1) * 100;
       
       // Rekomendasi markup dengan tambahan margin keamanan atau menggunakan custom markup
-      const recommendedMarkup = customMarkup !== null ? parseFloat(customMarkup) : Math.ceil(minimumMarkup + 20);
+      let recommendedMarkup;
+      
+      if (useMinimumMarkup) {
+        recommendedMarkup = minimumMarkup;
+      } else if (customMarkup !== null) {
+        recommendedMarkup = parseFloat(customMarkup);
+      } else {
+        recommendedMarkup = Math.ceil(minimumMarkup + 20);
+      }
       
       // Calculate final price with the markup
       const finalPrice = paidProductPrice * (1 + (recommendedMarkup / 100));
@@ -55,7 +124,59 @@
         totalCost,
         paidCost,
         breakEvenPrice: (totalCost / buyCount).toFixed(2),
-        finalPrice: finalPrice.toFixed(2)
+        finalPrice: finalPrice.toFixed(2),
+        useMinimumMarkup: useMinimumMarkup
+      };
+    }
+
+    function recommendDiscountMarkup(originalPrice, discountRate, maxDiscountAmount, quantity = 1, customMarkup = null, useMinimumMarkup = false) {
+      // Calculate discount amount
+      const discountAmount = originalPrice * (discountRate / 100);
+      const effectiveDiscountAmount = maxDiscountAmount 
+        ? Math.min(discountAmount, maxDiscountAmount) 
+        : discountAmount;
+      
+      // Calculate selling price after discount
+      const discountedPrice = originalPrice - effectiveDiscountAmount;
+      
+      // Total cost based on quantity
+      const totalOriginalCost = originalPrice * quantity;
+      const totalDiscountedCost = discountedPrice * quantity;
+      
+      // Calculate minimum markup to cover costs
+      const minimumMarkup = ((totalOriginalCost / totalDiscountedCost) - 1) * 100;
+      
+      // Recommended markup with safety margin or use custom markup
+      let recommendedMarkup;
+      
+      if (useMinimumMarkup) {
+        recommendedMarkup = minimumMarkup;
+      } else if (customMarkup !== null) {
+        recommendedMarkup = parseFloat(customMarkup);
+      } else {
+        recommendedMarkup = Math.ceil(minimumMarkup + 20);
+      }
+      
+      // Calculate price after minimum markup
+      const priceWithMinMarkup = discountedPrice * (1 + (minimumMarkup / 100));
+      
+      // Calculate price after recommended/custom markup
+      const priceWithRecommendedMarkup = discountedPrice * (1 + (recommendedMarkup / 100));
+      
+      return {
+        originalPrice,
+        discountRate,
+        quantity,
+        discountAmount: effectiveDiscountAmount,
+        discountedPrice,
+        totalOriginalCost: totalOriginalCost.toFixed(2),
+        totalDiscountedCost: totalDiscountedCost.toFixed(2),
+        minimumMarkup: minimumMarkup.toFixed(2),
+        recommendedMarkup,
+        breakEvenPrice: discountedPrice.toFixed(2),
+        priceWithMinMarkup: priceWithMinMarkup.toFixed(2),
+        priceWithRecommendedMarkup: priceWithRecommendedMarkup.toFixed(2),
+        useMinimumMarkup: useMinimumMarkup
       };
     }
 
@@ -63,6 +184,7 @@
     function updateMarkupRecommendation() {
       const buyProduct = buyProductSelect.options[buyProductSelect.selectedIndex];
       const freeProduct = freeProductSelect.options[freeProductSelect.selectedIndex];
+      const markupRecommendation = document.getElementById('markupRecommendation');
       
       if (!buyProduct || !freeProduct || buyProduct.value === '' || freeProduct.value === '') {
         markupRecommendation.innerHTML = '<p class="text-muted">Pilih produk beli dan gratis untuk melihat rekomendasi markup</p>';
@@ -72,6 +194,7 @@
       const buyCount = parseInt(document.getElementById('buyCount').value);
       const getCount = parseInt(document.getElementById('getCount').value);
       const customMarkup = document.getElementById('customMarkupBuyX').value;
+      const useMinimumMarkup = document.getElementById('minimumMarkupBuyX').checked;
       
       const buyProductPrice = parseFloat(buyProduct.getAttribute('data-selling-price'));
       const freeProductPrice = parseFloat(freeProduct.getAttribute('data-selling-price'));
@@ -81,7 +204,8 @@
         getCount, 
         buyProductPrice, 
         freeProductPrice,
-        customMarkup !== "" ? customMarkup : null
+        customMarkup !== "" ? customMarkup : null,
+        useMinimumMarkup
       );
       
       // Format rekomendasi
@@ -104,7 +228,8 @@
           </div>
           <div class="col-md-6">
             <strong>Markup Minimum:</strong> ${markupCalculation.minimumMarkup}%<br>
-            <strong>Markup Yang Digunakan:</strong> ${markupCalculation.recommendedMarkup}%
+            <strong>Markup Yang Digunakan:</strong> ${markupCalculation.recommendedMarkup.toFixed(2)}%
+            <small class="d-block text-info">${useMinimumMarkup ? '(Markup Minimum)' : '(Markup Rekomendasi)'}</small>
           </div>
         </div>
         <div class="row mt-2">
@@ -118,63 +243,20 @@
         <div class="row mt-2">
           <div class="col-12">
             <div class="alert alert-success">
-              <strong>Harga Jual Dengan Markup ${markupCalculation.recommendedMarkup}%:</strong> Rp${markupCalculation.finalPrice}
+              <strong>Harga Jual Dengan Markup ${markupCalculation.recommendedMarkup.toFixed(2)}%:</strong> Rp${markupCalculation.finalPrice}
             </div>
           </div>
         </div>
       `;
     }
 
-    function recommendDiscountMarkup(originalPrice, discountRate, maxDiscountAmount, quantity = 1, customMarkup = null) {
-      // Calculate discount amount
-      const discountAmount = originalPrice * (discountRate / 100);
-      const effectiveDiscountAmount = maxDiscountAmount 
-        ? Math.min(discountAmount, maxDiscountAmount) 
-        : discountAmount;
-      
-      // Calculate selling price after discount
-      const discountedPrice = originalPrice - effectiveDiscountAmount;
-      
-      // Total cost based on quantity
-      const totalOriginalCost = originalPrice * quantity;
-      const totalDiscountedCost = discountedPrice * quantity;
-      
-      // Calculate minimum markup to cover costs
-      const minimumMarkup = ((totalOriginalCost / totalDiscountedCost) - 1) * 100;
-      
-      // Recommended markup with safety margin or use custom markup
-      const recommendedMarkup = customMarkup !== null ? parseFloat(customMarkup) : Math.ceil(minimumMarkup + 20);
-      
-      // Calculate price after minimum markup
-      const priceWithMinMarkup = discountedPrice * (1 + (minimumMarkup / 100));
-      
-      // Calculate price after recommended/custom markup
-      const priceWithRecommendedMarkup = discountedPrice * (1 + (recommendedMarkup / 100));
-      
-      return {
-        originalPrice,
-        discountRate,
-        quantity,
-        discountAmount: effectiveDiscountAmount,
-        discountedPrice,
-        totalOriginalCost: totalOriginalCost.toFixed(2),
-        totalDiscountedCost: totalDiscountedCost.toFixed(2),
-        minimumMarkup: minimumMarkup.toFixed(2),
-        recommendedMarkup,
-        breakEvenPrice: discountedPrice.toFixed(2),
-        priceWithMinMarkup: priceWithMinMarkup.toFixed(2),
-        priceWithRecommendedMarkup: priceWithRecommendedMarkup.toFixed(2)
-      };
-    }
-
-    // Update the markup recommendation display function
     function updateDiscountMarkupRecommendation() {
       const discountProduct = document.getElementById('discountProductSelect');
       const selectedProduct = discountProduct.options[discountProduct.selectedIndex];
+      const discountMarkupRecommendation = document.getElementById('discountMarkupRecommendation');
       
       if (!selectedProduct || selectedProduct.value === '') {
-        document.getElementById('discountMarkupRecommendation').innerHTML = 
-          '<p class="text-muted">Select a product to see markup details</p>';
+        discountMarkupRecommendation.innerHTML = '<p class="text-muted">Select a product to see markup details</p>';
         return;
       }
       
@@ -183,17 +265,19 @@
       const maxDiscountAmount = parseFloat(document.getElementById('maxDiscountAmount').value) || null;
       const quantity = parseInt(document.getElementById('minQuantity').value) || 1;
       const customMarkup = document.getElementById('customMarkupDiscount').value;
+      const useMinimumMarkup = document.getElementById('minimumMarkupTypeDiscount').checked;
       
       const markupCalculation = recommendDiscountMarkup(
         originalPrice, 
         discountRate, 
         maxDiscountAmount,
         quantity,
-        customMarkup !== "" ? customMarkup : null
+        customMarkup !== "" ? customMarkup : null,
+        useMinimumMarkup
       );
       
       // Format recommendation with quantity details and markup prices
-      document.getElementById('discountMarkupRecommendation').innerHTML = `
+      discountMarkupRecommendation.innerHTML = `
         <div class="row">
           <div class="col-md-6">
             <strong>Product:</strong> ${selectedProduct.textContent}<br>
@@ -214,7 +298,8 @@
           </div>
           <div class="col-md-6">
             <strong>Minimum Markup:</strong> ${markupCalculation.minimumMarkup}%<br>
-            <strong>Applied Markup:</strong> ${markupCalculation.recommendedMarkup}%
+            <strong>Applied Markup:</strong> ${markupCalculation.recommendedMarkup.toFixed(2)}%
+            <small class="d-block text-info">${useMinimumMarkup ? '(Minimum Markup)' : '(Recommended Markup)'}</small>
           </div>
         </div>
         <div class="row mt-2">
@@ -235,7 +320,7 @@
                   Rp${markupCalculation.priceWithMinMarkup}
                 </div>
                 <div class="col-md-6">
-                  <strong>With Applied Markup (${markupCalculation.recommendedMarkup}%):</strong><br>
+                  <strong>With Applied Markup (${markupCalculation.recommendedMarkup.toFixed(2)}%):</strong><br>
                   Rp${markupCalculation.priceWithRecommendedMarkup}
                 </div>
               </div>
@@ -292,6 +377,7 @@
         const buyCount = parseInt(document.getElementById('buyCount').value);
         const getCount = parseInt(document.getElementById('getCount').value);
         const customMarkup = document.getElementById('customMarkupBuyX').value;
+        const useMinimumMarkup = document.getElementById('minimumMarkupBuyX').checked;
         
         const buyProductPrice = parseFloat(buyProduct.getAttribute('data-selling-price'));
         const freeProductPrice = parseFloat(freeProduct.getAttribute('data-selling-price'));
@@ -301,7 +387,8 @@
           getCount, 
           buyProductPrice, 
           freeProductPrice,
-          customMarkup !== "" ? customMarkup : null
+          customMarkup !== "" ? customMarkup : null,
+          useMinimumMarkup
         );
         
         configuration = {
@@ -312,7 +399,10 @@
           paid_product_price: buyProductPrice,
           free_product_price: freeProductPrice,
           markup_calculation: markupCalculation,
-          custom_markup: customMarkup !== "" ? parseFloat(customMarkup) : markupCalculation.recommendedMarkup
+          custom_markup: customMarkup !== "" ? parseFloat(customMarkup) : null,
+          selected_markup: useMinimumMarkup ? "minimum" : "recommended",
+          applied_markup_value: markupCalculation.recommendedMarkup,
+          is_minimum_markup: useMinimumMarkup
         };
       }
 
@@ -325,6 +415,7 @@
         const maxDiscountAmount = parseFloat(document.getElementById('maxDiscountAmount').value) || null;
         const minQuantity = parseInt(document.getElementById('minQuantity').value) || 1;
         const customMarkup = document.getElementById('customMarkupDiscount').value;
+        const useMinimumMarkup = document.getElementById('minimumMarkupTypeDiscount').checked;
         
         // Rules now include both product ID and minimum quantity
         rules = {
@@ -337,7 +428,8 @@
           discountRate, 
           maxDiscountAmount,
           minQuantity,
-          customMarkup !== "" ? customMarkup : null
+          customMarkup !== "" ? customMarkup : null,
+          useMinimumMarkup
         );
         
         // Make sure the entire markupCalculation object is stored, including markup prices
@@ -348,9 +440,22 @@
           min_quantity: minQuantity,
           original_price: originalPrice,
           markup_calculation: markupCalculation,
-          custom_markup: customMarkup !== "" ? parseFloat(customMarkup) : markupCalculation.recommendedMarkup,
+          custom_markup: customMarkup !== "" ? parseFloat(customMarkup) : null,
+          selected_markup: useMinimumMarkup ? "minimum" : "recommended",
+          applied_markup_value: markupCalculation.recommendedMarkup,
+          is_minimum_markup: useMinimumMarkup,
           price_with_min_markup: markupCalculation.priceWithMinMarkup,
           price_with_recommended_markup: markupCalculation.priceWithRecommendedMarkup
+        };
+      }
+      
+      if (promotionType === 'bundle') {
+        const bundlePrice = parseFloat(document.getElementById('bundlePrice').value);
+        const minItems = parseInt(document.getElementById('minItems').value);
+        
+        configuration = {
+          bundle_price: bundlePrice,
+          min_items: minItems
         };
       }
       
@@ -359,7 +464,7 @@
       document.getElementById('configurationJson').value = JSON.stringify(configuration);
       
       // Submit the form
-      form.submit();
+      this.submit();
     });
   });
 </script>
