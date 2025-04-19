@@ -211,10 +211,12 @@
         // Get selected promotion
         let selectedPromotion = null;
         const selectedPromoRadio = document.querySelector('input[name="productPromotion"]:checked');
-        
+
         if (selectedPromoRadio && selectedPromoRadio.value !== 'none') {
           const promoId = parseInt(selectedPromoRadio.value);
-          selectedPromotion = availablePromotions.find(p => p.id === promoId);
+
+          const promotionsArray = availablePromotions.data || [];
+          selectedPromotion = promotionsArray.find(p => p.id === promoId);
         }
         
         // Calculate discounted price if promotion applies
@@ -624,7 +626,7 @@
 
     // Extract the promotions array from the response object
     const promotionsArray = availablePromotions.data || [];
-    
+
     // Check if promotionsArray is an array
     if (!Array.isArray(promotionsArray)) {
       console.warn('availablePromotions.data is not an array:', availablePromotions);
