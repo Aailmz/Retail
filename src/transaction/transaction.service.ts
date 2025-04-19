@@ -47,7 +47,6 @@ export class TransactionService {
   async create(createTransactionDto: CreateTransactionDto): Promise<Transaction> {
     // Use transaction to ensure data consistency
     return this.connection.transaction(async (manager: EntityManager) => {
-      // 1. Verify all products exist and have sufficient stock
       const productIds = createTransactionDto.items.map(item => item.productId);
       const products = await manager.findByIds(Product, productIds);
       
@@ -57,8 +56,7 @@ export class TransactionService {
       
       const productMap = new Map<number, Product>();
       products.forEach(product => productMap.set(product.id, product));
-      
-      // 2. Check stock and calculate initial totals
+
       let subtotal = 0;
       const transactionItems: Partial<TransactionItem>[] = [];
       
@@ -68,62 +66,45 @@ export class TransactionService {
         if (product.stock < item.quantity) {
           throw new BadRequestException(`Insufficient stock for product: ${product.name}`);
         }
+
+        const unitPrice = item.discountedPrice || item.markedUpPrice || product.sellingPrice;
+        const itemTotal = parseFloat((unitPrice * item.quantity).toFixed(2));
         
-        const itemSubtotal = parseFloat((product.sellingPrice * item.quantity).toFixed(2));
-        const discountAmount = item.discountAmount || 0;
-        
-        subtotal += itemSubtotal;
+        subtotal += itemTotal;
         
         transactionItems.push({
           productId: product.id,
           productName: product.name,
           productPrice: product.sellingPrice,
+          originalPrice: item.originalPrice || product.sellingPrice,
+          markedUpPrice: item.markedUpPrice || product.sellingPrice,
+          discountedPrice: item.discountedPrice || item.markedUpPrice || product.sellingPrice,
+          unitPrice: unitPrice,
           quantity: item.quantity,
-          subtotal: itemSubtotal,
-          discountAmount: discountAmount,
-          total: itemSubtotal - discountAmount
+          subtotal: itemTotal,
+          discountAmount: item.discountAmount || 0,
+          markupPercentage: item.markupPercentage || 0,
+          promotionId: item.promotionId || null,
+          total: itemTotal
         });
       }
       
-      // 3. Apply promotion if provided
-      let discountAmount = 0;
-      if (createTransactionDto.promotionId) {
-        try {
-          const promotion = await this.promotionService.findOne(createTransactionDto.promotionId);
-          
-          // Apply promotion rules - this would need to be implemented based on your promotion rules
-          // This is a simplified example
-          if (promotion.status === 'active' && new Date() >= promotion.startDate && new Date() <= promotion.endDate) {
-            if (promotion.type === 'percentage_discount') {
-              const percentage = promotion.configuration.percentage || 0;
-              discountAmount = subtotal * (percentage / 100);
-            } else if (promotion.type === 'fixed_amount') {
-              discountAmount = promotion.configuration.amount || 0;
-            }
-          }
-        } catch (error) {
-          // If promotion not found or invalid, continue without discount
-          console.error('Error applying promotion:', error);
-        }
-      }
-      
-      // 4. Calculate tax (example: 10% tax)
+      // 3. Calculate tax (example: 10% tax)
       const taxRate = 0.1; // This could be configurable
-      const taxableAmount = subtotal - discountAmount;
-      const taxAmount = parseFloat((taxableAmount * taxRate).toFixed(2));
-      
-      // 5. Calculate grand total
-      const grandTotal = parseFloat((taxableAmount + taxAmount).toFixed(2));
-      
-      // 6. Create transaction
+      const taxAmount = parseFloat((subtotal * taxRate).toFixed(2));
+
+      const transactionDiscount = createTransactionDto.discountAmount || 0;
+
+      const grandTotal = parseFloat((subtotal + taxAmount - transactionDiscount).toFixed(2));
+
       const transaction = manager.create(Transaction, {
         transactionCode: generateTransactionCode(),
-        userId: createTransactionDto.userId,
+        memberId: createTransactionDto.userId,
         customerName: createTransactionDto.customerName,
         customerPhone: createTransactionDto.customerPhone,
         customerEmail: createTransactionDto.customerEmail,
         subtotal,
-        discountAmount,
+        discountAmount: transactionDiscount,
         taxAmount,
         grandTotal,
         paymentMethod: createTransactionDto.paymentMethod,
@@ -134,7 +115,6 @@ export class TransactionService {
       
       const savedTransaction = await manager.save(transaction);
       
-      // 7. Create transaction items
       const items = transactionItems.map(item => manager.create(TransactionItem, {
         ...item,
         transactionId: savedTransaction.id
@@ -142,15 +122,13 @@ export class TransactionService {
       
       await manager.save(items);
       
-      // 8. Update product stock
       for (const item of createTransactionDto.items) {
         const product = productMap.get(item.productId);
         await manager.update(Product, product.id, {
           stock: product.stock - item.quantity
         });
       }
-      
-      // 9. Return transaction with items
+
       return {
         ...savedTransaction,
         items: items as TransactionItem[]

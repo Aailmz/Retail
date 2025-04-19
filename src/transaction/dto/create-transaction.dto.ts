@@ -14,6 +14,30 @@ export class CreateTransactionItemDto {
   @IsOptional()
   @IsNumber()
   discountAmount?: number;
+  
+  @IsOptional()
+  @IsNumber()
+  originalPrice?: number;
+  
+  @IsOptional()
+  @IsNumber()
+  markedUpPrice?: number;
+  
+  @IsOptional()
+  @IsNumber()
+  discountedPrice?: number;
+  
+  @IsOptional()
+  @IsNumber()
+  unitPrice?: number;
+  
+  @IsOptional()
+  @IsNumber()
+  markupPercentage?: number;
+  
+  @IsOptional()
+  @IsNumber()
+  promotionId?: number;
 }
 
 export class CreateTransactionDto {
@@ -41,6 +65,22 @@ export class CreateTransactionDto {
   @IsOptional()
   @IsNumber()
   promotionId?: number;
+  
+  @IsOptional()
+  @IsNumber()
+  subtotal?: number;
+  
+  @IsOptional()
+  @IsNumber()
+  discountAmount?: number;
+  
+  @IsOptional()
+  @IsNumber()
+  taxAmount?: number;
+  
+  @IsOptional()
+  @IsNumber()
+  grandTotal?: number;
 
   @IsEnum(PaymentMethod)
   paymentMethod: PaymentMethod;
