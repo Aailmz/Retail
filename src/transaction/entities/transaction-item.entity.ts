@@ -27,6 +27,18 @@ export class TransactionItem {
   @Column('decimal', { precision: 10, scale: 2 })
   productPrice: number;
 
+  @Column('decimal', { precision: 10, scale: 2 })
+  originalPrice: number;
+
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  markedUpPrice: number;
+
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  discountedPrice: number;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  unitPrice: number;
+
   @Column()
   quantity: number;
 
@@ -35,6 +47,12 @@ export class TransactionItem {
 
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
   discountAmount: number;
+
+  @Column('decimal', { precision: 5, scale: 2, default: 0 })
+  markupPercentage: number;
+
+  @Column({ nullable: true })
+  promotionId: number;
 
   @Column('decimal', { precision: 10, scale: 2 })
   total: number;
