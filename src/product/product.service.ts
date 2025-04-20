@@ -57,4 +57,13 @@ export class ProductService {
     const product = await this.findOne(id);
     await this.productRepository.remove(product);
   }
+
+  async getLowStockCount(threshold: number = 10): Promise<number> {
+    const result = await this.productRepository
+      .createQueryBuilder('product')
+      .where('product.stock <= :threshold', { threshold })
+      .getCount();
+    
+    return result;
+  }
 }
