@@ -218,6 +218,83 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 300);
   }
 
+  //INVOICE
+  function generateInvoicePDF(transactionId, cartItems, transactionData) {
+    // Persiapkan data invoice tanpa loading modal
+    const invoiceData = {
+      transactionId: transactionId,
+      items: cartItems.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.discountedPrice || item.markedUpPrice,
+        originalPrice: item.originalPrice,
+        discountAmount: item.discountAmount || 0,
+        promotionName: item.promotionName
+      })),
+      customerName: transactionData.customerName || 'Guest',
+      customerPhone: transactionData.customerPhone || '-',
+      subtotal: transactionData.subtotal,
+      taxAmount: transactionData.taxAmount,
+      discountAmount: transactionData.discountAmount,
+      grandTotal: transactionData.grandTotal,
+      paymentMethod: transactionData.paymentMethod,
+      paymentReference: transactionData.paymentReference,
+      note: transactionData.note || '',
+      date: new Date().toLocaleString()
+    };
+    
+    // Kirim data ke server untuk generate PDF
+    fetch('/transactions/invoice/pdf', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      },
+      body: JSON.stringify(invoiceData)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to generate invoice: ${response.status}`);
+      }
+      return response.blob();
+    })
+    .then(blob => {
+      // Buat object URL untuk PDF blob
+      const pdfUrl = URL.createObjectURL(blob);
+      
+      // Buka PDF di tab baru
+      const printWindow = window.open(pdfUrl, '_blank');
+      
+      // Trigger print ketika PDF sudah dimuat
+      if (printWindow) {
+        printWindow.addEventListener('load', function() {
+          setTimeout(() => {
+            printWindow.print();
+            // Bebaskan blob URL setelah delay untuk memastikan printing sudah dimulai
+            setTimeout(() => URL.revokeObjectURL(pdfUrl), 2000);
+          }, 1000);
+        });
+      } else {
+        // Jika pop-up diblokir, tampilkan saja PDF
+        showAlert('Invoice opened in new tab. Please print manually if desired.');
+      }
+      
+      // Sediakan link download langsung
+      const downloadLink = document.createElement('a');
+      downloadLink.href = pdfUrl;
+      downloadLink.download = `invoice-${transactionId}.pdf`;
+      downloadLink.click();
+      
+      // Delay melepaskan URL untuk memastikan download dimulai
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 3000);
+    })
+    .catch(error => {
+      console.error('Error generating invoice PDF:', error);
+      showAlert('Failed to generate invoice PDF. Please try again or check server logs.');
+    });
+  }
+
   // Confirm quantity
   document.getElementById('confirm-quantity').addEventListener('click', function() {
     const quantity = parseInt(document.getElementById('quantity-input').value);
@@ -493,7 +570,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       })
       .then(data => {
+        // Simpan ID transaksi untuk invoice
+        const transactionId = data.id || data.transactionId;
+        
         showAlert('Transaction completed successfully!');
+        
+        // Generate dan print invoice
+        generateInvoicePDF(transactionId, cart, transactionData);
+        
+        // Bersihkan keranjang dan field form
         cart = [];
         updateCartUI();
         document.getElementById('customer-name').value = '';
