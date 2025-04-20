@@ -207,4 +207,89 @@ export class TransactionService {
       // Add other stats as needed
     };
   }
+
+  async findRecent(limit: number = 5): Promise<Transaction[]> {
+    return this.transactionRepository.find({
+      relations: ['items', 'member'],
+      order: { createdAt: 'DESC' },
+      take: limit
+    });
+  }
+  
+  async getTodaySales(): Promise<number> {
+    const today = new Date();
+    const startOfToday = new Date(today.setHours(0, 0, 0, 0));
+    const endOfToday = new Date(new Date().setHours(23, 59, 59, 999));
+    
+    const result = await this.transactionRepository
+      .createQueryBuilder('transaction')
+      .select('SUM(transaction.grandTotal)', 'total')
+      .where('transaction.createdAt BETWEEN :start AND :end', {
+        start: startOfToday,
+        end: endOfToday
+      })
+      .andWhere('transaction.isVoided = :isVoided', { isVoided: false })
+      .getRawOne();
+    
+    return parseFloat(result.total) || 0;
+  }
+  
+  async getTransactionCount(): Promise<number> {
+    const count = await this.transactionRepository.count({
+      where: { isVoided: false }
+    });
+    
+    return count;
+  }
+  
+  async getPaymentMethodStats(): Promise<Record<string, number>> {
+    const transactions = await this.transactionRepository.find({
+      where: { isVoided: false }
+    });
+    
+    const stats = {
+      cash: 0,
+      credit_card: 0,
+      debit_card: 0,
+      bank_transfer: 0,
+      digital_wallet: 0
+    };
+    
+    transactions.forEach(transaction => {
+      stats[transaction.paymentMethod]++;
+    });
+    
+    return stats;
+  }
+  
+  // Get sales data for chart (past 7 days)
+  async getWeeklySalesData(): Promise<{ date: string; amount: number }[]> {
+    const result = [];
+    const today = new Date();
+    
+    // Get data for the past 7 days
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(today.getDate() - i);
+      const startOfDay = new Date(date.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(date.setHours(23, 59, 59, 999));
+      
+      const dayData = await this.transactionRepository
+        .createQueryBuilder('transaction')
+        .select('SUM(transaction.grandTotal)', 'total')
+        .where('transaction.createdAt BETWEEN :start AND :end', {
+          start: startOfDay,
+          end: endOfDay
+        })
+        .andWhere('transaction.isVoided = :isVoided', { isVoided: false })
+        .getRawOne();
+      
+      result.push({
+        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        amount: parseFloat(dayData.total) || 0
+      });
+    }
+    
+    return result;
+  }
 }
