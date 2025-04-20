@@ -88,6 +88,7 @@ export class MemberController {
 
   @Get(':id')
   @Render('members/show')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'kasir')
   async findOne(@Param('id') id: string, @Req() req: Request) {
     const member = await this.memberService.findOne(+id);

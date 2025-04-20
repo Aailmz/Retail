@@ -82,6 +82,7 @@ export class ProductController {
 
   @Get(':id')
   @Render('products/show')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'gudang')
   async findOne(@Param('id') id: string, @Req() req: Request) {
     const product = await this.productService.findOne(+id);
