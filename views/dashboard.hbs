@@ -37,8 +37,29 @@
       </div>
     </nav>
     
+    <!-- Notification Banner -->
+    {{#if notification}}
+    <div class="container-fluid px-0 mb-4">
+      <div class="alert alert-{{notification.type}} alert-dismissible fade show" role="alert">
+        {{notification.message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    </div>
+    {{/if}}
+    
+    <!-- Error Message -->
+    {{#if error}}
+    <div class="container-fluid px-0 mb-4">
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{error}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    </div>
+    {{/if}}
+    
     <!-- Dashboard Content -->
     <div class="container-fluid px-0">
+      <!-- Summary Cards -->
       <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-4">
           <div class="card border shadow-xs card-stats">
@@ -46,11 +67,19 @@
               <div class="row">
                 <div class="col-8">
                   <div class="numbers">
-                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Products</p>
-                    <h5 class="font-weight-bolder mb-0">350</h5>
+                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Today's Sales</p>
+                    <h5 class="font-weight-bolder mb-0">{{todaySales}}</h5>
                     <p class="mb-0 text-success">
-                      <span class="font-weight-bolder">+12%</span> this month
+                      <span class="font-weight-bolder">{{salesPercentChange}}%</span> vs yesterday
                     </p>
+                  </div>
+                </div>
+                <div class="col-4 text-end">
+                  <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                      <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                      <line x1="2" y1="10" x2="22" y2="10"></line>
+                    </svg>
                   </div>
                 </div>
               </div>
@@ -64,11 +93,19 @@
               <div class="row">
                 <div class="col-8">
                   <div class="numbers">
-                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Sales</p>
-                    <h5 class="font-weight-bolder mb-0">$53,000</h5>
+                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Transactions</p>
+                    <h5 class="font-weight-bolder mb-0">{{totalTransactions}}</h5>
                     <p class="mb-0 text-success">
-                      <span class="font-weight-bolder">+8%</span> this week
+                      <span class="font-weight-bolder">+{{transactionPercentChange}}%</span> this week
                     </p>
+                  </div>
+                </div>
+                <div class="col-4 text-end">
+                  <div class="icon icon-shape bg-gradient-success shadow text-center border-radius-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                      <polyline points="17 6 23 6 23 12"></polyline>
+                    </svg>
                   </div>
                 </div>
               </div>
@@ -82,11 +119,20 @@
               <div class="row">
                 <div class="col-8">
                   <div class="numbers">
-                    <p class="text-sm mb-0 text-uppercase font-weight-bold">New Orders</p>
-                    <h5 class="font-weight-bolder mb-0">45</h5>
+                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Low Stock Items</p>
+                    <h5 class="font-weight-bolder mb-0">{{lowStockItems}}</h5>
                     <p class="mb-0 text-danger">
-                      <span class="font-weight-bolder">-3%</span> since yesterday
+                      <span class="font-weight-bolder">{{lowStockPercentChange}}%</span> vs last month
                     </p>
+                  </div>
+                </div>
+                <div class="col-4 text-end">
+                  <div class="icon icon-shape bg-gradient-warning shadow text-center border-radius-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                      <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"></path>
+                      <path d="M4 6v12c0 1.1.9 2 2 2h14v-4"></path>
+                      <path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z"></path>
+                    </svg>
                   </div>
                 </div>
               </div>
@@ -100,11 +146,21 @@
               <div class="row">
                 <div class="col-8">
                   <div class="numbers">
-                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Active Users</p>
-                    <h5 class="font-weight-bolder mb-0">2,300</h5>
+                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Active Members</p>
+                    <h5 class="font-weight-bolder mb-0">{{activeMembers}}</h5>
                     <p class="mb-0 text-success">
-                      <span class="font-weight-bolder">+5%</span> this month
+                      <span class="font-weight-bolder">+{{memberPercentChange}}%</span> this month
                     </p>
+                  </div>
+                </div>
+                <div class="col-4 text-end">
+                  <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
                   </div>
                 </div>
               </div>
@@ -114,21 +170,22 @@
       </div>
       
       <div class="row">
+        <!-- Recent Transactions Table -->
         <div class="col-lg-8 mb-4">
           <div class="card border shadow-xs">
             <div class="card-header border-bottom pb-0">
               <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
                 <div class="mb-3 mb-md-0">
-                  <h6 class="font-weight-semibold text-lg mb-0">Recent Sales Overview</h6>
-                  <p class="text-sm mb-0">Monthly sales performance</p>
+                  <h6 class="font-weight-semibold text-lg mb-0">Recent Transactions</h6>
+                  <p class="text-sm mb-0">Latest transactions in your system</p>
                 </div>
                 <div class="d-flex">
-                  <button type="button" class="btn btn-sm btn-white me-2">
-                    View Report
-                  </button>
-                  <button type="button" class="btn btn-sm btn-dark">
-                    Export Data
-                  </button>
+                  <a href="/transactions" class="btn btn-sm btn-white me-2">
+                    View All
+                  </a>
+                  <a href="/transactions/create" class="btn btn-sm btn-dark">
+                    New Transaction
+                  </a>
                 </div>
               </div>
             </div>
@@ -137,106 +194,61 @@
                 <table class="table align-items-center justify-content-center mb-0">
                   <thead class="bg-gray-100">
                     <tr>
-                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-3">Product</th>
-                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Category</th>
-                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Sales</th>
-                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2 text-center">Status</th>
-                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Last Updated</th>
+                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-3">Transaction</th>
+                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Customer</th>
+                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Amount</th>
+                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Payment</th>
+                      <th class="text-secondary text-xs font-weight-semibold opacity-7 ps-2">Status</th>
                     </tr>
                   </thead>
                   <tbody>
+                    {{#each recentTransactions}}
                     <tr>
                       <td>
                         <div class="d-flex px-3">
                           <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Premium Keyboard</h6>
+                            <h6 class="mb-0 text-sm">
+                              <a href="/transactions/{{this.id}}">#{{this.transactionCode}}</a>
+                            </h6>
                           </div>
                         </div>
                       </td>
                       <td>
-                        <p class="text-sm font-weight-normal mb-0">Electronics</p>
+                        <p class="text-sm font-weight-normal mb-0">
+                          {{#if this.customerName}}
+                            {{this.customerName}}
+                          {{else if this.member}}
+                            {{this.member.name}}
+                          {{else}}
+                            Guest
+                          {{/if}}
+                        </p>
                       </td>
                       <td>
-                        <p class="text-sm font-weight-normal mb-0">$2,500</p>
+                        <p class="text-sm font-weight-normal mb-0">${{this.grandTotal}}</p>
                       </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="badge bg-success">In Stock</span>
+                      <td>
+                        <p class="text-sm font-weight-normal text-capitalize mb-0">{{this.paymentMethod}}</p>
+                      </td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          {{#if this.isVoided}}
+                          <span class="badge bg-danger">Voided</span>
+                          {{else}}
+                          <span class="badge bg-success">Completed</span>
+                          {{/if}}
                         </div>
                       </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">Mar 15, 2025</p>
-                      </td>
                     </tr>
+                    {{/each}}
+                    
+                    {{#unless recentTransactions.length}}
                     <tr>
-                      <td>
-                        <div class="d-flex px-3">
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Ergonomic Mouse</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">Electronics</p>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">$1,200</p>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="badge bg-success">In Stock</span>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">Mar 14, 2025</p>
+                      <td colspan="5" class="text-center py-4">
+                        <p class="text-sm font-weight-normal mb-0">No transactions found</p>
                       </td>
                     </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-3">
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Monitor 27"</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">Electronics</p>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">$3,400</p>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="badge bg-warning">Low Stock</span>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">Mar 13, 2025</p>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-3">
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Premium Headphones</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">Audio</p>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">$1,800</p>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="badge bg-danger">Out of Stock</span>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-normal mb-0">Mar 10, 2025</p>
-                      </td>
-                    </tr>
+                    {{/unless}}
                   </tbody>
                 </table>
               </div>
@@ -244,19 +256,21 @@
           </div>
         </div>
         
-        <div class="col-lg-4 mb-4">
-          <div class="card border shadow-xs h-100">
+        <!-- Quick Actions and Payment Methods -->
+        <div class="col-lg-4">
+          <!-- Quick Actions Card -->
+          <div class="card border shadow-xs mb-4">
             <div class="card-header border-bottom pb-0">
               <h6 class="font-weight-semibold text-lg mb-0">Quick Actions</h6>
               <p class="text-sm mb-0">Commonly used functions</p>
             </div>
             <div class="card-body">
               <div class="list-group">
-                <a href="/products/new" class="list-group-item list-group-item-action border-0 py-3">
+                <a href="/transactions/create" class="list-group-item list-group-item-action border-0 py-3">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
-                      <h6 class="mb-1 font-weight-semibold">Add New Product</h6>
-                      <p class="mb-0 text-sm">Create a new product listing</p>
+                      <h6 class="mb-1 font-weight-semibold">New Transaction</h6>
+                      <p class="mb-0 text-sm">Create a new sales transaction</p>
                     </div>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                       <circle cx="12" cy="12" r="10"/>
@@ -266,11 +280,11 @@
                   </div>
                 </a>
                 
-                <a href="/products/inventory" class="list-group-item list-group-item-action border-0 py-3">
+                <a href="/pos" class="list-group-item list-group-item-action border-0 py-3">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
-                      <h6 class="mb-1 font-weight-semibold">Manage Inventory</h6>
-                      <p class="mb-0 text-sm">Update stock and quantities</p>
+                      <h6 class="mb-1 font-weight-semibold">Point of Sale</h6>
+                      <p class="mb-0 text-sm">Quick sales processing</p>
                     </div>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                       <rect x="2" y="5" width="20" height="14" rx="2"/>
@@ -279,36 +293,46 @@
                   </div>
                 </a>
                 
-                <a href="/orders" class="list-group-item list-group-item-action border-0 py-3">
+                <a href="/products" class="list-group-item list-group-item-action border-0 py-3">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
-                      <h6 class="mb-1 font-weight-semibold">Review Orders</h6>
-                      <p class="mb-0 text-sm">Process pending orders</p>
+                      <h6 class="mb-1 font-weight-semibold">Manage Products</h6>
+                      <p class="mb-0 text-sm">Inventory control</p>
                     </div>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                      <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                      <line x1="9" y1="10" x2="15" y2="10"/>
-                      <line x1="9" y1="14" x2="15" y2="14"/>
-                      <line x1="9" y1="18" x2="12" y2="18"/>
+                      <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"></path>
+                      <path d="M4 6v12c0 1.1.9 2 2 2h14v-4"></path>
+                      <path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z"></path>
                     </svg>
                   </div>
                 </a>
                 
-                <a href="/analytics" class="list-group-item list-group-item-action border-0 py-3">
+                <a href="/transactions/reports" class="list-group-item list-group-item-action border-0 py-3">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
-                      <h6 class="mb-1 font-weight-semibold">View Analytics</h6>
-                      <p class="mb-0 text-sm">Check performance metrics</p>
+                      <h6 class="mb-1 font-weight-semibold">Sales Reports</h6>
+                      <p class="mb-0 text-sm">View analytics and reports</p>
                     </div>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                       <rect x="3" y="3" width="18" height="18" rx="2"/>
                       <line x1="3" y1="9" x2="21" y2="9"/>
-                      <line x1="3" y1="15" x2="21" y2="15"/>
                       <line x1="9" y1="3" x2="9" y2="21"/>
-                      <line x1="15" y1="3" x2="15" y2="21"/>
                     </svg>
                   </div>
                 </a>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Payment Method Breakdown -->
+          <div class="card border shadow-xs">
+            <div class="card-header border-bottom pb-0">
+              <h6 class="font-weight-semibold text-lg mb-0">Payment Methods</h6>
+              <p class="text-sm mb-0">Transaction payment breakdown</p>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="paymentMethodChart" height="220"></canvas>
               </div>
             </div>
           </div>
@@ -320,8 +344,55 @@
   <!-- Core JS Files -->
   <script src="/js/core/popper.min.js"></script>
   <script src="/js/core/bootstrap.min.js"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+  
   {{> script}}
-
+  
+  <script>
+    // Payment Method Chart
+    document.addEventListener('DOMContentLoaded', function() {
+      const ctx = document.getElementById('paymentMethodChart').getContext('2d');
+      
+      const paymentMethodChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Cash', 'Credit Card', 'Debit Card', 'Bank Transfer', 'Digital Wallet'],
+          datasets: [{
+            data: [{{paymentMethodData}}],
+            backgroundColor: [
+              '#4CAF50', // Cash
+              '#2196F3', // Credit Card
+              '#FF9800', // Debit Card
+              '#9C27B0', // Bank Transfer
+              '#03A9F4'  // Digital Wallet
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '70%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 20,
+                font: {
+                  size: 12
+                }
+              }
+            }
+          }
+        }
+      });
+    });
+    
+    // Menu Toggle
+    document.getElementById('menuToggle').addEventListener('click', function() {
+      document.body.classList.toggle('sidebar-collapsed');
+    });
+  </script>
 </body>
 </html>
