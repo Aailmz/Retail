@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>{{title}}</title>
+  
+  <!-- Fonts and icons -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Noto+Sans:300,400,500,600,700,800|PT+Mono:300,400,500,600,700" rel="stylesheet" />
+  
+  <!-- CSS Files -->
+  <link id="pagestyle" href="/css/corporate-ui-dashboard.css" rel="stylesheet" />
+  
+  {{> style}}
+</head>
+
+<body class="bg-gray-100">
+  {{> sidebar}}
+  <!-- Main Content -->
+  <div class="main-content bg-gray-100">
+    <nav class="navbar navbar-expand-lg mb-4 p-3">
+      <div class="container-fluid px-0">
+        <div class="d-flex align-items-center">
+          <button class="menu-toggle" id="menuToggle">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h4 class="font-weight-bold mb-0">Edit User</h4>
+        </div>
+        <div class="ms-auto">
+          <span class="font-weight-bold d-none d-sm-inline">Welcome, {{user.username}}</span>
+          <span class="d-inline d-sm-none">{{user.username}}</span>
+        </div>
+      </div>
+    </nav>
+
+    {{> notification}}
+    
+    <!-- Edit User Content -->
+    <div class="row">
+      <div class="col-12 mb-4">
+        <div class="card border shadow-xs">
+          <div class="card-header border-bottom pb-0">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="font-weight-semibold text-lg mb-0">Edit User Information</h6>
+                <p class="text-sm mb-0">Update user details</p>
+              </div>
+              <a href="/users" class="btn btn-sm btn-secondary">
+                Cancel
+              </a>
+            </div>
+          </div>
+          <div class="card-body">
+            <form action="/users/{{userDetails.id}}/update" method="POST">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="username" class="form-control-label">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" value="{{userDetails.username}}" required>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="fullName" class="form-control-label">Full Name</label>
+                    <input type="text" class="form-control" id="fullName" name="fullName" value="{{userDetails.fullName}}">
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="password" class="form-control-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Leave blank to keep current password">
+                    <small class="text-muted">Only fill this if you want to change the password</small>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="role" class="form-control-label">Role</label>
+                    <select class="form-control" id="role" name="role" required>
+                      <option value="user" {{#if (eq userDetails.role 'user')}}selected{{/if}}>User</option>
+                      <option value="admin" {{#if (eq userDetails.role 'admin')}}selected{{/if}}>Admin</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-check form-switch ps-0">
+                    <input class="form-check-input ms-auto" type="checkbox" id="isActive" name="isActive" {{#if userDetails.isActive}}checked{{/if}}>
+                    <label class="form-check-label ms-2" for="isActive">Active Account</label>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="d-flex justify-content-end mt-4">
+                <button type="submit" class="btn btn-primary">Update User</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Core JS Files -->
+  <script src="/js/core/popper.min.js"></script>
+  <script src="/js/core/bootstrap.min.js"></script>
+
+  {{> script}}
+</body>
+</html>
