@@ -16,6 +16,7 @@ import { Promotion } from './promotion/entities/promotion.entity';
 import { TransactionModule } from './transaction/transaction.module';
 import { Transaction } from './transaction/entities/transaction.entity';
 import { TransactionItem } from './transaction/entities/transaction-item.entity';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { TransactionItem } from './transaction/entities/transaction-item.entity'
     MemberModule,
     PromotionModule,
     TransactionModule,
+    InvoiceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
