@@ -4,6 +4,7 @@ import { Repository, LessThanOrEqual, MoreThanOrEqual, Raw } from 'typeorm';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
 import { UpdatePromotionDto } from './dto/update-promotion.dto';
 import { Promotion } from './entities/promotion.entity';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class PromotionService {
@@ -50,6 +51,25 @@ export class PromotionService {
       where: { status: 'active' },
       order: { createdAt: 'DESC' }
     });
+  }
+
+  @Cron(CronExpression.EVERY_HOUR)
+  async checkExpiredPromotions() {
+    await this.updateExpiredPromotions();
+  }
+
+  async updateExpiredPromotions(): Promise<void> {
+    const now = new Date();
+    
+    await this.promotionRepository.update(
+      { 
+        status: 'active',
+        endDate: LessThanOrEqual(now)
+      },
+      { 
+        status: 'inactive' 
+      }
+    );
   }
 
 }
