@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>{{title}}</title>
+  
+  <!-- Fonts and icons -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Noto+Sans:300,400,500,600,700,800|PT+Mono:300,400,500,600,700" rel="stylesheet" />
+  
+  <!-- CSS Files -->
+  <link id="pagestyle" href="/css/corporate-ui-dashboard.css" rel="stylesheet" />
+  
+  {{> style}}
+</head>
+
+<body class="bg-gray-100">
+  {{> sidebar}}
+  <!-- Main Content -->
+  <div class="main-content bg-gray-100">
+    <nav class="navbar navbar-expand-lg mb-4 p-3">
+      <div class="container-fluid px-0">
+        <div class="d-flex align-items-center">
+          <button class="menu-toggle" id="menuToggle">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h4 class="font-weight-bold mb-0">User Details</h4>
+        </div>
+        <div class="ms-auto">
+          <span class="font-weight-bold d-none d-sm-inline">Welcome, {{user.username}}</span>
+          <span class="d-inline d-sm-none">{{user.username}}</span>
+        </div>
+      </div>
+    </nav>
+
+    {{> notification}}
+    
+    <!-- User Details Content -->
+    <div class="row">
+      <div class="col-12 mb-4">
+        <div class="card border shadow-xs">
+          <div class="card-header border-bottom pb-0">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="font-weight-semibold text-lg mb-0">User Information</h6>
+                <p class="text-sm mb-0">Viewing user details</p>
+              </div>
+              <div class="d-flex gap-2">
+                <a href="/users" class="btn btn-sm btn-secondary">
+                  Back to List
+                </a>
+                <a href="/users/{{userDetails.id}}/edit" class="btn btn-sm btn-primary">
+                  Edit User
+                </a>
+                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{userDetails.id}}">
+                  Delete User
+                </button>
+                
+                {{> delete
+                  id=userDetails.id 
+                  itemType="user" 
+                  itemName=userDetails.username 
+                  route="users"
+                }}
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-12 col-md-6 mb-4">
+                <h6 class="text-sm text-secondary mb-1">Username</h6>
+                <p class="mb-3 text-dark font-weight-semibold">{{userDetails.username}}</p>
+                
+                <h6 class="text-sm text-secondary mb-1">Full Name</h6>
+                <p class="mb-3 text-dark font-weight-semibold">{{userDetails.fullName}}</p>
+                
+                <h6 class="text-sm text-secondary mb-1">Role</h6>
+                <p class="mb-3">
+                  <span class="badge bg-{{#if (eq userDetails.role 'admin')}}primary{{else}}secondary{{/if}} text-white">
+                    {{userDetails.role}}
+                  </span>
+                </p>
+              </div>
+              
+              <div class="col-12 col-md-6 mb-4">
+                <h6 class="text-sm text-secondary mb-1">Status</h6>
+                <p class="mb-3">
+                  <span class="badge bg-{{#if userDetails.isActive}}success{{else}}danger{{/if}} text-white">
+                    {{#if userDetails.isActive}}Active{{else}}Inactive{{/if}}
+                  </span>
+                </p>
+                
+                <h6 class="text-sm text-secondary mb-1">Created At</h6>
+                <p class="mb-3 text-dark font-weight-semibold">{{formatDate userDetails.createdAt}}</p>
+                
+                <h6 class="text-sm text-secondary mb-1">Last Updated</h6>
+                <p class="mb-3 text-dark font-weight-semibold">{{formatDate userDetails.updatedAt}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Core JS Files -->
+  <script src="/js/core/popper.min.js"></script>
+  <script src="/js/core/bootstrap.min.js"></script>
+
+  {{> script}}
+</body>
+</html>
