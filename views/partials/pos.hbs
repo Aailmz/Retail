@@ -7,6 +7,44 @@ document.addEventListener('DOMContentLoaded', function() {
   let tempQuantity = 1;
   let availablePromotions = [];
 
+  function showAlert(message) {
+    // Periksa apakah modal sudah ada dalam dokumen
+    let alertModal = document.getElementById('alertModal');
+    
+    // Jika modal belum ada, buat elemen modal baru
+    if (!alertModal) {
+      const modalHtml = `
+        <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="alertModalLabel">Alert</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <p id="alertMessage"></p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Tambahkan modal ke body
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+      alertModal = document.getElementById('alertModal');
+    }
+    
+    // Setelah yakin modal ada di DOM, setel pesan alert
+    document.getElementById('alertMessage').textContent = message;
+    
+    // Tampilkan modal
+    const bsModal = new bootstrap.Modal(alertModal);
+    bsModal.show();
+  }
+
   // Load available promotions when page loads
   loadAvailablePromotions();
 
@@ -250,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
             cart[existingItemIndex].discountAmount = 0;
           }
         } else {
-          alert(`Cannot add more than available stock (${productStock})`);
+          showAlert(`Cannot add more than available stock (${productStock})`);
           return;
         }
       } else {
@@ -310,11 +348,11 @@ document.addEventListener('DOMContentLoaded', function() {
               });
             }
           } else if (freeQuantity > freeProductStock) {
-            alert(`Cannot add free product: insufficient stock for ${freeProductName} (Available: ${freeProductStock})`);
+            showAlert(`Cannot add free product: insufficient stock for ${freeProductName} (Available: ${freeProductStock})`);
             return;
           }
         } else {
-          alert('Free product not found in product list.');
+          showAlert('Free product not found in product list.');
           return;
         }
       }
@@ -357,13 +395,13 @@ document.addEventListener('DOMContentLoaded', function() {
   // Complete transaction
   document.getElementById('complete-transaction').addEventListener('click', function() {
     if (cart.length === 0) {
-      alert('Cannot complete transaction with empty cart.');
+      showAlert('Cannot complete transaction with empty cart.');
       return;
     }
 
     for (const item of cart) {
       if (item.quantity > item.maxStock) {
-        alert(`Stock for ${item.name} is insufficient. Available: ${item.maxStock}, Requested: ${item.quantity}`);
+        showAlert(`Stock for ${item.name} is insufficient. Available: ${item.maxStock}, Requested: ${item.quantity}`);
         return;
       }
     }
@@ -376,7 +414,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (selectedPaymentMethod !== 'cash') {
       paymentReference = document.getElementById('payment-reference').value;
       if (!paymentReference) {
-        alert('Please enter payment reference for ' + selectedPaymentMethod);
+        showAlert('Please enter payment reference for ' + selectedPaymentMethod);
         return;
       }
     }
@@ -420,7 +458,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const contentType = response.headers.get('content-type');
         if (!response.ok) {
           if (response.status === 401) {
-            alert('Unauthorized: Please log in again.');
+            showAlert('Unauthorized: Please log in again.');
             window.location.href = '/login';
             throw new Error('Unauthorized');
           } else {
@@ -452,7 +490,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       })
       .then(data => {
-        alert('Transaction completed successfully!');
+        showAlert('Transaction completed successfully!');
         cart = [];
         updateCartUI();
         document.getElementById('customer-name').value = '';
@@ -465,7 +503,7 @@ document.addEventListener('DOMContentLoaded', function() {
       })
       .catch(error => {
         console.error('Error completing transaction:', error);
-        alert('Error completing transaction: ' + error.message);
+        showAlert('Error completing transaction: ' + error.message);
       });
   });
 
@@ -473,7 +511,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('search-member-btn').addEventListener('click', function() {
     const searchValue = document.getElementById('member-search').value;
     if (!searchValue) {
-      alert('Please enter search term');
+      showAlert('Please enter search term');
       return;
     }
     fetch(`/members/search?q=${encodeURIComponent(searchValue)}`)
@@ -509,7 +547,7 @@ document.addEventListener('DOMContentLoaded', function() {
       })
       .catch(error => {
         console.error('Error searching members:', error);
-        alert('Error searching for members. Please try again.');
+        showAlert('Error searching for members. Please try again.');
       });
   });
 
@@ -817,11 +855,11 @@ document.addEventListener('DOMContentLoaded', function() {
                   });
                 }
               } else if (freeQuantity > freeProductStock) {
-                alert(`Cannot add free product: insufficient stock for ${freeProductName} (Available: ${freeProductStock})`);
+                showAlert(`Cannot add free product: insufficient stock for ${freeProductName} (Available: ${freeProductStock})`);
                 return;
               }
             } else {
-              alert('Free product not found in product list.');
+              showAlert('Free product not found in product list.');
               return;
             }
           }
