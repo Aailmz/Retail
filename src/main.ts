@@ -95,6 +95,18 @@ async function bootstrap() {
     return margin.toFixed(2);
   });
 
+  hbs.registerHelper('or', function(v1, v2) {
+    return v1 || v2;
+  });
+
+  hbs.registerHelper('and', function(v1, v2) {
+    return v1 && v2;
+  });
+
+  hbs.registerHelper('neq', function(v1, v2) {
+    return v1 !== v2;
+  });
+
   // New helpers for POS page
   hbs.registerHelper('formatPrice', function(price) {
     return parseFloat(price).toFixed(2);

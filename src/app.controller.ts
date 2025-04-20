@@ -61,11 +61,12 @@ export class AppController {
   }
 
   @Get('/dashboard')
+  @UseGuards(JwtAuthGuard)
   @Render('dashboard')
-  getDashboard() {
+  getDashboard(@Request() req) {
     return { 
       title: 'Dashboard',
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: {
         dashboard: true
       }
@@ -109,12 +110,12 @@ export class AppController {
 
   @Get('category')
   @Render('categories')
-  async getCategory() {
+  async getCategory(@Request() req) {
     const category = await this.categoryService.findAll();
     
     return { 
       title: 'Categories',
-      user: { username: 'Admin' },
+      user: req.user,
       isActivePage: {
         products: true
       },

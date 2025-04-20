@@ -17,7 +17,7 @@ export class TransactionController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin', 'cashier')
+  @Roles('admin', 'kasir')
   @Render('transactions/index')
   async findAll(@Req() req: Request) {
     const transactions = await this.transactionService.findAll();
@@ -45,7 +45,7 @@ export class TransactionController {
 
   @Get('create')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin', 'cashier')
+  @Roles('admin', 'kasir')
   @Render('transactions/create')
   async showCreateForm(@Req() req: Request) {
     const products = await this.productService.findAll();
@@ -60,7 +60,7 @@ export class TransactionController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin', 'cashier')
+  @Roles('admin', 'kasir')
   async create(@Body() createTransactionDto: CreateTransactionDto, @Res() res: Response, @Req() req: Request) {
     try {
       const transaction = await this.transactionService.create(createTransactionDto);
@@ -74,7 +74,7 @@ export class TransactionController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin', 'cashier')
+  @Roles('admin', 'kasir')
   @Render('transactions/show')
   async findOne(@Param('id') id: string, @Req() req: Request) {
     const transaction = await this.transactionService.findOne(+id);
@@ -108,7 +108,7 @@ export class TransactionController {
 
   @Get('receipt/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin', 'cashier')
+  @Roles('admin', 'kasir')
   @Render('transactions/receipt')
   async generateReceipt(@Param('id') id: string) {
     const transaction = await this.transactionService.findOne(+id);
