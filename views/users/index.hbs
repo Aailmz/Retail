@@ -87,12 +87,12 @@
                           <p class="text-sm font-weight-bold mb-0">{{this.fullName}}</p>
                         </td>
                         <td>
-                          <span class="badge bg-{{#if (eq this.role 'admin')}}primary{{else}}secondary{{/if}} text-white">
-                            {{this.role}}
-                          </span>
+                            <span class="{{#if (eq this.role 'admin')}}text-primary{{else}}text-secondary{{/if}}">
+                                {{this.role}}
+                            </span>
                         </td>
                         <td>
-                          <span class="badge bg-{{#if this.isActive}}success{{else}}danger{{/if}} text-white">
+                          <span class="{{#if this.isActive}}text-primary{{else}}text-secondary{{/if}}">
                             {{#if this.isActive}}Active{{else}}Inactive{{/if}}
                           </span>
                         </td>

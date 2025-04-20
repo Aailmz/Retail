@@ -101,15 +101,15 @@
                             </p>
                           </td>
                           <td>
-                            <span class="badge badge-sm 
+                            <span class="
                               {{#if (eq this.status "active")}}
-                                bg-success
+                                text-primary
                               {{else if (eq this.status "inactive")}}
-                                bg-secondary
+                                text-secondary
                               {{else if (eq this.status "scheduled")}}
-                                bg-info
+                                text-secondary
                               {{else if (eq this.status "expired")}}
-                                bg-danger
+                                text-secondary
                               {{/if}}">
                               {{this.status}}
                             </span>
