@@ -2,6 +2,7 @@ import { Controller, Get, UseGuards, Request, Render, Post, Body, Res, Req, Redi
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { AuthService } from './auth/auth.service';
 import { ProductService } from './product/product.service';
+import { UsersService } from "./users/users.service";
 import { CategoryService } from './category/category.service';
 import { MemberService } from './member/member.service';
 import { PromotionService } from './promotion/promotion.service';
@@ -13,6 +14,7 @@ export class AppController {
     private authService: AuthService,
     private productService: ProductService,
     private categoryService: CategoryService,
+    private usersService: UsersService,
     private memberService: MemberService,
     private promotionService: PromotionService,
     private transactionService: TransactionService
@@ -81,6 +83,13 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Redirect('/members')
   redirectToMembers() {
+    return;
+  }
+
+  @Get('user')
+  @UseGuards(JwtAuthGuard)
+  @Redirect('/users')
+  redirectToUsers() {
     return;
   }
 
