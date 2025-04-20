@@ -113,7 +113,66 @@
                       <h6 class="mb-0">Rules</h6>
                     </div>
                     <div class="card-body">
-                      <pre class="mb-0"><code>{{jsonPretty promotion.rules}}</code></pre>
+                      <div class="table-responsive">
+                        <table class="table align-items-center mb-0">
+                          <tbody>
+                            {{#if promotion.rules.member_only}}
+                            <tr>
+                              <td class="ps-1">
+                                <p class="text-sm font-weight-bold mb-0">Member Only</p>
+                              </td>
+                              <td class="text-end pe-1">
+                                <span class="badge bg-primary">Yes</span>
+                              </td>
+                            </tr>
+                            {{/if}}
+                            
+                            {{#if promotion.rules.min_quantity}}
+                            <tr>
+                              <td class="ps-1">
+                                <p class="text-sm font-weight-bold mb-0">Min Quantity</p>
+                              </td>
+                              <td class="text-end pe-1">
+                                <p class="text-sm font-weight-bold mb-0">{{promotion.rules.min_quantity}}</p>
+                              </td>
+                            </tr>
+                            {{/if}}
+                            
+                            {{#if promotion.rules.buy_product_id}}
+                            <tr>
+                              <td class="ps-1">
+                                <p class="text-sm font-weight-bold mb-0">Buy Product ID</p>
+                              </td>
+                              <td class="text-end pe-1">
+                                <p class="text-sm font-weight-bold mb-0">{{promotion.rules.buy_product_id}}</p>
+                              </td>
+                            </tr>
+                            {{/if}}
+
+                            {{#if promotion.rules.max_quantity}}
+                            <tr>
+                              <td class="ps-1">
+                                <p class="text-sm font-weight-bold mb-0">Max Quantity</p>
+                              </td>
+                              <td class="text-end pe-1">
+                                <p class="text-sm font-weight-bold mb-0">{{promotion.rules.max_quantity}}</p>
+                              </td>
+                            </tr>
+                            {{/if}}
+
+                            {{#if promotion.rules.applicable_days}}
+                            <tr>
+                              <td class="ps-1">
+                                <p class="text-sm font-weight-bold mb-0">Applicable Days</p>
+                              </td>
+                              <td class="text-end pe-1">
+                                <p class="text-sm font-weight-bold mb-0">{{promotion.rules.applicable_days}}</p>
+                              </td>
+                            </tr>
+                            {{/if}}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -123,7 +182,55 @@
                       <h6 class="mb-0">Configuration</h6>
                     </div>
                     <div class="card-body">
-                      <pre class="mb-0"><code>{{jsonPretty promotion.configuration}}</code></pre>
+                      <div class="table-responsive">
+                        <table class="table align-items-center mb-0">
+                          <tbody>
+                            {{#if promotion.configuration.free_product_id}}
+                            <tr>
+                              <td class="ps-1">
+                                <p class="text-sm font-weight-bold mb-0">Free Product ID</p>
+                              </td>
+                              <td class="text-end pe-1">
+                                <p class="text-sm font-weight-bold mb-0">{{promotion.configuration.free_product_id}}</p>
+                              </td>
+                            </tr>
+                            {{/if}}
+                            
+                            {{#if promotion.configuration.applied_markup_value}}
+                            <tr>
+                              <td class="ps-1">
+                                <p class="text-sm font-weight-bold mb-0">Applied Markup Value</p>
+                              </td>
+                              <td class="text-end pe-1">
+                                <p class="text-sm font-weight-bold mb-0">{{promotion.configuration.applied_markup_value}}%</p>
+                              </td>
+                            </tr>
+                            {{/if}}
+
+                            {{#if promotion.configuration.buy_count}}
+                            <tr>
+                              <td class="ps-1">
+                                <p class="text-sm font-weight-bold mb-0">Buy Count</p>
+                              </td>
+                              <td class="text-end pe-1">
+                                <p class="text-sm font-weight-bold mb-0">{{promotion.configuration.buy_count}}</p>
+                              </td>
+                            </tr>
+                            {{/if}}
+
+                            {{#if promotion.configuration.get_count}}
+                            <tr>
+                              <td class="ps-1">
+                                <p class="text-sm font-weight-bold mb-0">Get Count</p>
+                              </td>
+                              <td class="text-end pe-1">
+                                <p class="text-sm font-weight-bold mb-0">{{promotion.configuration.get_count}}</p>
+                              </td>
+                            </tr>
+                            {{/if}}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
                 </div>
