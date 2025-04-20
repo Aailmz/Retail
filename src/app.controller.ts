@@ -103,7 +103,7 @@ export class AppController {
         user: req.user,
         isActivePage: { dashboard: true },
         // Stats
-        todaySales: stats.today.total.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+        todaySales: stats.today.total.toLocaleString('en-US'),
         totalTransactions: stats.today.count,
         lowStockItems: lowStockCount || 0,
         activeMembers: activeMembers || 0,
