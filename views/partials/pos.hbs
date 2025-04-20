@@ -163,6 +163,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const applicable = promotionsArray.filter(promo => {
         if (promo.rules && promo.rules.buy_product_id === productId) {
+          if (promo.rules.member_only && !selectedMemberId) {
+            return false;
+          }
           const minQuantity = promo.rules.min_quantity || 1;
           return quantity >= minQuantity;
         }
