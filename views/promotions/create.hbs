@@ -170,6 +170,19 @@
                         </div>
                       </div>
                     </div>
+                    <div class="row mt-3">
+                      <div class="col-12">
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="memberOnly_buy_x_get_y" name="memberOnly">
+                          <label class="form-check-label" for="memberOnly_buy_x_get_y">
+                            Member Only Promotion
+                          </label>
+                          <small class="form-text text-muted d-block">
+                            Check this option if this promotion is exclusive to members
+                          </small>
+                        </div>
+                      </div>
+                    </div>
                     
                     <!-- Markup Recommendation Section -->
                     <div class="row mt-3">
@@ -238,6 +251,19 @@
                         </div>
                       </div>
                     </div>
+                    <div class="row mt-3">
+                      <div class="col-12">
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="memberOnly_discount_percentage" name="memberOnly">
+                          <label class="form-check-label" for="memberOnly_discount_percentage">
+                            Member Only Promotion
+                          </label>
+                          <small class="form-text text-muted d-block">
+                            Check this option if this promotion is exclusive to members
+                          </small>
+                        </div>
+                      </div>
+                    </div>
                     
                     <!-- Markup Recommendation Section -->
                     <div class="row mt-3">
@@ -294,6 +320,67 @@
   
   <!-- Core JS Files -->
   {{> createpromotion}}
+  <script>
+        // Wait for the DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      const startDateInput = document.getElementById('startDate');
+      const endDateInput = document.getElementById('endDate');
+      
+      // Format current date and time to the format expected by datetime-local input
+      function formatDateTimeForInput(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+      }
+      
+      // Set minimum date for start date to now
+      const now = new Date();
+      const formattedNow = formatDateTimeForInput(now);
+      startDateInput.setAttribute('min', formattedNow);
+      
+      // Initially disable end date until start date is selected
+      endDateInput.disabled = true;
+      
+      // Add event listener to start date
+      startDateInput.addEventListener('change', function() {
+        const selectedStartDate = new Date(this.value);
+        
+        // Enable end date input
+        endDateInput.disabled = false;
+        
+        // Set minimum value for end date to be the selected start date
+        endDateInput.setAttribute('min', this.value);
+        
+        // Clear the end date if it's now less than the start date
+        const currentEndDate = new Date(endDateInput.value);
+        if (endDateInput.value && currentEndDate <= selectedStartDate) {
+          endDateInput.value = '';
+        }
+      });
+      
+      // Add validation for the form submission
+      document.getElementById('promotionForm').addEventListener('submit', function(event) {
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(endDateInput.value);
+        
+        // Check if end date is greater than start date
+        if (endDate <= startDate) {
+          event.preventDefault();
+          alert('End date must be after start date');
+        }
+        
+        // Check if start date is in the future
+        if (startDate < now) {
+          event.preventDefault();
+          alert('Start date cannot be in the past');
+        }
+      });
+    });
+  </script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   

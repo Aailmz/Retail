@@ -372,6 +372,9 @@
       // Prepare rules object
       const promotionType = document.getElementById('type').value;
       let rules = {};
+
+      const memberOnlyCheckbox = document.getElementById(`memberOnly_${promotionType}`);
+      const isMemberOnly = memberOnlyCheckbox ? memberOnlyCheckbox.checked : false;
       
       if (promotionType === 'buy_x_get_y') {
         const buyProduct = buyProductSelect.options[buyProductSelect.selectedIndex];
@@ -379,7 +382,8 @@
         
         rules = {
           buy_product_id: parseInt(buyProduct.value),
-          min_quantity: buyCount  // Added this line to store buy_count as min_quantity
+          min_quantity: buyCount,
+          member_only: isMemberOnly
         };
       }
       
@@ -437,7 +441,8 @@
         // Rules now include both product ID and minimum quantity
         rules = {
           buy_product_id: parseInt(selectedProduct.value),
-          min_quantity: minQuantity
+          min_quantity: minQuantity,
+          member_only: isMemberOnly
         };
         
         const markupCalculation = recommendDiscountMarkup(
