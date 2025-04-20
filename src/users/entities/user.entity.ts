@@ -14,7 +14,10 @@ export class User {
   @Column({ nullable: true })
   fullName: string;
 
-  @Column({ default: true })
+  @Column({ type: 'tinyint', width: 1, default: true, transformer: {
+    to: (value: boolean) => value ? 1 : 0,
+    from: (value: number) => Boolean(value)
+  }})
   isActive: boolean;
 
   @Column({ default: 'user' })
