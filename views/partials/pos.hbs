@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function() {
         markedUpPrice: item.markedUpPrice,
         discountedPrice: item.discountedPrice,
         markupPercentage: item.markupPercentage || 0,
-        unitPrice: item.discountedPrice !== undefined ? item.discountedPrice : item.markedUpPrice
+        unitPrice: item.isFree ? 0 : (item.discountedPrice !== undefined ? item.discountedPrice : item.markedUpPrice)
       })),
       subtotal: calculateSubtotal(),
       paymentMethod: selectedPaymentMethod,
@@ -499,7 +499,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('discount-amount').value = '';
         document.getElementById('selected-member').textContent = 'No member selected';
         selectedMemberId = null;
-        window.location.href = `/pos`;
       })
       .catch(error => {
         console.error('Error completing transaction:', error);

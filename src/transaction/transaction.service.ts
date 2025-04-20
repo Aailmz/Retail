@@ -67,7 +67,8 @@ export class TransactionService {
           throw new BadRequestException(`Insufficient stock for product: ${product.name}`);
         }
 
-        const unitPrice = item.discountedPrice || item.markedUpPrice || product.sellingPrice;
+        const unitPrice = item.discountedPrice !== undefined ? item.discountedPrice : 
+                 (item.markedUpPrice !== undefined ? item.markedUpPrice : product.sellingPrice);
         const itemTotal = parseFloat((unitPrice * item.quantity).toFixed(2));
         
         subtotal += itemTotal;
@@ -76,9 +77,10 @@ export class TransactionService {
           productId: product.id,
           productName: product.name,
           productPrice: product.sellingPrice,
-          originalPrice: item.originalPrice || product.sellingPrice,
-          markedUpPrice: item.markedUpPrice || product.sellingPrice,
-          discountedPrice: item.discountedPrice || item.markedUpPrice || product.sellingPrice,
+          originalPrice: item.originalPrice !== undefined ? item.originalPrice : product.sellingPrice,
+          markedUpPrice: item.markedUpPrice !== undefined ? item.markedUpPrice : product.sellingPrice,
+          discountedPrice: item.discountedPrice !== undefined ? item.discountedPrice : 
+                          (item.markedUpPrice !== undefined ? item.markedUpPrice : product.sellingPrice),
           unitPrice: unitPrice,
           quantity: item.quantity,
           subtotal: itemTotal,
