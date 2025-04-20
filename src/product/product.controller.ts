@@ -17,7 +17,7 @@ export class ProductController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'gudang')
   @Render('products/index')
   async findAll(@Req() req: Request) {
     const products = await this.productService.findAll();
@@ -45,7 +45,7 @@ export class ProductController {
 
   @Get('create')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'gudang')
   @Render('products/create')
   async showCreateForm(@Req() req: Request) {
     const categories = await this.categoryService.findAll();
@@ -68,7 +68,7 @@ export class ProductController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'gudang')
   async create(@Body() createProductDto: CreateProductDto, @Res() res: Response, @Req() req: Request) {
     try {
       await this.productService.create(createProductDto);
@@ -82,6 +82,7 @@ export class ProductController {
 
   @Get(':id')
   @Render('products/show')
+  @Roles('admin', 'gudang')
   async findOne(@Param('id') id: string, @Req() req: Request) {
     const product = await this.productService.findOne(+id);
     return { 
@@ -94,7 +95,7 @@ export class ProductController {
 
   @Get(':id/edit')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'gudang')
   @Render('products/edit')
   async showEditForm(@Param('id') id: string, @Req() req: Request) {
     const product = await this.productService.findOne(+id);
@@ -119,7 +120,7 @@ export class ProductController {
 
   @Post(':id/update')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'gudang')
   async update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto, @Res() res: Response, @Req() req: Request) {
     try {
       await this.productService.update(+id, updateProductDto);
@@ -133,7 +134,7 @@ export class ProductController {
 
   @Post(':id/delete')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'gudang')
   async remove(@Param('id') id: string, @Res() res: Response, @Req() req: Request) {
     try {
       await this.productService.remove(+id);

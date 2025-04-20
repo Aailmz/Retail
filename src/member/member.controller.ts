@@ -15,7 +15,7 @@ export class MemberController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'kasir')
   @Render('members/index')
   async findAll(@Req() req: Request) {
     const members = await this.memberService.findAll();
@@ -43,7 +43,7 @@ export class MemberController {
 
   @Get('search')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'kasir')
   async searchMembers(@Query('q') query: string, @Req() req: Request) {
     if (!query) {
       return [];
@@ -54,7 +54,7 @@ export class MemberController {
 
   @Get('create')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'kasir')
   @Render('members/create')
   showCreateForm(@Req() req: Request) {
     // Get error messages if redirected from failed creation
@@ -74,7 +74,7 @@ export class MemberController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'kasir')
   async create(@Body() createMemberDto: CreateMemberDto, @Res() res: Response, @Req() req: Request) {
     try {
       await this.memberService.create(createMemberDto);
@@ -88,6 +88,7 @@ export class MemberController {
 
   @Get(':id')
   @Render('members/show')
+  @Roles('admin', 'kasir')
   async findOne(@Param('id') id: string, @Req() req: Request) {
     const member = await this.memberService.findOne(+id);
     return { 
@@ -100,7 +101,7 @@ export class MemberController {
 
   @Get(':id/edit')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'kasir')
   @Render('members/edit')
   async showEditForm(@Param('id') id: string, @Req() req: Request) {
     const member = await this.memberService.findOne(+id);
@@ -123,7 +124,7 @@ export class MemberController {
 
   @Post(':id/update')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'kasir')
   async update(@Param('id') id: string, @Body() updateMemberDto: UpdateMemberDto, @Res() res: Response, @Req() req: Request) {
     try {
       await this.memberService.update(+id, updateMemberDto);
@@ -137,7 +138,7 @@ export class MemberController {
 
   @Post(':id/delete')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'kasir')
   async remove(@Param('id') id: string, @Res() res: Response, @Req() req: Request) {
     try {
       await this.memberService.remove(+id);
