@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>{{title}}</title>
+  
+  <!-- Fonts and icons -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Noto+Sans:300,400,500,600,700,800|PT+Mono:300,400,500,600,700" rel="stylesheet" />
+  
+  <!-- CSS Files -->
+  <link id="pagestyle" href="/css/corporate-ui-dashboard.css" rel="stylesheet" />
+  
+  {{> style}}
+</head>
+
+<body class="bg-gray-100">
+  {{> sidebar}}
+  <!-- Main Content -->
+  <div class="main-content bg-gray-100">
+    <nav class="navbar navbar-expand-lg mb-4 p-3">
+      <div class="container-fluid px-0">
+        <div class="d-flex align-items-center">
+          <button class="menu-toggle" id="menuToggle">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h4 class="font-weight-bold mb-0">Transaction Details</h4>
+        </div>
+        <div class="ms-auto">
+          <span class="font-weight-bold d-none d-sm-inline">Welcome, {{user.username}}</span>
+        </div>
+      </div>
+    </nav>
+
+    {{> notification}}
+    
+    <!-- Transaction Detail Content -->
+    <div class="row">
+      <div class="col-12 mb-4">
+        <div class="card border shadow-xs">
+          <div class="card-header border-bottom pb-0">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+              <div class="mb-3 mb-md-0">
+                <h6 class="font-weight-semibold text-lg mb-0">
+                  Transaction #{{transaction.transactionCode}}
+                  {{#if transaction.isVoided}}
+                    <span class="badge bg-danger ms-2">VOIDED</span>
+                  {{/if}}
+                </h6>
+                <p class="text-sm mb-0">{{formatDate transaction.createdAt}} at {{formatTime transaction.createdAt}}</p>
+              </div>
+              <div class="d-flex gap-2">
+                <a href="/transactions" class="btn btn-sm btn-secondary">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                  </svg>
+                  Back
+                </a>
+                <a href="/transactions/receipt/{{transaction.id}}" class="btn btn-sm btn-primary" target="_blank">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
+                    <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+                    <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
+                  </svg>
+                  Print Receipt
+                </a>
+                {{#unless transaction.isVoided}}
+                  <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#voidModal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                      <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                    Void Transaction
+                  </button>
+                {{/unless}}
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <div class="card border h-100">
+                  <div class="card-header bg-light">
+                    <h6 class="mb-0">Customer Information</h6>
+                  </div>
+                  <div class="card-body">
+                    <p class="mb-1"><strong>Name:</strong> {{transaction.customerName}}</p>
+                    <p class="mb-1"><strong>Phone:</strong> {{transaction.customerPhone}}</p>
+                    {{#if transaction.customerEmail}}
+                      <p class="mb-1"><strong>Email:</strong> {{transaction.customerEmail}}</p>
+                    {{/if}}
+                    {{#if transaction.member}}
+                      <p class="mb-0"><strong>Member:</strong> Yes (ID: {{transaction.memberId}})</p>
+                    {{else}}
+                      <p class="mb-0"><strong>Member:</strong> No</p>
+                    {{/if}}
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-4">
+                <div class="card border h-100">
+                  <div class="card-header bg-light">
+                    <h6 class="mb-0">Payment Information</h6>
+                  </div>
+                  <div class="card-body">
+                    <p class="mb-1"><strong>Method:</strong> {{capitalize transaction.paymentMethod}}</p>
+                    {{#if transaction.paymentReference}}
+                      <p class="mb-1"><strong>Reference:</strong> {{transaction.paymentReference}}</p>
+                    {{/if}}
+                    <p class="mb-1"><strong>Status:</strong> 
+                      {{#if transaction.isVoided}}
+                        <span class="badge bg-danger">Voided</span>
+                      {{else}}
+                        <span class="badge bg-success">Completed</span>
+                      {{/if}}
+                    </p>
+                    {{#if transaction.isVoided}}
+                      <p class="mb-0"><strong>Void Reason:</strong> {{transaction.voidReason}}</p>
+                    {{/if}}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card border mb-4">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">Transaction Items</h6>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table align-items-center mb-0">
+                    <thead>
+                      <tr>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Product</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Price</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-center">Quantity</th>
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-end">Subtotal</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{#each transaction.items}}
+                        <tr>
+                          <td>
+                            <div class="d-flex px-3 py-2">
+                              <div>
+                                <h6 class="mb-0 text-sm">{{this.productName}}</h6>
+                                {{#if this.promotionId}}
+                                  <span class="badge bg-info text-xs">Promotion Applied</span>
+                                {{/if}}
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <p class="text-sm font-weight-bold mb-0">Rp{{formatNumber this.unitPrice}}</p>
+                            {{#if this.discountAmount}}
+                              <span class="text-xs text-success">-Rp{{formatNumber this.discountAmount}}</span>
+                            {{/if}}
+                          </td>
+                          <td class="align-middle text-center">
+                            <span class="text-sm font-weight-bold">{{this.quantity}}</span>
+                          </td>
+                          <td class="align-middle text-end pe-3">
+                            <span class="text-sm font-weight-bold">Rp{{formatNumber this.total}}</span>
+                          </td>
+                        </tr>
+                      {{/each}}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-7">
+                {{#if transaction.note}}
+                  <div class="card border mb-4">
+                    <div class="card-header bg-light">
+                      <h6 class="mb-0">Notes</h6>
+                    </div>
+                    <div class="card-body">
+                      <p class="mb-0">{{transaction.note}}</p>
+                    </div>
+                  </div>
+                {{/if}}
+              </div>
+              <div class="col-md-5">
+                <div class="card border mb-4">
+                  <div class="card-header bg-light">
+                    <h6 class="mb-0">Summary</h6>
+                  </div>
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                      <span class="text-sm">Subtotal:</span>
+                      <span class="text-sm font-weight-bold">Rp{{formatNumber transaction.total}}</span>
+                    </div>
+                    {{#if transaction.discountAmount}}
+                      <div class="d-flex justify-content-between mb-2">
+                        <span class="text-sm">Discount:</span>
+                        <span class="text-sm font-weight-bold text-success">-Rp{{formatNumber transaction.discountAmount}}</span>
+                      </div>
+                    {{/if}}
+                    {{#if transaction.taxAmount}}
+                      <div class="d-flex justify-content-between mb-2">
+                        <span class="text-sm">Tax:</span>
+                        <span class="text-sm font-weight-bold">Rp{{formatNumber transaction.taxAmount}}</span>
+                      </div>
+                    {{/if}}
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                      <span class="text-sm font-weight-bold">Total:</span>
+                      <span class="text-lg font-weight-bold">Rp{{formatNumber transaction.grandTotal}}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Void Modal -->
+  <div class="modal fade" id="voidModal" tabindex="-1" aria-labelledby="voidModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="voidModalLabel">Void Transaction #{{transaction.transactionCode}}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form action="/transactions/{{transaction.id}}/void" method="POST">
+          <div class="modal-body">
+            <div class="mb-3">
+              <p class="text-sm">Are you sure you want to void this transaction? This action cannot be undone and will return all stock to inventory.</p>
+              <label for="reason" class="form-label">Reason for voiding</label>
+              <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-danger">Void Transaction</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Core JS Files -->
+  <script src="/js/core/popper.min.js"></script>
+  <script src="/js/core/bootstrap.min.js"></script>
+
+  {{> script}}
+</body>
+</html>
