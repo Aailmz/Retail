@@ -140,7 +140,7 @@
                             </div>
                             <h6 class="card-title mb-1 text-truncate">{{this.name}}</h6>
                             <div class="d-flex justify-content-between align-items-center">
-                              <p class="card-text mb-0 text-dark font-weight-bold">${{formatPrice this.sellingPrice}}</p>
+                              <p class="card-text mb-0 text-dark font-weight-bold">Rp{{formatPrice this.sellingPrice}}</p>
                             </div>
                           </div>
                         </div>
@@ -200,7 +200,7 @@
               <div class="p-3 border-top mt-auto">
                 <div class="d-flex justify-content-between mb-2">
                   <span class="text-sm">Subtotal:</span>
-                  <span id="subtotal" class="text-sm font-weight-bold">$0.00</span>
+                  <span id="subtotal" class="text-sm font-weight-bold">Rp0.00</span>
                 </div>
                 <div class="d-flex justify-content-between mb-2" style="display: none !important;">
                   <span class="text-sm">Discount:</span>
@@ -213,7 +213,7 @@
                 <input type="hidden" id="discount-amount" value="0">
                 <div class="d-flex justify-content-between mb-2">
                   <span class="text-sm">Tax (10%):</span>
-                  <span id="tax-amount" class="text-sm font-weight-bold">$0.00</span>
+                  <span id="tax-amount" class="text-sm font-weight-bold">Rp0.00</span>
                 </div>
                 <div class="d-flex justify-content-between mb-2" style="display: none !important;">
                   <span class="text-sm">Promotion:</span>
@@ -226,7 +226,7 @@
                 </div>
                 <div class="d-flex justify-content-between mb-3">
                   <span class="font-weight-bold">TOTAL:</span>
-                  <span class="font-weight-bold fs-5 text-primary" id="grand-total">$0.00</span>
+                  <span class="font-weight-bold fs-5 text-primary" id="grand-total">Rp0.00</span>
                 </div>
                 
                 <!-- Payment Methods -->

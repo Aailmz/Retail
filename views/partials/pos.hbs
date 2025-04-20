@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
             promoDescription = `${discountRate}% off`;
           } else if (promo.type === 'fixed_amount_discount') {
             const discountAmount = promo.configuration?.discount_amount || 0;
-            promoDescription = `$${discountAmount} off`;
+            promoDescription = `Rp${discountAmount} off`;
           } else if (promo.type === 'buy_x_get_y_free' || promo.type === 'buy_x_get_y') {
             const buyQty = promo.buy_count || 1;
             const freeQty = promo.get_count || 1;
@@ -573,10 +573,10 @@ document.addEventListener('DOMContentLoaded', function() {
           ? `<span class="badge bg-success text-white ms-2">${item.promotionName}</span>`
           : '';
         const originalPriceDisplay = (item.markupPercentage > 0 || item.discountAmount > 0)
-          ? `<span class="text-sm text-muted text-decoration-line-through me-1">$${item.originalPrice.toFixed(2)}</span>`
+          ? `<span class="text-sm text-muted text-decoration-line-through me-1">Rp${item.originalPrice.toFixed(2)}</span>`
           : '';
         const markedUpPriceDisplay = (item.markupPercentage > 0 && item.discountAmount > 0)
-          ? `<span class="text-sm text-muted text-decoration-line-through me-1">$${item.markedUpPrice.toFixed(2)}</span>`
+          ? `<span class="text-sm text-muted text-decoration-line-through me-1">Rp${item.markedUpPrice.toFixed(2)}</span>`
           : '';
 
         cartHTML += `
@@ -591,12 +591,12 @@ document.addEventListener('DOMContentLoaded', function() {
                   ${originalPriceDisplay}
                   ${markedUpPriceDisplay}
                   <span class="text-sm ${item.discountAmount > 0 ? 'text-success font-weight-bold' : 'text-muted'}">
-                    $${priceToUse.toFixed(2)} × ${item.quantity}
+                    Rp${priceToUse.toFixed(2)} × ${item.quantity}
                   </span>
                 </div>
               </div>
               <div class="text-end">
-                <span class="font-weight-bold">$${itemTotal.toFixed(2)}</span>
+                <span class="font-weight-bold">Rp${itemTotal.toFixed(2)}</span>
                 <div class="d-flex gap-1 mt-1">
                   <button class="btn btn-sm btn-outline-success promotion-btn" data-index="${index}">
                     <i class="fas fa-tag"></i>
@@ -725,8 +725,8 @@ document.addEventListener('DOMContentLoaded', function() {
               id="item-promo-none" value="none" ${!item.promotionId ? 'checked' : ''}>
         <label class="form-check-label w-100" for="item-promo-none">
           <strong>No Promotion</strong>
-          <div class="text-muted small">Original price: $${item.originalPrice.toFixed(2)}</div>
-          ${item.markupPercentage > 0 ? `<div class="text-muted small">Marked-up price: $${item.markedUpPrice.toFixed(2)} (${item.markupPercentage}% markup)</div>` : ''}
+          <div class="text-muted small">Original price: Rp${item.originalPrice.toFixed(2)}</div>
+          ${item.markupPercentage > 0 ? `<div class="text-muted small">Marked-up price: Rp${item.markedUpPrice.toFixed(2)} (${item.markupPercentage}% markup)</div>` : ''}
         </label>
       </div>
     `;
@@ -751,7 +751,7 @@ document.addEventListener('DOMContentLoaded', function() {
         discountAmount = promo.configuration.discount_amount;
         discountedPrice = markedUpPrice - discountAmount;
         if (discountedPrice < 0) discountedPrice = 0;
-        promoDescription = `$${discountAmount.toFixed(2)} off`;
+        promoDescription = `Rp${discountAmount.toFixed(2)} off`;
       } else if (promo.type === 'buy_x_get_y_free' || promo.type === 'buy_x_get_y') {
         const buyCount = promo.buy_count || 1;
         const getCount = promo.get_count || 1;
@@ -776,10 +776,10 @@ document.addEventListener('DOMContentLoaded', function() {
           <label class="form-check-label w-100" for="item-promo-${promo.id}">
             <strong>${promo.name}</strong> - ${promoDescription}
             <div class="text-muted small">${promo.description || ''}</div>
-            <div class="text-muted small">Original price: $${item.originalPrice.toFixed(2)}</div>
-            <div class="text-muted small">With markup: $${markedUpPrice.toFixed(2)} (${markupPercentage}% markup)</div>
+            <div class="text-muted small">Original price: Rp${item.originalPrice.toFixed(2)}</div>
+            <div class="text-muted small">With markup: Rp${markedUpPrice.toFixed(2)} (${markupPercentage}% markup)</div>
             <div class="text-success small">
-              ${discountAmount > 0 ? `Savings: $${discountAmount.toFixed(2)}` : ''}
+              ${discountAmount > 0 ? `Savings: Rp${discountAmount.toFixed(2)}` : ''}
             </div>
           </label>
         </div>
@@ -915,9 +915,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const tax = subtotal * 0.1;
     const discount = parseFloat(document.getElementById('discount-amount').value) || 0;
     const grandTotal = subtotal + tax - discount;
-    document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
-    document.getElementById('tax-amount').textContent = '$' + tax.toFixed(2);
-    document.getElementById('grand-total').textContent = '$' + grandTotal.toFixed(2);
+    document.getElementById('subtotal').textContent = 'Rp' + subtotal.toFixed(2);
+    document.getElementById('tax-amount').textContent = 'Rp' + tax.toFixed(2);
+    document.getElementById('grand-total').textContent = 'Rp' + grandTotal.toFixed(2);
   }
 });
 </script>
