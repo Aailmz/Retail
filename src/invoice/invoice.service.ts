@@ -47,11 +47,11 @@ export class InvoiceService {
     doc.pipe(res);
 
     // Add company logo and header
-    doc.fontSize(20).text('YOUR COMPANY NAME', { align: 'center' });
+    doc.fontSize(20).text('RETAIL', { align: 'center' });
     doc
       .fontSize(10)
-      .text('Address: 123 Business St, City, Country', { align: 'center' });
-    doc.text('Phone: +1-234-567-8901 | Email: info@yourcompany.com', {
+      .text('Grand Indonesia Shopping Town West Mall 3A', { align: 'center' });
+    doc.text('Mirza Ganteng', {
       align: 'center',
     });
     doc.moveDown(1);
@@ -64,7 +64,6 @@ export class InvoiceService {
     doc.fontSize(16).text('INVOICE', { align: 'center' });
     doc.moveDown(0.5);
 
-    doc.fontSize(10).text(`Invoice Number: ${invoiceData.transactionId}`);
     doc.text(`Date: ${invoiceData.date}`);
     doc.moveDown(0.5);
 
@@ -188,7 +187,7 @@ export class InvoiceService {
     doc.moveDown(1);
 
     // Add footer
-    doc.fontSize(8).text('Thank you for your business!', { align: 'center' });
+    doc.fontSize(8).text('Thank you!', { align: 'center' });
 
     // Finalize PDF
     doc.end();
