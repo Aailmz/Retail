@@ -54,4 +54,8 @@ export class MemberService {
       select: ['id', 'name', 'email', 'phone'], // Hanya ambil field yang diperlukan
     });
   }
+
+  async countActiveMembers(): Promise<number> {
+    return this.memberRepository.count();
+  }
 }
