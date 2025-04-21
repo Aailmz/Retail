@@ -83,7 +83,8 @@
                   <div class="form-group">
                     <label for="role" class="form-control-label">Role</label>
                     <select class="form-control" id="role" name="role" required>
-                      <option value="user" {{#if (eq userDetails.role 'user')}}selected{{/if}}>User</option>
+                      <option value="gudang" {{#if (eq userDetails.role 'gudang')}}selected{{/if}}>Storage</option>
+                      <option value="kasir" {{#if (eq userDetails.role 'kasir')}}selected{{/if}}>Cashier</option>
                       <option value="admin" {{#if (eq userDetails.role 'admin')}}selected{{/if}}>Admin</option>
                     </select>
                   </div>
