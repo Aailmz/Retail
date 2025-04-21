@@ -108,6 +108,92 @@
       </a>
     {{/if}}
     
-    <a href="/logout" class="btn btn-dark logout-btn">Logout</a>
+    <button id="logout-btn" class="btn btn-dark logout-btn">Logout</button>
   </div>
 </div>
+
+<!-- Logout Confirmation Modal -->
+<div class="modal" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="logoutModalLabel">Logout Confirmation</h5>
+        <button type="button" class="close" id="closeModalBtn" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Are you sure?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelLogoutBtn">Cancel</button>
+        <a href="/login" class="btn btn-primary">Yes</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add this JavaScript code at the end -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get modal element
+    const modal = document.getElementById('logoutModal');
+    
+    // Get logout button
+    const logoutBtn = document.getElementById('logout-btn');
+    
+    // Get cancel button
+    const cancelBtn = document.getElementById('cancelLogoutBtn');
+    
+    // Get close button (×)
+    const closeBtn = document.getElementById('closeModalBtn');
+    
+    // Function to show the modal
+    function showModal() {
+      modal.style.display = 'block';
+      modal.classList.add('show');
+      document.body.classList.add('modal-open');
+      
+      // Create backdrop
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop fade show';
+      document.body.appendChild(backdrop);
+    }
+    
+    // Function to hide the modal
+    function hideModal() {
+      modal.style.display = 'none';
+      modal.classList.remove('show');
+      document.body.classList.remove('modal-open');
+      
+      // Remove backdrop
+      const backdrop = document.querySelector('.modal-backdrop');
+      if (backdrop) {
+        document.body.removeChild(backdrop);
+      }
+    }
+    
+    // Add click event to logout button
+    logoutBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      showModal();
+    });
+    
+    // Add click event to cancel button
+    cancelBtn.addEventListener('click', function() {
+      hideModal();
+    });
+    
+    // Add click event to close button
+    closeBtn.addEventListener('click', function() {
+      hideModal();
+    });
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+      if (event.target === modal) {
+        hideModal();
+      }
+    });
+  });
+</script>
