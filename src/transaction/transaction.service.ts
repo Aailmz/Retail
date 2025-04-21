@@ -324,4 +324,129 @@ export class TransactionService {
     
     return result;
   }
+
+  async generateReportPdf(transactions: Transaction[], startDate: string, endDate: string): Promise<Buffer> {
+    const PDFDocument = require('pdfkit');
+    
+    return new Promise((resolve, reject) => {
+      try {
+        // Create a document
+        const doc = new PDFDocument({ margin: 50 });
+        const buffers = [];
+        
+        doc.on('data', buffer => buffers.push(buffer));
+        doc.on('end', () => resolve(Buffer.concat(buffers)));
+        doc.on('error', err => reject(err));
+        
+        // Add content to the PDF
+        
+        // Company info and title
+        doc.fontSize(20).text('Sales Report', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(12).text(`Date Range: ${startDate} to ${endDate}`, { align: 'center' });
+        doc.moveDown(2);
+        
+        // Calculate summary data
+        let totalSales = 0;
+        let totalItems = 0;
+        let voidedTransactions = 0;
+        
+        transactions.forEach(transaction => {
+          if (transaction.isVoided) {
+            voidedTransactions++;
+          } else {
+            totalSales += transaction.grandTotal;
+            transaction.items.forEach(item => {
+              totalItems += item.quantity;
+            });
+          }
+        });
+        
+        // Summary section
+        doc.fontSize(14).text('Summary', { underline: true });
+        doc.moveDown(0.5);
+        doc.fontSize(10);
+        doc.text(`Total Transactions: ${transactions.length}`);
+        doc.text(`Completed Transactions: ${transactions.length - voidedTransactions}`);
+        doc.text(`Voided Transactions: ${voidedTransactions}`);
+        doc.text(`Total Sales: Rp${totalSales.toLocaleString()}`);
+        doc.text(`Total Items Sold: ${totalItems}`);
+        doc.moveDown(2);
+        
+        // Transactions table
+        doc.fontSize(14).text('Transaction Details', { underline: true });
+        doc.moveDown(0.5);
+        
+        // Table headers
+        const tableTop = doc.y + 10;
+        let currentY = tableTop;
+        
+        // Define column widths
+        const colWidths = {
+          code: 100,
+          date: 80,
+          customer: 120,
+          total: 80,
+          payment: 80,
+          status: 60
+        };
+        
+        // Draw table headers
+        doc.fontSize(10).font('Helvetica-Bold');
+        
+        doc.text('Code', 50, currentY);
+        doc.text('Date', 50 + colWidths.code, currentY);
+        doc.text('Customer', 50 + colWidths.code + colWidths.date, currentY);
+        doc.text('Total (Rp)', 50 + colWidths.code + colWidths.date + colWidths.customer, currentY);
+        doc.text('Payment', 50 + colWidths.code + colWidths.date + colWidths.customer + colWidths.total, currentY);
+        doc.text('Status', 50 + colWidths.code + colWidths.date + colWidths.customer + colWidths.total + colWidths.payment, currentY);
+        
+        currentY += 20;
+        doc.moveTo(50, currentY).lineTo(550, currentY).stroke();
+        currentY += 10;
+        
+        // Draw table rows
+        doc.font('Helvetica');
+        
+        // Page setup
+        const itemsPerPage = 20;
+        let itemCount = 0;
+        
+        transactions.forEach((transaction, index) => {
+          // Check if we need a new page
+          if (itemCount === itemsPerPage) {
+            doc.addPage();
+            currentY = 50;
+            itemCount = 0;
+          }
+          
+          const date = new Date(transaction.createdAt);
+          const dateStr = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+          
+          doc.text(transaction.transactionCode, 50, currentY);
+          doc.text(dateStr, 50 + colWidths.code, currentY);
+          doc.text(transaction.customerName || 'N/A', 50 + colWidths.code + colWidths.date, currentY);
+          doc.text(transaction.grandTotal.toLocaleString(), 50 + colWidths.code + colWidths.date + colWidths.customer, currentY);
+          doc.text(transaction.paymentMethod.replace('_', ' '), 50 + colWidths.code + colWidths.date + colWidths.customer + colWidths.total, currentY);
+          doc.text(transaction.isVoided ? 'Voided' : 'Completed', 50 + colWidths.code + colWidths.date + colWidths.customer + colWidths.total + colWidths.payment, currentY);
+          
+          currentY += 20;
+          itemCount++;
+          
+          // Add a separator line except for the last item
+          if (index < transactions.length - 1) {
+            doc.moveTo(50, currentY - 10).lineTo(550, currentY - 10).stroke({ opacity: 0.2 });
+          }
+        });
+        
+        // Footer
+        doc.fontSize(8).text(`Report Generated On: ${new Date().toLocaleString()}`, 50, doc.page.height - 50, { align: 'center' });
+        
+        // Finalize the PDF
+        doc.end();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
 }
