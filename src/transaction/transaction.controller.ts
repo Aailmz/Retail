@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Render, Res, Req, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Render, Res, Req, Query, BadRequestException } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
@@ -204,5 +204,36 @@ export class TransactionController {
       startDate,
       endDate
     };
+  }
+
+  @Get('reports/export-pdf')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'kasir')
+  async exportReportPdf(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+    @Res() res: Response
+  ) {
+    if (!startDate || !endDate) {
+      throw new BadRequestException('Start date and end date are required');
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+    
+    const transactions = await this.transactionService.getTransactionsByDateRange(start, end);
+    
+    // Generate PDF and send as response
+    const buffer = await this.transactionService.generateReportPdf(transactions, startDate, endDate);
+    
+    // Set headers for PDF download
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="transactions-report-${startDate}-to-${endDate}.pdf"`,
+      'Content-Length': buffer.length,
+    });
+    
+    res.end(buffer);
   }
 }
