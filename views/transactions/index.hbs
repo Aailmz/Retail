@@ -49,17 +49,13 @@
                   <h6 class="font-weight-semibold text-lg mb-0">Transaction History</h6>
                   <p class="text-sm mb-0">Manage your transactions</p>
                 </div>
-                <!-- Add this to the reports.html template in the filter/search form area -->
-                <div class="d-flex justify-content-end mb-3">
-                  {{#if transactions.length}}
-                    <a href="/transactions/reports/export-pdf?startDate={{startDate}}&endDate={{endDate}}" class="btn btn-primary">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-pdf" viewBox="0 0 16 16">
-                        <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
-                        <path d="M4.603 14.087a.8.8 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102.198-.307.526-.568.897-.787a7.7 7.7 0 0 1 1.482-.645 20 20 0 0 0 1.062-2.227 7.3 7.3 0 0 1-.43-1.295c-.086-.4-.119-.796-.046-1.136.075-.354.274-.672.65-.823.192-.077.4-.12.602-.077a.7.7 0 0 1 .477.365c.088.164.12.356.127.538.007.188-.012.396-.047.614-.084.51-.27 1.134-.52 1.794a11 11 0 0 0 .98 1.686 5.8 5.8 0 0 1 1.334.05c.364.066.705.19.92.374.216.186.312.452.305.72a.8.8 0 0 1-.334.681.86.86 0 0 1-.614.196c-.334-.006-.64-.104-.925-.207a5.7 5.7 0 0 1-1.051-.449 20.96 20.96 0 0 1-1.552-.891 8 8 0 0 1-1.7-.243c-.445.188-.868.386-1.261.629-.448.278-.87.595-1.185.949zm1.036-4.563c.59-.235.98-.52 1.2-.81.209-.278.33-.59.363-.928a2 2 0 0 0-.724.064c-.17.066-.29.185-.36.344-.077.173-.077.387.004.598.081.21.241.445.493.731zm2.012-6.561c-.208.04-.384.168-.477.38-.088.208-.07.492.07.822.124.265.3.524.478.761a1.9 1.9 0 0 0 .118-.582c0-.205-.031-.397-.086-.568a1.8 1.8 0 0 0-.103-.257zm1.834 5.252a24 24 0 0 1 1.345.777c-.004-.008-.007-.01-.013-.018a1.8 1.8 0 0 0-.677-.491c-.21-.093-.448-.144-.683-.121zm1.651.7a48 48 0 0 0 1.143.486c.193.004.381-.018.556-.073a.5.5 0 0 0 .296-.273.48.48 0 0 0 .026-.331c-.033-.138-.11-.254-.234-.33-.128-.08-.292-.134-.477-.153a2.9 2.9 0 0 0-.662.024zM8.636 10.52c.33-.285.648-.592.953-.92a12 12 0 0 0-1.002-1.106c-.148.181-.304.35-.467.507-.163.158-.332.305-.51.44-.35.268-.72.512-1.109.73.336.348.663.652.98.916z"/>
-                      </svg>
-                      Export PDF
-                    </a>
-                  {{/if}}
+                <div class="d-flex">
+                  <a href="/transactions/reports" class="btn btn-sm btn-outline-dark">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-graph-up" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M0 0h1v15h15v1H0V0Zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.15-5.073a.5.5 0 0 1 .704-.07Z"/>
+                    </svg>
+                    Reports
+                  </a>
                 </div>
               </div>
             </div>
@@ -87,8 +83,18 @@
                     <input type="date" class="form-control" name="endDate" value="{{filters.endDate}}">
                   </div>
                 </div>
-                <div class="col-md-2">
-                  <button type="submit" class="btn btn-primary w-100">Filter</button>
+                <div class="col-md-2 d-flex gap-2">
+                  <button type="submit" class="btn btn-primary">Filter</button>
+                  <!-- Add PDF Export button here -->
+                  {{#if filters.startDate}}
+                  <a href="/transactions/reports/export-pdf?startDate={{filters.startDate}}&endDate={{filters.endDate}}{{#if filters.search}}&search={{filters.search}}{{/if}}" class="btn btn-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-pdf" viewBox="0 0 16 16">
+                      <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                      <path d="M4.603 14.087a.8.8 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102.198-.307.526-.568.897-.787a7.7 7.7 0 0 1 1.482-.645 20 20 0 0 0 1.062-2.227 7.3 7.3 0 0 1-.43-1.295c-.086-.4-.119-.796-.046-1.136.075-.354.274-.672.65-.823.192-.077.4-.12.602-.077a.7.7 0 0 1 .477.365c.088.164.12.356.127.538.007.188-.012.396-.047.614-.084.51-.27 1.134-.52 1.794a11 11 0 0 0 .98 1.686 5.8 5.8 0 0 1 1.334.05c.364.066.705.19.92.374.216.186.312.452.305.72a.8.8 0 0 1-.334.681.86.86 0 0 1-.614.196c-.334-.006-.64-.104-.925-.207a5.7 5.7 0 0 1-1.051-.449 20.96 20.96 0 0 1-1.552-.891 8 8 0 0 1-1.7-.243c-.445.188-.868.386-1.261.629-.448.278-.87.595-1.185.949z"/>
+                    </svg>
+                    PDF
+                  </a>
+                  {{/if}}
                 </div>
               </form>
             </div>

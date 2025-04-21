@@ -341,7 +341,7 @@ export class TransactionService {
         // Add content to the PDF
         
         // Company info and title
-        doc.fontSize(20).text('Sales Report', { align: 'center' });
+        doc.fontSize(20).text('RETAIL Sales Report', { align: 'center' });
         doc.moveDown();
         doc.fontSize(12).text(`Date Range: ${startDate} to ${endDate}`, { align: 'center' });
         doc.moveDown(2);
@@ -368,8 +368,6 @@ export class TransactionService {
         doc.fontSize(10);
         doc.text(`Total Transactions: ${transactions.length}`);
         doc.text(`Completed Transactions: ${transactions.length - voidedTransactions}`);
-        doc.text(`Voided Transactions: ${voidedTransactions}`);
-        doc.text(`Total Sales: Rp${totalSales.toLocaleString()}`);
         doc.text(`Total Items Sold: ${totalItems}`);
         doc.moveDown(2);
         
