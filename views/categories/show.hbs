@@ -63,45 +63,7 @@
                   <p>{{#if category.description}}{{category.description}}{{else}}No description provided{{/if}}</p>
                 </div>
               </div>
-              
-              <!-- Related Products Section -->
-              <div class="mt-4">
-                <h6 class="font-weight-semibold">Products in this Category</h6>
-                {{#if category.products.length}}
-                  <div class="table-responsive">
-                    <table class="table align-items-center">
-                      <thead>
-                        <tr>
-                          <th class="text-secondary text-xs font-weight-semibold opacity-7">ID</th>
-                          <th class="text-secondary text-xs font-weight-semibold opacity-7">Name</th>
-                          <th class="text-secondary text-xs font-weight-semibold opacity-7">Price</th>
-                          <th class="text-secondary text-xs font-weight-semibold opacity-7">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {{#each category.products}}
-                          <tr>
-                            <td>
-                              <p class="text-sm font-weight-bold mb-0">{{this.id}}</p>
-                            </td>
-                            <td>
-                              <p class="text-sm font-weight-bold mb-0">{{this.name}}</p>
-                            </td>
-                            <td>
-                              <p class="text-sm font-weight-bold mb-0">${{this.price}}</p>
-                            </td>
-                            <td>
-                              <a href="/products/{{this.id}}" class="btn btn-sm btn-info">View</a>
-                            </td>
-                          </tr>
-                        {{/each}}
-                      </tbody>
-                    </table>
-                  </div>
-                {{else}}
-                  <p class="text-sm">No products in this category.</p>
-                {{/if}}
-              </div>
+            
               
               <div class="mt-4">
                 <a href="/categories" class="btn btn-outline-secondary">Back to Categories</a>
