@@ -19,8 +19,27 @@ export class TransactionController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'kasir')
   @Render('transactions/index')
-  async findAll(@Req() req: Request) {
-    const transactions = await this.transactionService.findAll();
+  async findAll(
+    @Req() req: Request,
+    @Query('search') search: string,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string
+  ) {
+    // Build filter options
+    const filterOptions: any = {};
+    
+    if (search) {
+      filterOptions.search = search;
+    }
+    
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      filterOptions.dateRange = { start, end };
+    }
+    
+    const transactions = await this.transactionService.findAllWithFilters(filterOptions);
     
     // Get flash messages
     const successMessage = req.flash('success');
@@ -39,7 +58,12 @@ export class TransactionController {
       transactions: transactions,
       user: req.user,
       isActivePage: { transactions: true },
-      notification: notification
+      notification: notification,
+      filters: {
+        search: search || '',
+        startDate: startDate || '',
+        endDate: endDate || ''
+      }
     };
   }
 
