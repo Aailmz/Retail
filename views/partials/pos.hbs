@@ -7,6 +7,40 @@ document.addEventListener('DOMContentLoaded', function() {
   let tempQuantity = 1;
   let availablePromotions = [];
 
+  const promotionStyles = document.createElement('style');
+  promotionStyles.textContent = `
+    .product-card.has-promotion {
+      border: 2px solid #28a745;
+      box-shadow: 0 0 8px rgba(40, 167, 69, 0.4);
+      transition: transform 0.2s ease;
+    }
+    
+    .product-card.has-promotion:hover {
+      transform: scale(1.03);
+    }
+    
+    .promotion-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background-color: #28a745;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 15px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .promotion-badge i {
+      font-size: 0.7rem;
+    }
+  `;
+
+  document.head.appendChild(promotionStyles);
+
   function showAlert(message) {
     // Periksa apakah modal sudah ada dalam dokumen
     let alertModal = document.getElementById('alertModal');
@@ -58,10 +92,64 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(data => {
         availablePromotions = data;
         console.log('Loaded promotions:', availablePromotions);
+        
+        // Panggil fungsi untuk meng-highlight produk yang eligible untuk promosi
+        updatePromotionHighlights();
       })
       .catch(error => {
         console.error('Error loading promotions:', error);
       });
+  }
+
+  function updatePromotionHighlights() {
+    // Hapus semua highlight dan badge yang ada terlebih dahulu
+    document.querySelectorAll('.product-card').forEach(card => {
+      card.classList.remove('has-promotion');
+      const existingBadge = card.querySelector('.promotion-badge');
+      if (existingBadge) {
+        existingBadge.remove();
+      }
+    });
+    
+    // Periksa apakah ada data promosi
+    if (!availablePromotions || !availablePromotions.data || !availablePromotions.data.length) {
+      console.log('No promotions available to highlight products');
+      return;
+    }
+    
+    // Filter promosi yang eligible berdasarkan kriteria
+    const eligiblePromotions = availablePromotions.data.filter(promotion => {
+      // Jika promosi memerlukan member, periksa apakah sudah dipilih member
+      if (promotion.rules && promotion.rules.member_only) {
+        return selectedMemberId !== null;
+      }
+      return true; // Promosi tidak memerlukan member
+    });
+    
+    // Set untuk menyimpan ID produk yang memiliki promosi eligible
+    const productsWithPromotions = new Set();
+    
+    // Tambahkan semua produk dengan promosi eligible ke dalam set
+    eligiblePromotions.forEach(promotion => {
+      if (promotion.rules && promotion.rules.buy_product_id) {
+        productsWithPromotions.add(promotion.rules.buy_product_id);
+      }
+    });
+    
+    // Highlight produk yang memiliki promosi eligible
+    document.querySelectorAll('.product-card').forEach(card => {
+      const productId = parseInt(card.getAttribute('data-id'));
+      if (productsWithPromotions.has(productId)) {
+        // Tambahkan class untuk highlight
+        card.classList.add('has-promotion');
+        
+        // Tambahkan badge promosi
+        const badge = document.createElement('div');
+        badge.className = 'promotion-badge';
+        badge.innerHTML = '<i class="fas fa-tags"></i> Promo';
+        card.appendChild(badge);
+      }
+    });
   }
 
   // Category filtering
@@ -596,6 +684,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Search members
   document.getElementById('search-member-btn').addEventListener('click', function() {
+    // Kode existing untuk pencarian member
     const searchValue = document.getElementById('member-search').value;
     if (!searchValue) {
       showAlert('Please enter search term');
@@ -628,6 +717,9 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('customer-name').value = member.name;
             document.getElementById('customer-phone').value = member.phone || '';
             bootstrap.Modal.getInstance(document.getElementById('memberModal')).hide();
+            
+            // Update highlight produk setelah memilih member
+            updatePromotionHighlights();
           });
           resultsContainer.appendChild(item);
         });
