@@ -109,42 +109,6 @@
                             <a href="/transactions/{{this.id}}" class="btn btn-sm btn-info">
                               View
                             </a>
-                            <a href="/transactions/receipt/{{this.id}}" class="btn btn-sm btn-secondary" target="_blank">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
-                                <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
-                                <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
-                              </svg>
-                            </a>
-                            {{#unless this.isVoided}}
-                              <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#voidModal-{{this.id}}">
-                                Void
-                              </button>
-                              
-                              <!-- Void Modal -->
-                              <div class="modal fade" id="voidModal-{{this.id}}" tabindex="-1" aria-labelledby="voidModalLabel-{{this.id}}" aria-hidden="true">
-                                <div class="modal-dialog">
-                                  <div class="modal-content">
-                                    <div class="modal-header">
-                                      <h5 class="modal-title" id="voidModalLabel-{{this.id}}">Void Transaction #{{this.transactionCode}}</h5>
-                                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form action="/transactions/{{this.id}}/void" method="POST">
-                                      <div class="modal-body">
-                                        <div class="mb-3">
-                                          <p class="text-sm">Are you sure you want to void this transaction? This action cannot be undone and will return all stock to inventory.</p>
-                                          <label for="reason-{{this.id}}" class="form-label">Reason for voiding</label>
-                                          <textarea class="form-control" id="reason-{{this.id}}" name="reason" rows="3" required></textarea>
-                                        </div>
-                                      </div>
-                                      <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                        <button type="submit" class="btn btn-danger">Void Transaction</button>
-                                      </div>
-                                    </form>
-                                  </div>
-                                </div>
-                              </div>
-                            {{/unless}}
                           </div>
                         </td>
                       </tr>

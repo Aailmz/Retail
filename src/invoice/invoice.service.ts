@@ -40,7 +40,7 @@ export class InvoiceService {
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',
-      `inline; filename="invoice-${invoiceData.transactionId}.pdf"`,
+      `inline; filename="invoice-RETAIL.pdf"`,
     );
 
     // Pipe PDF to response

@@ -44,6 +44,38 @@ export class TransactionService {
     return transaction;
   }
 
+  async findAllWithFilters(filterOptions: any = {}): Promise<Transaction[]> {
+    const queryBuilder = this.transactionRepository
+      .createQueryBuilder('transaction')
+      .leftJoinAndSelect('transaction.items', 'items')
+      .leftJoinAndSelect('transaction.member', 'member')
+      .orderBy('transaction.createdAt', 'DESC');
+    
+    // Apply search filter
+    if (filterOptions.search) {
+      queryBuilder.andWhere(
+        '(transaction.transactionCode LIKE :search OR ' +
+        'transaction.customerName LIKE :search OR ' +
+        'transaction.customerPhone LIKE :search OR ' +
+        'transaction.customerEmail LIKE :search)',
+        { search: `%${filterOptions.search}%` }
+      );
+    }
+    
+    // Apply date range filter
+    if (filterOptions.dateRange) {
+      queryBuilder.andWhere(
+        'transaction.createdAt BETWEEN :startDate AND :endDate',
+        { 
+          startDate: filterOptions.dateRange.start,
+          endDate: filterOptions.dateRange.end
+        }
+      );
+    }
+    
+    return queryBuilder.getMany();
+  }
+
   async create(createTransactionDto: CreateTransactionDto): Promise<Transaction> {
     // Use transaction to ensure data consistency
     return this.connection.transaction(async (manager: EntityManager) => {
