@@ -17,6 +17,7 @@ import { TransactionModule } from './transaction/transaction.module';
 import { Transaction } from './transaction/entities/transaction.entity';
 import { TransactionItem } from './transaction/entities/transaction-item.entity';
 import { InvoiceModule } from './invoice/invoice.module';
+import { MidtransModule } from '@ruraim/nestjs-midtrans';
 
 @Module({
   imports: [
@@ -38,6 +39,13 @@ import { InvoiceModule } from './invoice/invoice.module';
     PromotionModule,
     TransactionModule,
     InvoiceModule,
+    MidtransModule.register({
+      clientKey: 'client-key',
+      serverKey: 'server-key',
+      merchantId: 'merchant-id',
+      sandbox: true, // default: false
+      isGlobal: true // default: false
+    })
   ],
   controllers: [AppController],
   providers: [AppService],
