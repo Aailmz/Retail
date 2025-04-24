@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
@@ -21,15 +22,22 @@ import { MidtransModule } from '@ruraim/nestjs-midtrans';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: '',
-      database: 'discount_ukk',
-      entities: [User, Product, Category, Member, Promotion, Transaction, TransactionItem],
-      synchronize: true,
+    ConfigModule.forRoot({
+      isGlobal: true, // Agar config dapat diakses di semua modul
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'mysql',
+        host: configService.get('DB_HOST'),
+        port: configService.get('DB_PORT'),
+        username: configService.get('DB_USERNAME'),
+        password: configService.get('DB_PASSWORD'),
+        database: configService.get('DB_NAME'),
+        entities: [User, Product, Category, Member, Promotion, Transaction, TransactionItem],
+        synchronize: true, // Perhatian: Jangan gunakan 'true' di production
+      }),
     }),
     AuthModule,
     UsersModule,
