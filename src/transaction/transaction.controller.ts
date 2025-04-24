@@ -112,6 +112,17 @@ export class TransactionController {
     }
   }
 
+  @Post('midtrans-notification')
+  async handleMidtransNotification(@Body() notification: any) {
+    console.log('Received Midtrans notification:', JSON.stringify(notification));
+    try {
+      const transaction = await this.transactionService.handleMidtransNotification(notification);
+      return { success: true, transaction };
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'kasir')

@@ -18,6 +18,11 @@ export enum PaymentStatus {
   FAILED = 'failed'
 }
 
+export enum TransactionType {
+  REGULAR = 'regular',
+  QRIS_PENDING = 'qris_pending'
+}
+
 @Injectable()
 export class TransactionService {
   constructor(
@@ -36,7 +41,8 @@ export class TransactionService {
   async findAll(): Promise<Transaction[]> {
     return this.transactionRepository.find({
       relations: ['items', 'member'],
-      order: { createdAt: 'DESC' }
+      order: { createdAt: 'DESC' },
+      where: { transactionType: TransactionType.REGULAR }
     });
   }
 
@@ -88,215 +94,272 @@ export class TransactionService {
   async create(createTransactionDto: CreateTransactionDto): Promise<Transaction> {
     // Use transaction to ensure data consistency
     return this.connection.transaction(async (manager: EntityManager) => {
-      // Existing code to create transaction...
-      const productIds = createTransactionDto.items.map(item => item.productId);
-      const products = await manager.findByIds(Product, productIds);
-      
-      if (products.length !== productIds.length) {
-        throw new BadRequestException('Some products do not exist');
-      }
-      
-      const productMap = new Map<number, Product>();
-      products.forEach(product => productMap.set(product.id, product));
-
-      let subtotal = 0;
-      const transactionItems: Partial<TransactionItem>[] = [];
-      
-      for (const item of createTransactionDto.items) {
-        const product = productMap.get(item.productId);
-        
-        if (product.stock < item.quantity) {
-          throw new BadRequestException(`Insufficient stock for product: ${product.name}`);
-        }
-
-        const unitPrice = item.discountedPrice !== undefined ? item.discountedPrice : 
-                 (item.markedUpPrice !== undefined ? item.markedUpPrice : product.sellingPrice);
-        const itemTotal = parseFloat((unitPrice * item.quantity).toFixed(2));
-        
-        subtotal += itemTotal;
-        
-        transactionItems.push({
-          productId: product.id,
-          productName: product.name,
-          productPrice: product.sellingPrice,
-          originalPrice: item.originalPrice !== undefined ? item.originalPrice : product.sellingPrice,
-          markedUpPrice: item.markedUpPrice !== undefined ? item.markedUpPrice : product.sellingPrice,
-          discountedPrice: item.discountedPrice !== undefined ? item.discountedPrice : 
-                          (item.markedUpPrice !== undefined ? item.markedUpPrice : product.sellingPrice),
-          unitPrice: unitPrice,
-          quantity: item.quantity,
-          subtotal: itemTotal,
-          discountAmount: item.discountAmount || 0,
-          markupPercentage: item.markupPercentage || 0,
-          promotionId: item.promotionId || null,
-          total: itemTotal
-        });
-      }
-      
-      const taxRate = 0.1; 
-      const taxAmount = parseFloat((subtotal * taxRate).toFixed(2));
-      const transactionDiscount = createTransactionDto.discountAmount || 0;
-      const grandTotal = parseFloat((subtotal + taxAmount - transactionDiscount).toFixed(2));
-
-      // Set initial payment status
-      let paymentStatus = PaymentStatus.PAID; // Default for cash and most methods
-      
-      // For QRIS, set as pending
+      // For QRIS payment, create a pending transaction record
       if (createTransactionDto.paymentMethod === 'qris') {
-        paymentStatus = PaymentStatus.PENDING;
+        return await this.createQrisPendingTransaction(createTransactionDto, manager);
       }
-
-      const transaction = manager.create(Transaction, {
-        transactionCode: generateTransactionCode(),
-        memberId: createTransactionDto.userId,
-        customerName: createTransactionDto.customerName,
-        customerPhone: createTransactionDto.customerPhone,
-        customerEmail: createTransactionDto.customerEmail,
-        subtotal,
-        discountAmount: transactionDiscount,
-        taxAmount,
-        grandTotal,
-        paymentMethod: createTransactionDto.paymentMethod,
-        paymentReference: createTransactionDto.paymentReference,
-        paymentStatus: paymentStatus,
-        promotionId: createTransactionDto.promotionId,
-        note: createTransactionDto.note,
-      });
       
-      const savedTransaction = await manager.save(transaction);
-      
-      const items = transactionItems.map(item => manager.create(TransactionItem, {
-        ...item,
-        transactionId: savedTransaction.id
-      }));
-      
-      await manager.save(items);
-      
-      // Process QRIS payment if selected
-      if (createTransactionDto.paymentMethod === 'qris') {
-        try {
-          // Hitung total item untuk memastikan presisi yang tepat
-          let itemTotal = 0;
-          
-          // Format item details dari transaction items
-          const itemDetails = createTransactionDto.items.map(item => {
-            const product = productMap.get(item.productId);
-            const itemPrice = item.discountedPrice || item.markedUpPrice || product.sellingPrice;
-            const quantity = item.quantity;
-            const price = parseFloat(itemPrice.toFixed(2));
-            
-            // Akumulasi total
-            itemTotal += price * quantity;
-            
-            return {
-              id: product.id.toString(),
-              price: price,
-              quantity: quantity,
-              name: product.name.substring(0, 50) // Midtrans membatasi panjang nama item
-            };
-          });
-          
-          // Tambahkan item untuk pajak jika ada
-          if (taxAmount > 0) {
-            itemDetails.push({
-              id: 'tax',
-              price: parseFloat(taxAmount.toFixed(2)),
-              quantity: 1,
-              name: 'Tax'
-            });
-            itemTotal += taxAmount;
-          }
-          
-          // Tambahkan item untuk diskon jika ada (sebagai nilai negatif)
-          if (transactionDiscount > 0) {
-            itemDetails.push({
-              id: 'discount',
-              price: -parseFloat(transactionDiscount.toFixed(2)),
-              quantity: 1,
-              name: 'Discount'
-            });
-            itemTotal -= transactionDiscount;
-          }
-          
-          // Pastikan nilai total tepat sama dengan jumlah item
-          const finalTotal = parseFloat(itemTotal.toFixed(2));
-          
-          // Menggunakan MidtransService dari @ruraim/nestjs-midtrans
-          const paymentParams = {
-            payment_type: 'qris' as const,
-            transaction_details: {
-              order_id: savedTransaction.transactionCode,
-              gross_amount: finalTotal // Gunakan nilai yang dihitung dari item details
-            },
-            item_details: itemDetails,
-            customer_details: {
-              first_name: savedTransaction.customerName,
-              email: savedTransaction.customerEmail || 'noemail@example.com',
-              phone: savedTransaction.customerPhone || '08123456789',
-            },
-            qris: {
-              acquirer: 'gopay'
-            }
-          };
-          
-          const qrisResponse = await this.midtransService.charge(paymentParams);
-          
-          await manager.update(Transaction, savedTransaction.id, {
-            midtransOrderId: qrisResponse.order_id,
-            qrisImageUrl: qrisResponse.actions?.find(action => action.name === 'generate-qr-code')?.url || 
-                          qrisResponse.qr_image_url
-          });
-
-          console.log('Item Details Total:', itemTotal);
-          console.log('Final Total to Midtrans:', finalTotal);
-          console.log('Transaction Grand Total:', savedTransaction.grandTotal);
-          console.log('Payment Params:', JSON.stringify(paymentParams));
-          console.log('QRIS Response:', JSON.stringify(qrisResponse));
-          
-          savedTransaction.midtransOrderId = qrisResponse.order_id;
-          savedTransaction.qrisImageUrl = qrisResponse.actions?.find(action => action.name === 'generate-qr-code')?.url || 
-                                        qrisResponse.qr_image_url;
-        } catch (error) {
-          throw new BadRequestException(`Failed to generate QRIS: ${error.message}`);
-        }
-      }
-
-      return {
-        ...savedTransaction,
-        items: items as TransactionItem[]
-      };
+      // For other payment methods, proceed with normal transaction creation
+      return await this.createRegularTransaction(createTransactionDto, manager);
     });
   }
 
-  async updatePaymentStatus(transactionId: number, status: PaymentStatus): Promise<Transaction> {
-    const transaction = await this.transactionRepository.findOne({
-      where: { id: transactionId },
-      relations: ['items']
-    });
+  private async createQrisPendingTransaction(
+    createTransactionDto: CreateTransactionDto, 
+    manager: EntityManager
+  ): Promise<Transaction> {
+    const productIds = createTransactionDto.items.map(item => item.productId);
+    const products = await manager.findByIds(Product, productIds);
     
-    if (!transaction) {
-      throw new NotFoundException(`Transaction with ID ${transactionId} not found`);
+    if (products.length !== productIds.length) {
+      throw new BadRequestException('Some products do not exist');
     }
     
-    transaction.paymentStatus = status;
+    const productMap = new Map<number, Product>();
+    products.forEach(product => productMap.set(product.id, product));
+
+    // Calculate totals
+    let subtotal = 0;
+    const transactionItems: Partial<TransactionItem>[] = [];
     
-    // If payment is successful, reduce inventory
-    if (status === PaymentStatus.PAID && transaction.paymentStatus !== PaymentStatus.PAID) {
-      await this.connection.transaction(async (manager: EntityManager) => {
-        for (const item of transaction.items) {
-          await manager.decrement(
-            Product,
-            { id: item.productId },
-            'stock',
-            item.quantity
-          );
-        }
-        
-        await manager.save(transaction);
+    for (const item of createTransactionDto.items) {
+      const product = productMap.get(item.productId);
+      
+      if (product.stock < item.quantity) {
+        throw new BadRequestException(`Insufficient stock for product: ${product.name}`);
+      }
+
+      const unitPrice = item.discountedPrice !== undefined ? item.discountedPrice : 
+               (item.markedUpPrice !== undefined ? item.markedUpPrice : product.sellingPrice);
+      const itemTotal = parseFloat((unitPrice * item.quantity).toFixed(2));
+      
+      subtotal += itemTotal;
+      
+      transactionItems.push({
+        productId: product.id,
+        productName: product.name,
+        productPrice: product.sellingPrice,
+        originalPrice: item.originalPrice !== undefined ? item.originalPrice : product.sellingPrice,
+        markedUpPrice: item.markedUpPrice !== undefined ? item.markedUpPrice : product.sellingPrice,
+        discountedPrice: item.discountedPrice !== undefined ? item.discountedPrice : 
+                        (item.markedUpPrice !== undefined ? item.markedUpPrice : product.sellingPrice),
+        unitPrice: unitPrice,
+        quantity: item.quantity,
+        subtotal: itemTotal,
+        discountAmount: item.discountAmount || 0,
+        markupPercentage: item.markupPercentage || 0,
+        promotionId: item.promotionId || null,
+        total: itemTotal
       });
     }
     
-    return this.transactionRepository.save(transaction);
+    const taxRate = 0.1; 
+    const taxAmount = parseFloat((subtotal * taxRate).toFixed(2));
+    const transactionDiscount = createTransactionDto.discountAmount || 0;
+    const grandTotal = parseFloat((subtotal + taxAmount - transactionDiscount).toFixed(2));
+
+    // Create a pending QRIS transaction
+    const transaction = manager.create(Transaction, {
+      transactionCode: generateTransactionCode(),
+      memberId: createTransactionDto.userId,
+      customerName: createTransactionDto.customerName,
+      customerPhone: createTransactionDto.customerPhone,
+      customerEmail: createTransactionDto.customerEmail,
+      subtotal,
+      discountAmount: transactionDiscount,
+      taxAmount,
+      grandTotal,
+      paymentMethod: createTransactionDto.paymentMethod,
+      paymentReference: createTransactionDto.paymentReference,
+      paymentStatus: PaymentStatus.PENDING,
+      promotionId: createTransactionDto.promotionId,
+      note: createTransactionDto.note,
+      transactionType: TransactionType.QRIS_PENDING // Mark as pending QRIS transaction
+    });
+    
+    const savedTransaction = await manager.save(transaction);
+    
+    const items = transactionItems.map(item => manager.create(TransactionItem, {
+      ...item,
+      transactionId: savedTransaction.id
+    }));
+    
+    await manager.save(items);
+    
+    // Generate QRIS code through Midtrans
+    try {
+      // Format item details from transaction items
+      const itemDetails = createTransactionDto.items.map(item => {
+        const product = productMap.get(item.productId);
+        const itemPrice = item.discountedPrice || item.markedUpPrice || product.sellingPrice;
+        const quantity = item.quantity;
+        const price = parseFloat(itemPrice.toFixed(2));
+        
+        return {
+          id: product.id.toString(),
+          price: price,
+          quantity: quantity,
+          name: product.name.substring(0, 50) // Midtrans limits item name length
+        };
+      });
+      
+      // Add tax as an item
+      if (taxAmount > 0) {
+        itemDetails.push({
+          id: 'tax',
+          price: parseFloat(taxAmount.toFixed(2)),
+          quantity: 1,
+          name: 'Tax'
+        });
+      }
+      
+      // Add discount as an item (negative value)
+      if (transactionDiscount > 0) {
+        itemDetails.push({
+          id: 'discount',
+          price: -parseFloat(transactionDiscount.toFixed(2)),
+          quantity: 1,
+          name: 'Discount'
+        });
+      }
+      
+      // Using MidtransService from @ruraim/nestjs-midtrans
+      const paymentParams = {
+        payment_type: 'qris' as const,
+        transaction_details: {
+          order_id: savedTransaction.transactionCode,
+          gross_amount: grandTotal
+        },
+        item_details: itemDetails,
+        customer_details: {
+          first_name: savedTransaction.customerName,
+          email: savedTransaction.customerEmail || 'noemail@example.com',
+          phone: savedTransaction.customerPhone || '08123456789',
+        },
+        qris: {
+          acquirer: 'gopay'
+        }
+      };
+      
+      const qrisResponse = await this.midtransService.charge(paymentParams);
+      
+      await manager.update(Transaction, savedTransaction.id, {
+        midtransOrderId: qrisResponse.order_id,
+        qrisImageUrl: qrisResponse.actions?.find(action => action.name === 'generate-qr-code')?.url || 
+                      qrisResponse.qr_image_url
+      });
+
+      console.log('QRIS pending transaction created:', savedTransaction.id);
+      console.log('QRIS Response:', JSON.stringify(qrisResponse));
+      
+      savedTransaction.midtransOrderId = qrisResponse.order_id;
+      savedTransaction.qrisImageUrl = qrisResponse.actions?.find(action => action.name === 'generate-qr-code')?.url || 
+                                    qrisResponse.qr_image_url;
+    } catch (error) {
+      throw new BadRequestException(`Failed to generate QRIS: ${error.message}`);
+    }
+
+    return {
+      ...savedTransaction,
+      items: items as TransactionItem[]
+    };
+  }
+
+  private async createRegularTransaction(
+    createTransactionDto: CreateTransactionDto, 
+    manager: EntityManager
+  ): Promise<Transaction> {
+    const productIds = createTransactionDto.items.map(item => item.productId);
+    const products = await manager.findByIds(Product, productIds);
+    
+    if (products.length !== productIds.length) {
+      throw new BadRequestException('Some products do not exist');
+    }
+    
+    const productMap = new Map<number, Product>();
+    products.forEach(product => productMap.set(product.id, product));
+
+    let subtotal = 0;
+    const transactionItems: Partial<TransactionItem>[] = [];
+    
+    for (const item of createTransactionDto.items) {
+      const product = productMap.get(item.productId);
+      
+      if (product.stock < item.quantity) {
+        throw new BadRequestException(`Insufficient stock for product: ${product.name}`);
+      }
+
+      const unitPrice = item.discountedPrice !== undefined ? item.discountedPrice : 
+               (item.markedUpPrice !== undefined ? item.markedUpPrice : product.sellingPrice);
+      const itemTotal = parseFloat((unitPrice * item.quantity).toFixed(2));
+      
+      subtotal += itemTotal;
+      
+      transactionItems.push({
+        productId: product.id,
+        productName: product.name,
+        productPrice: product.sellingPrice,
+        originalPrice: item.originalPrice !== undefined ? item.originalPrice : product.sellingPrice,
+        markedUpPrice: item.markedUpPrice !== undefined ? item.markedUpPrice : product.sellingPrice,
+        discountedPrice: item.discountedPrice !== undefined ? item.discountedPrice : 
+                        (item.markedUpPrice !== undefined ? item.markedUpPrice : product.sellingPrice),
+        unitPrice: unitPrice,
+        quantity: item.quantity,
+        subtotal: itemTotal,
+        discountAmount: item.discountAmount || 0,
+        markupPercentage: item.markupPercentage || 0,
+        promotionId: item.promotionId || null,
+        total: itemTotal
+      });
+    }
+    
+    const taxRate = 0.1; 
+    const taxAmount = parseFloat((subtotal * taxRate).toFixed(2));
+    const transactionDiscount = createTransactionDto.discountAmount || 0;
+    const grandTotal = parseFloat((subtotal + taxAmount - transactionDiscount).toFixed(2));
+
+    // Create a regular transaction with PAID status
+    const transaction = manager.create(Transaction, {
+      transactionCode: generateTransactionCode(),
+      memberId: createTransactionDto.userId,
+      customerName: createTransactionDto.customerName,
+      customerPhone: createTransactionDto.customerPhone,
+      customerEmail: createTransactionDto.customerEmail,
+      subtotal,
+      discountAmount: transactionDiscount,
+      taxAmount,
+      grandTotal,
+      paymentMethod: createTransactionDto.paymentMethod,
+      paymentReference: createTransactionDto.paymentReference,
+      paymentStatus: PaymentStatus.PAID, // Regular transactions are paid immediately
+      promotionId: createTransactionDto.promotionId,
+      note: createTransactionDto.note,
+      transactionType: TransactionType.REGULAR // Mark as regular transaction
+    });
+    
+    const savedTransaction = await manager.save(transaction);
+    
+    const items = transactionItems.map(item => manager.create(TransactionItem, {
+      ...item,
+      transactionId: savedTransaction.id
+    }));
+    
+    await manager.save(items);
+    
+    // Update inventory immediately for regular transactions
+    for (const item of transactionItems) {
+      await manager.decrement(
+        Product,
+        { id: item.productId },
+        'stock',
+        item.quantity
+      );
+    }
+    
+    return {
+      ...savedTransaction,
+      items: items as TransactionItem[]
+    };
   }
 
   async handleMidtransNotification(notification: any): Promise<Transaction> {
@@ -304,16 +367,17 @@ export class TransactionService {
     const transactionStatus = notification.transaction_status;
     const fraudStatus = notification.fraud_status;
     
-    // Extract transaction ID from order ID (QRIS-TXCODE format)
-    const transactionCode = orderId.replace('QRIS-', '');
-    
-    const transaction = await this.transactionRepository.findOne({
-      where: { transactionCode },
+    // Find the pending QRIS transaction
+    const pendingTransaction = await this.transactionRepository.findOne({
+      where: { 
+        transactionCode: orderId,
+        transactionType: TransactionType.QRIS_PENDING 
+      },
       relations: ['items']
     });
     
-    if (!transaction) {
-      throw new NotFoundException(`Transaction with code ${transactionCode} not found`);
+    if (!pendingTransaction) {
+      throw new NotFoundException(`Pending QRIS transaction with code ${orderId} not found`);
     }
     
     // Map Midtrans status to our status
@@ -329,7 +393,57 @@ export class TransactionService {
       paymentStatus = PaymentStatus.FAILED;
     }
     
-    return this.updatePaymentStatus(transaction.id, paymentStatus);
+    // If payment is successful, complete the transaction
+    if (paymentStatus === PaymentStatus.PAID) {
+      return await this.completeQrisTransaction(pendingTransaction);
+    }
+    
+    // Otherwise, just update the status
+    pendingTransaction.paymentStatus = paymentStatus;
+    return this.transactionRepository.save(pendingTransaction);
+  }
+
+  private async completeQrisTransaction(pendingTransaction: Transaction): Promise<Transaction> {
+    return this.connection.transaction(async (manager: EntityManager) => {
+      // Create a new regular transaction based on the pending one
+      const regularTransaction = manager.create(Transaction, {
+        ...pendingTransaction,
+        id: undefined, // Generate new ID
+        transactionCode: generateTransactionCode(), // Generate new code
+        paymentStatus: PaymentStatus.PAID,
+        transactionType: TransactionType.REGULAR,
+        qrisReferenceId: pendingTransaction.transactionCode, // Store reference to QRIS transaction
+        createdAt: new Date() // Set current timestamp
+      });
+      
+      const savedTransaction = await manager.save(regularTransaction);
+      
+      // Copy all items to the new transaction
+      for (const item of pendingTransaction.items) {
+        const newItem = manager.create(TransactionItem, {
+          ...item,
+          id: undefined, // Generate new ID
+          transactionId: savedTransaction.id
+        });
+        
+        await manager.save(newItem);
+        
+        // Update inventory
+        await manager.decrement(
+          Product,
+          { id: item.productId },
+          'stock',
+          item.quantity
+        );
+      }
+      
+      // Mark the pending transaction as completed
+      pendingTransaction.regularTransactionId = savedTransaction.id;
+      pendingTransaction.paymentStatus = PaymentStatus.PAID;
+      await manager.save(pendingTransaction);
+      
+      return savedTransaction;
+    });
   }
 
   async voidTransaction(id: number, reason: string): Promise<Transaction> {
