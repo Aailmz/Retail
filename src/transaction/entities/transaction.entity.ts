@@ -7,6 +7,12 @@ export enum PaymentMethod {
   QRIS = 'qris',
 }
 
+export enum PaymentStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  FAILED = 'failed',
+}
+
 @Entity()
 export class Transaction {
   @PrimaryGeneratedColumn()
@@ -64,6 +70,13 @@ export class Transaction {
     default: PaymentMethod.CASH
   })
   paymentMethod: PaymentMethod;
+
+  @Column({
+    type: 'enum',
+    enum: PaymentStatus,
+    default: PaymentStatus.PAID
+  })
+  paymentStatus: PaymentStatus;
 
   @Column({ nullable: true })
   paymentReference: string;
