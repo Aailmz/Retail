@@ -13,6 +13,11 @@ export enum PaymentStatus {
   FAILED = 'failed',
 }
 
+export enum TransactionType {
+  REGULAR = 'regular',
+  QRIS_PENDING = 'qris_pending'
+}
+
 @Entity()
 export class Transaction {
   @PrimaryGeneratedColumn()
@@ -104,4 +109,17 @@ export class Transaction {
 
   @Column({ type: 'text', nullable: true })
   qrisImageUrl: string;
+
+  @Column({ 
+    type: 'enum', 
+    enum: TransactionType, 
+    default: TransactionType.REGULAR 
+  })
+  transactionType: TransactionType;
+  
+  @Column({ nullable: true })
+  qrisReferenceId: string;
+  
+  @Column({ nullable: true })
+  regularTransactionId: number;
 }
