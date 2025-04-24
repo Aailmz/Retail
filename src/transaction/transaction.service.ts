@@ -9,7 +9,14 @@ import { ProductService } from '../product/product.service';
 import { PromotionService } from '../promotion/promotion.service';
 import { Product } from '../product/entities/product.entity';
 import { generateTransactionCode } from './utils/code-generator';
-import { MidtransPaymentService } from '../payment/midtrans-payment.service';
+import { MidtransService } from '@ruraim/nestjs-midtrans';
+
+// Define PaymentStatus enum - you may move this to a separate file if desired
+export enum PaymentStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  FAILED = 'failed'
+}
 
 @Injectable()
 export class TransactionService {
@@ -22,7 +29,7 @@ export class TransactionService {
     private productRepository: Repository<Product>,
     private productService: ProductService,
     private promotionService: PromotionService,
-    private midtransPaymentService: MidtransPaymentService,
+    private midtransService: MidtransService,
     private connection: Connection
   ) {}
 
@@ -132,11 +139,11 @@ export class TransactionService {
       const grandTotal = parseFloat((subtotal + taxAmount - transactionDiscount).toFixed(2));
 
       // Set initial payment status
-      let paymentStatus = 'paid'; // Default for cash and most methods
+      let paymentStatus = PaymentStatus.PAID; // Default for cash and most methods
       
       // For QRIS, set as pending
       if (createTransactionDto.paymentMethod === 'qris') {
-        paymentStatus = 'pending';
+        paymentStatus = PaymentStatus.PENDING;
       }
 
       const transaction = manager.create(Transaction, {
@@ -168,32 +175,89 @@ export class TransactionService {
       // Process QRIS payment if selected
       if (createTransactionDto.paymentMethod === 'qris') {
         try {
-          const completeTransaction = {
-            ...savedTransaction,
-            items: items as TransactionItem[]
+          // Hitung total item untuk memastikan presisi yang tepat
+          let itemTotal = 0;
+          
+          // Format item details dari transaction items
+          const itemDetails = createTransactionDto.items.map(item => {
+            const product = productMap.get(item.productId);
+            const itemPrice = item.discountedPrice || item.markedUpPrice || product.sellingPrice;
+            const quantity = item.quantity;
+            const price = parseFloat(itemPrice.toFixed(2));
+            
+            // Akumulasi total
+            itemTotal += price * quantity;
+            
+            return {
+              id: product.id.toString(),
+              price: price,
+              quantity: quantity,
+              name: product.name.substring(0, 50) // Midtrans membatasi panjang nama item
+            };
+          });
+          
+          // Tambahkan item untuk pajak jika ada
+          if (taxAmount > 0) {
+            itemDetails.push({
+              id: 'tax',
+              price: parseFloat(taxAmount.toFixed(2)),
+              quantity: 1,
+              name: 'Tax'
+            });
+            itemTotal += taxAmount;
+          }
+          
+          // Tambahkan item untuk diskon jika ada (sebagai nilai negatif)
+          if (transactionDiscount > 0) {
+            itemDetails.push({
+              id: 'discount',
+              price: -parseFloat(transactionDiscount.toFixed(2)),
+              quantity: 1,
+              name: 'Discount'
+            });
+            itemTotal -= transactionDiscount;
+          }
+          
+          // Pastikan nilai total tepat sama dengan jumlah item
+          const finalTotal = parseFloat(itemTotal.toFixed(2));
+          
+          // Menggunakan MidtransService dari @ruraim/nestjs-midtrans
+          const paymentParams = {
+            payment_type: 'qris' as const,
+            transaction_details: {
+              order_id: savedTransaction.transactionCode,
+              gross_amount: finalTotal // Gunakan nilai yang dihitung dari item details
+            },
+            item_details: itemDetails,
+            customer_details: {
+              first_name: savedTransaction.customerName,
+              email: savedTransaction.customerEmail || 'noemail@example.com',
+              phone: savedTransaction.customerPhone || '08123456789',
+            },
+            qris: {
+              acquirer: 'gopay'
+            }
           };
           
-          const qrisResponse = await this.midtransPaymentService.createQrisTransaction(completeTransaction);
+          const qrisResponse = await this.midtransService.charge(paymentParams);
           
-          // Save QRIS information
           await manager.update(Transaction, savedTransaction.id, {
             midtransOrderId: qrisResponse.order_id,
-            qrisImageUrl: qrisResponse.actions.find(action => action.name === 'generate-qr-code').url
+            qrisImageUrl: qrisResponse.actions?.find(action => action.name === 'generate-qr-code')?.url || 
+                          qrisResponse.qr_image_url
           });
+
+          console.log('Item Details Total:', itemTotal);
+          console.log('Final Total to Midtrans:', finalTotal);
+          console.log('Transaction Grand Total:', savedTransaction.grandTotal);
+          console.log('Payment Params:', JSON.stringify(paymentParams));
+          console.log('QRIS Response:', JSON.stringify(qrisResponse));
           
-          // Update the savedTransaction object with QRIS data
           savedTransaction.midtransOrderId = qrisResponse.order_id;
-          savedTransaction.qrisImageUrl = qrisResponse.actions.find(action => action.name === 'generate-qr-code').url;
+          savedTransaction.qrisImageUrl = qrisResponse.actions?.find(action => action.name === 'generate-qr-code')?.url || 
+                                        qrisResponse.qr_image_url;
         } catch (error) {
           throw new BadRequestException(`Failed to generate QRIS: ${error.message}`);
-        }
-      } else {
-        // For non-QRIS payments, update stock immediately
-        for (const item of createTransactionDto.items) {
-          const product = productMap.get(item.productId);
-          await manager.update(Product, product.id, {
-            stock: product.stock - item.quantity
-          });
         }
       }
 
@@ -204,7 +268,7 @@ export class TransactionService {
     });
   }
 
-  async updatePaymentStatus(transactionId: number, status: string): Promise<Transaction> {
+  async updatePaymentStatus(transactionId: number, status: PaymentStatus): Promise<Transaction> {
     const transaction = await this.transactionRepository.findOne({
       where: { id: transactionId },
       relations: ['items']
@@ -217,7 +281,7 @@ export class TransactionService {
     transaction.paymentStatus = status;
     
     // If payment is successful, reduce inventory
-    if (status === 'paid' && transaction.paymentStatus !== 'paid') {
+    if (status === PaymentStatus.PAID && transaction.paymentStatus !== PaymentStatus.PAID) {
       await this.connection.transaction(async (manager: EntityManager) => {
         for (const item of transaction.items) {
           await manager.decrement(
@@ -253,16 +317,16 @@ export class TransactionService {
     }
     
     // Map Midtrans status to our status
-    let paymentStatus = 'pending';
+    let paymentStatus = PaymentStatus.PENDING;
     
     if (transactionStatus === 'capture' || transactionStatus === 'settlement') {
       if (fraudStatus === 'accept') {
-        paymentStatus = 'paid';
+        paymentStatus = PaymentStatus.PAID;
       }
     } else if (transactionStatus === 'cancel' || 
                transactionStatus === 'deny' || 
                transactionStatus === 'expire') {
-      paymentStatus = 'failed';
+      paymentStatus = PaymentStatus.FAILED;
     }
     
     return this.updatePaymentStatus(transaction.id, paymentStatus);

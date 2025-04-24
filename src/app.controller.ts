@@ -133,8 +133,6 @@ export class AppController {
   // Helper method to get payment method breakdown
   private async getPaymentMethodBreakdown(): Promise<number[]> {
     try {
-      // In a real app, you'd query this from your database
-      // For now, we'll return mock data
       const transactions = await this.transactionService.findAll();
       
       // Initialize counts for each payment method
@@ -151,18 +149,6 @@ export class AppController {
         switch (transaction.paymentMethod) {
           case 'cash':
             cashCount++;
-            break;
-          case 'credit_card':
-            creditCardCount++;
-            break;
-          case 'debit_card':
-            debitCardCount++;
-            break;
-          case 'bank_transfer':
-            bankTransferCount++;
-            break;
-          case 'digital_wallet':
-            digitalWalletCount++;
             break;
         }
       });

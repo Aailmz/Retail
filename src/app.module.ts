@@ -18,7 +18,6 @@ import { TransactionModule } from './transaction/transaction.module';
 import { Transaction } from './transaction/entities/transaction.entity';
 import { TransactionItem } from './transaction/entities/transaction-item.entity';
 import { InvoiceModule } from './invoice/invoice.module';
-import { MidtransModule } from '@ruraim/nestjs-midtrans';
 
 @Module({
   imports: [
@@ -47,17 +46,6 @@ import { MidtransModule } from '@ruraim/nestjs-midtrans';
     PromotionModule,
     TransactionModule,
     InvoiceModule,
-    MidtransModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        clientKey: configService.get('MIDTRANS_CLIENT_KEY'),
-        serverKey: configService.get('MIDTRANS_SERVER_KEY'),
-        merchantId: configService.get('MIDTRANS_MERCHANT_ID'),
-        sandbox: configService.get('MIDTRANS_SANDBOX') === 'true',
-        isGlobal: true
-      }),
-    }),
   ],
   controllers: [AppController],
   providers: [AppService],
