@@ -23,7 +23,7 @@ import { MidtransModule } from '@ruraim/nestjs-midtrans';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // Agar config dapat diakses di semua modul
+      isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -36,7 +36,7 @@ import { MidtransModule } from '@ruraim/nestjs-midtrans';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
         entities: [User, Product, Category, Member, Promotion, Transaction, TransactionItem],
-        synchronize: true, // Perhatian: Jangan gunakan 'true' di production
+        synchronize: true,
       }),
     }),
     AuthModule,
@@ -47,13 +47,17 @@ import { MidtransModule } from '@ruraim/nestjs-midtrans';
     PromotionModule,
     TransactionModule,
     InvoiceModule,
-    MidtransModule.register({
-      clientKey: 'client-key',
-      serverKey: 'server-key',
-      merchantId: 'merchant-id',
-      sandbox: true, // default: false
-      isGlobal: true // default: false
-    })
+    MidtransModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        clientKey: configService.get('MIDTRANS_CLIENT_KEY'),
+        serverKey: configService.get('MIDTRANS_SERVER_KEY'),
+        merchantId: configService.get('MIDTRANS_MERCHANT_ID'),
+        sandbox: configService.get('MIDTRANS_SANDBOX') === 'true',
+        isGlobal: true
+      }),
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
