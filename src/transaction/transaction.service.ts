@@ -9,6 +9,7 @@ import { ProductService } from '../product/product.service';
 import { PromotionService } from '../promotion/promotion.service';
 import { Product } from '../product/entities/product.entity';
 import { generateTransactionCode } from './utils/code-generator';
+import { MidtransPaymentService } from '../payment/midtrans-payment.service';
 
 @Injectable()
 export class TransactionService {
@@ -21,6 +22,7 @@ export class TransactionService {
     private productRepository: Repository<Product>,
     private productService: ProductService,
     private promotionService: PromotionService,
+    private midtransPaymentService: MidtransPaymentService,
     private connection: Connection
   ) {}
 
@@ -79,6 +81,7 @@ export class TransactionService {
   async create(createTransactionDto: CreateTransactionDto): Promise<Transaction> {
     // Use transaction to ensure data consistency
     return this.connection.transaction(async (manager: EntityManager) => {
+      // Existing code to create transaction...
       const productIds = createTransactionDto.items.map(item => item.productId);
       const products = await manager.findByIds(Product, productIds);
       
@@ -128,6 +131,14 @@ export class TransactionService {
       const transactionDiscount = createTransactionDto.discountAmount || 0;
       const grandTotal = parseFloat((subtotal + taxAmount - transactionDiscount).toFixed(2));
 
+      // Set initial payment status
+      let paymentStatus = 'paid'; // Default for cash and most methods
+      
+      // For QRIS, set as pending
+      if (createTransactionDto.paymentMethod === 'qris') {
+        paymentStatus = 'pending';
+      }
+
       const transaction = manager.create(Transaction, {
         transactionCode: generateTransactionCode(),
         memberId: createTransactionDto.userId,
@@ -140,6 +151,7 @@ export class TransactionService {
         grandTotal,
         paymentMethod: createTransactionDto.paymentMethod,
         paymentReference: createTransactionDto.paymentReference,
+        paymentStatus: paymentStatus,
         promotionId: createTransactionDto.promotionId,
         note: createTransactionDto.note,
       });
@@ -153,11 +165,36 @@ export class TransactionService {
       
       await manager.save(items);
       
-      for (const item of createTransactionDto.items) {
-        const product = productMap.get(item.productId);
-        await manager.update(Product, product.id, {
-          stock: product.stock - item.quantity
-        });
+      // Process QRIS payment if selected
+      if (createTransactionDto.paymentMethod === 'qris') {
+        try {
+          const completeTransaction = {
+            ...savedTransaction,
+            items: items as TransactionItem[]
+          };
+          
+          const qrisResponse = await this.midtransPaymentService.createQrisTransaction(completeTransaction);
+          
+          // Save QRIS information
+          await manager.update(Transaction, savedTransaction.id, {
+            midtransOrderId: qrisResponse.order_id,
+            qrisImageUrl: qrisResponse.actions.find(action => action.name === 'generate-qr-code').url
+          });
+          
+          // Update the savedTransaction object with QRIS data
+          savedTransaction.midtransOrderId = qrisResponse.order_id;
+          savedTransaction.qrisImageUrl = qrisResponse.actions.find(action => action.name === 'generate-qr-code').url;
+        } catch (error) {
+          throw new BadRequestException(`Failed to generate QRIS: ${error.message}`);
+        }
+      } else {
+        // For non-QRIS payments, update stock immediately
+        for (const item of createTransactionDto.items) {
+          const product = productMap.get(item.productId);
+          await manager.update(Product, product.id, {
+            stock: product.stock - item.quantity
+          });
+        }
       }
 
       return {
@@ -165,6 +202,70 @@ export class TransactionService {
         items: items as TransactionItem[]
       };
     });
+  }
+
+  async updatePaymentStatus(transactionId: number, status: string): Promise<Transaction> {
+    const transaction = await this.transactionRepository.findOne({
+      where: { id: transactionId },
+      relations: ['items']
+    });
+    
+    if (!transaction) {
+      throw new NotFoundException(`Transaction with ID ${transactionId} not found`);
+    }
+    
+    transaction.paymentStatus = status;
+    
+    // If payment is successful, reduce inventory
+    if (status === 'paid' && transaction.paymentStatus !== 'paid') {
+      await this.connection.transaction(async (manager: EntityManager) => {
+        for (const item of transaction.items) {
+          await manager.decrement(
+            Product,
+            { id: item.productId },
+            'stock',
+            item.quantity
+          );
+        }
+        
+        await manager.save(transaction);
+      });
+    }
+    
+    return this.transactionRepository.save(transaction);
+  }
+
+  async handleMidtransNotification(notification: any): Promise<Transaction> {
+    const orderId = notification.order_id;
+    const transactionStatus = notification.transaction_status;
+    const fraudStatus = notification.fraud_status;
+    
+    // Extract transaction ID from order ID (QRIS-TXCODE format)
+    const transactionCode = orderId.replace('QRIS-', '');
+    
+    const transaction = await this.transactionRepository.findOne({
+      where: { transactionCode },
+      relations: ['items']
+    });
+    
+    if (!transaction) {
+      throw new NotFoundException(`Transaction with code ${transactionCode} not found`);
+    }
+    
+    // Map Midtrans status to our status
+    let paymentStatus = 'pending';
+    
+    if (transactionStatus === 'capture' || transactionStatus === 'settlement') {
+      if (fraudStatus === 'accept') {
+        paymentStatus = 'paid';
+      }
+    } else if (transactionStatus === 'cancel' || 
+               transactionStatus === 'deny' || 
+               transactionStatus === 'expire') {
+      paymentStatus = 'failed';
+    }
+    
+    return this.updatePaymentStatus(transaction.id, paymentStatus);
   }
 
   async voidTransaction(id: number, reason: string): Promise<Transaction> {
