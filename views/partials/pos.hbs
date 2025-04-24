@@ -658,37 +658,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       })
       .then(data => {
-        // Simpan ID transaksi untuk invoice
-        const transactionId = data.id || data.transactionId;
+      // Simpan ID transaksi untuk invoice
+      const transactionId = data.id || data.transactionId;
+      
+      // Cek apakah ini transaksi QRIS
+      if (data.isQris && data.qrisImageUrl) {
+        showAlert('QRIS payment generated. Opening QR code...');
         
-        // Check if this is a QRIS transaction and has a QR code URL
-        if (transactionData.paymentMethod === 'qris' && data.qrisImageUrl) {
-          // Open the QRIS image URL directly in a new tab
-          window.open(data.qrisImageUrl, '_blank');
-          
-          showAlert('Transaction created successfully! QRIS payment page opened in new tab.');
-        } else {
-          // For other payment methods, continue with normal flow
-          showAlert('Transaction completed successfully!');
-          
-          // Generate dan print invoice
-          generateInvoicePDF(transactionId, cart, transactionData);
-        }
+        // Buka URL QRIS di jendela baru
+        window.open(data.qrisImageUrl);
         
-        // Bersihkan keranjang dan field form
-        cart = [];
-        updateCartUI();
-        document.getElementById('customer-name').value = '';
-        document.getElementById('customer-phone').value = '';
-        document.getElementById('transaction-note').value = '';
-        document.getElementById('discount-amount').value = '';
-        document.getElementById('selected-member').textContent = 'No member selected';
-        selectedMemberId = null;
-      })
-      .catch(error => {
-        console.error('Error completing transaction:', error);
-        showAlert('Error completing transaction: ' + error.message);
-      });
+      } else {
+        showAlert('Transaction completed successfully!');
+      }
+      
+      // Generate dan print invoice
+      generateInvoicePDF(transactionId, cart, transactionData);
+      
+      // Bersihkan keranjang dan field form
+      cart = [];
+      updateCartUI();
+      document.getElementById('customer-name').value = '';
+      document.getElementById('customer-phone').value = '';
+      document.getElementById('transaction-note').value = '';
+      document.getElementById('discount-amount').value = '';
+      document.getElementById('selected-member').textContent = 'No member selected';
+      selectedMemberId = null;
+    })
+    .catch(error => {
+      console.error('Error completing transaction:', error);
+      showAlert('Error completing transaction: ' + error.message);
+    });
     });
 
   // Search members

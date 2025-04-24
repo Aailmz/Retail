@@ -89,10 +89,26 @@ export class TransactionController {
     try {
       const transaction = await this.transactionService.create(createTransactionDto);
       req.flash('success', `Transaction #${transaction.transactionCode} created successfully!`);
-      return res.redirect(`/transactions/${transaction.id}`);
+      
+      // Jika pembayaran menggunakan QRIS, kirim URL QRIS dalam response
+      if (transaction.paymentMethod === 'qris' && transaction.qrisImageUrl) {
+        return res.status(201).json({
+          id: transaction.id,
+          transactionCode: transaction.transactionCode,
+          qrisImageUrl: transaction.qrisImageUrl,
+          isQris: true
+        });
+      }
+      
+      // Jika bukan QRIS, lakukan redirect seperti biasa
+      return res.status(201).json({
+        id: transaction.id,
+        transactionCode: transaction.transactionCode
+      });
     } catch (error) {
-      req.flash('error', 'Failed to create transaction: ' + error.message);
-      return res.redirect('/transactions/create');
+      return res.status(400).json({ 
+        message: 'Failed to create transaction: ' + error.message 
+      });
     }
   }
 
