@@ -4,10 +4,7 @@ import { TransactionItem } from './transaction-item.entity';
 
 export enum PaymentMethod {
   CASH = 'cash',
-  CREDIT_CARD = 'credit_card',
-  DEBIT_CARD = 'debit_card',
-  BANK_TRANSFER = 'bank_transfer',
-  DIGITAL_WALLET = 'digital_wallet'
+  QRIS = 'qris',
 }
 
 @Entity()
@@ -88,4 +85,10 @@ export class Transaction {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ nullable: true })
+  midtransOrderId: string;
+
+  @Column({ type: 'text', nullable: true })
+  qrisImageUrl: string;
 }
