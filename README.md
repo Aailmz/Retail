@@ -8,6 +8,7 @@
 
 - ✅ Product & Inventory Management
 - ✅ Promotion Management with Mark-Up calculation
+- ✅ Store Member management & privillege
 - ✅ POS (Point of Sale) System  
 - ✅ QRIS Payment Integration (Midtrans)  
 - ✅ Transaction History  
