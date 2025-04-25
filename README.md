@@ -22,7 +22,7 @@
 
 - **Backend Framework:** [NestJS](https://nestjs.com/)  
 - **Templating Engine:** [Handlebars](https://handlebarsjs.com/)  
-- **Database:** MySQL  
+- **Database:** MySQL (depends on you actually)  
 - **Payment Gateway:** [Midtrans - QRIS](https://docs.midtrans.com/)  
 - **Authentication:** JWT & Sessions  
 
