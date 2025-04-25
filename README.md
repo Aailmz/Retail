@@ -33,8 +33,8 @@
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/retail.git
-cd retail
+git clone https://github.com/Aailmz/Retail.git
+cd Retail
 ```
 
 ### 2. Install Dependencies
