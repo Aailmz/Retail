@@ -102,16 +102,16 @@
                           </td>
                           <td>
                             <span class="
-                              {{#if (eq this.status "active")}}
+                              {{#if (eq this.status "Active")}}
                                 text-primary
-                              {{else if (eq this.status "inactive")}}
+                              {{else if (eq this.status "Inactive")}}
                                 text-secondary
-                              {{else if (eq this.status "scheduled")}}
+                              {{else if (eq this.status "Scheduled")}}
                                 text-secondary
-                              {{else if (eq this.status "expired")}}
+                              {{else if (eq this.status "Expired")}}
                                 text-secondary
                               {{/if}}">
-                              {{this.status}}
+                              {{uppercase this.status}}
                             </span>
                           </td>
                           <td>

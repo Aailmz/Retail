@@ -25,7 +25,7 @@ async function bootstrap() {
   // (YYYY-MM-DD)
   hbs.registerHelper('formatDate', function(date) {
     if (!date) return '';
-    return new Date(date).toLocaleDateString('id-ID', {
+    return new Date(date).toLocaleDateString('en-US', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -63,9 +63,9 @@ async function bootstrap() {
     const decimals = options && options.hash && options.hash.decimals !== undefined ? 
                     options.hash.decimals : 2;
     const thousandSeparator = options && options.hash && options.hash.thousandSeparator !== undefined ? 
-                            options.hash.thousandSeparator : ',';
+                            options.hash.thousandSeparator : '.';
     const decimalSeparator = options && options.hash && options.hash.decimalSeparator !== undefined ? 
-                          options.hash.decimalSeparator : '.';
+                          options.hash.decimalSeparator : ',';
 
     const parsedNumber = parseFloat(number);
     if (isNaN(parsedNumber)) return '0';

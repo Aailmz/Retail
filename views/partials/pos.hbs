@@ -7,6 +7,18 @@ document.addEventListener('DOMContentLoaded', function() {
   let tempQuantity = 1;
   let availablePromotions = [];
 
+  function formatNumber(number, decimals = 2, thousandSeparator = '.', decimalSeparator = ',') {
+    if (number === undefined || number === null) return '0';
+    
+    const parsedNumber = parseFloat(number);
+    if (isNaN(parsedNumber)) return '0';
+    
+    const parts = parsedNumber.toFixed(decimals).split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator);
+    
+    return parts.join(decimalSeparator);
+  }
+
   const promotionStyles = document.createElement('style');
   promotionStyles.textContent = `
     .product-card.has-promotion {
@@ -738,10 +750,10 @@ document.addEventListener('DOMContentLoaded', function() {
           ? `<span class="badge bg-success text-white ms-2">${item.promotionName}</span>`
           : '';
         const originalPriceDisplay = (item.markupPercentage > 0 || item.discountAmount > 0)
-          ? `<span class="text-sm text-muted text-decoration-line-through me-1">Rp${item.originalPrice.toFixed(2)}</span>`
+          ? `<span class="text-sm text-muted text-decoration-line-through me-1">Rp${item.originalPrice}</span>`
           : '';
         const markedUpPriceDisplay = (item.markupPercentage > 0 && item.discountAmount > 0)
-          ? `<span class="text-sm text-muted text-decoration-line-through me-1">Rp${item.markedUpPrice.toFixed(2)}</span>`
+          ? `<span class="text-sm text-muted text-decoration-line-through me-1">Rp${item.markedUpPrice}</span>`
           : '';
 
         cartHTML += `
@@ -1080,9 +1092,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const tax = subtotal * 0.1;
     const discount = parseFloat(document.getElementById('discount-amount').value) || 0;
     const grandTotal = subtotal + tax - discount;
-    document.getElementById('subtotal').textContent = 'Rp' + subtotal.toFixed(2);
-    document.getElementById('tax-amount').textContent = 'Rp' + tax.toFixed(2);
-    document.getElementById('grand-total').textContent = 'Rp' + grandTotal.toFixed(2);
+    document.getElementById('subtotal').textContent = 'Rp' + formatNumber(subtotal);
+    document.getElementById('tax-amount').textContent = 'Rp' + formatNumber(tax);
+    document.getElementById('grand-total').textContent = 'Rp' + formatNumber(grandTotal);
   }
 });
 </script>

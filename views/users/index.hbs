@@ -88,12 +88,12 @@
                         </td>
                         <td>
                             <span class="{{#if (eq this.role 'admin')}}text-primary{{else}}text-secondary{{/if}}">
-                                {{this.role}}
+                                {{uppercase this.role}}
                             </span>
                         </td>
                         <td>
                           <span class="{{#if this.isActive}}text-primary{{else}}text-secondary{{/if}}">
-                            {{#if this.isActive}}Active{{else}}Inactive{{/if}}
+                            {{#if this.isActive}}ACTIVE{{else}}INACTIVE{{/if}}
                           </span>
                         </td>
                         <td>
