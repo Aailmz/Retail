@@ -106,6 +106,7 @@
                   </thead>
                   <tbody>
                     {{#each transactions}}
+                    {{#if (eq this.transactionType "regular")}}
                       <tr>
                         <td class="ps-3">
                           <p class="text-sm font-weight-bold mb-0">{{this.transactionCode}}</p>
@@ -143,6 +144,7 @@
                           </div>
                         </td>
                       </tr>
+                    {{/if}}
                     {{else}}
                       <tr>
                         <td colspan="7" class="text-center py-5">
