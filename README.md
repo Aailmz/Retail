@@ -6,7 +6,8 @@
 
 ## ✨ Features
 
-- ✅ Product & Inventory Management  
+- ✅ Product & Inventory Management
+- ✅ Promotion Management with Mark-Up calculation
 - ✅ POS (Point of Sale) System  
 - ✅ QRIS Payment Integration (Midtrans)  
 - ✅ Transaction History  
