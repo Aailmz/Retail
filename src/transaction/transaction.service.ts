@@ -495,7 +495,8 @@ export class TransactionService {
     return this.transactionRepository.find({
       where: {
         createdAt: Between(startDate, endDate),
-        isVoided: false
+        isVoided: false,
+        transactionType: TransactionType.REGULAR // Only include regular transactions
       },
       relations: ['items']
     });
@@ -515,6 +516,7 @@ export class TransactionService {
         end: endOfToday
       })
       .andWhere('transaction.isVoided = :isVoided', { isVoided: false })
+      .andWhere('transaction.transactionType = :type', { type: TransactionType.REGULAR }) // Only include regular transactions
       .getRawOne();
     
     // Get weekly stats, monthly stats, etc.
@@ -532,7 +534,8 @@ export class TransactionService {
     return this.transactionRepository.find({
       relations: ['items', 'member'],
       order: { createdAt: 'DESC' },
-      take: limit
+      take: limit,
+      where: { transactionType: TransactionType.REGULAR } // Only include regular transactions
     });
   }
   
@@ -549,6 +552,7 @@ export class TransactionService {
         end: endOfToday
       })
       .andWhere('transaction.isVoided = :isVoided', { isVoided: false })
+      .andWhere('transaction.transactionType = :type', { type: TransactionType.REGULAR }) // Only include regular transactions
       .getRawOne();
     
     return parseFloat(result.total) || 0;
@@ -556,7 +560,10 @@ export class TransactionService {
   
   async getTransactionCount(): Promise<number> {
     const count = await this.transactionRepository.count({
-      where: { isVoided: false }
+      where: { 
+        isVoided: false,
+        transactionType: TransactionType.REGULAR // Only include regular transactions
+      }
     });
     
     return count;
@@ -564,15 +571,15 @@ export class TransactionService {
   
   async getPaymentMethodStats(): Promise<Record<string, number>> {
     const transactions = await this.transactionRepository.find({
-      where: { isVoided: false }
+      where: { 
+        isVoided: false,
+        transactionType: TransactionType.REGULAR // Only include regular transactions
+      }
     });
     
     const stats = {
       cash: 0,
-      credit_card: 0,
-      debit_card: 0,
-      bank_transfer: 0,
-      digital_wallet: 0
+      qris: 0
     };
     
     transactions.forEach(transaction => {
@@ -602,6 +609,7 @@ export class TransactionService {
           end: endOfDay
         })
         .andWhere('transaction.isVoided = :isVoided', { isVoided: false })
+        .andWhere('transaction.transactionType = :type', { type: TransactionType.REGULAR }) // Only include regular transactions
         .getRawOne();
       
       result.push({
@@ -634,12 +642,13 @@ export class TransactionService {
         doc.fontSize(12).text(`Date Range: ${startDate} to ${endDate}`, { align: 'center' });
         doc.moveDown(2);
         
-        // Calculate summary data
+        // Calculate summary data - filter for regular transactions only
+        const regularTransactions = transactions.filter(t => t.transactionType === TransactionType.REGULAR);
         let totalSales = 0;
         let totalItems = 0;
         let voidedTransactions = 0;
         
-        transactions.forEach(transaction => {
+        regularTransactions.forEach(transaction => {
           if (transaction.isVoided) {
             voidedTransactions++;
           } else {
@@ -654,8 +663,8 @@ export class TransactionService {
         doc.fontSize(14).text('Summary', { underline: true });
         doc.moveDown(0.5);
         doc.fontSize(10);
-        doc.text(`Total Transactions: ${transactions.length}`);
-        doc.text(`Completed Transactions: ${transactions.length - voidedTransactions}`);
+        doc.text(`Total Transactions: ${regularTransactions.length}`);
+        doc.text(`Completed Transactions: ${regularTransactions.length - voidedTransactions}`);
         doc.text(`Total Items Sold: ${totalItems}`);
         doc.moveDown(2);
         
@@ -698,7 +707,8 @@ export class TransactionService {
         const itemsPerPage = 20;
         let itemCount = 0;
         
-        transactions.forEach((transaction, index) => {
+        // Only process regular transactions
+        regularTransactions.forEach((transaction, index) => {
           // Check if we need a new page
           if (itemCount === itemsPerPage) {
             doc.addPage();
@@ -720,7 +730,7 @@ export class TransactionService {
           itemCount++;
           
           // Add a separator line except for the last item
-          if (index < transactions.length - 1) {
+          if (index < regularTransactions.length - 1) {
             doc.moveTo(50, currentY - 10).lineTo(550, currentY - 10).stroke({ opacity: 0.2 });
           }
         });

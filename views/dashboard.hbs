@@ -113,7 +113,7 @@
               <div class="row">
                 <div class="col-8">
                   <div class="numbers">
-                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Low Stock Items</p>
+                    <p class="text-sm mb-0 text-uppercase font-weight-bold">Products</p>
                     <h5 class="font-weight-bolder mb-0">{{lowStockItems}}</h5>
                   </div>
                 </div>
@@ -188,6 +188,7 @@
                   </thead>
                   <tbody>
                     {{#each recentTransactions}}
+                    {{#if (eq this.transactionType "regular")}}
                     <tr>
                       <td>
                         <div class="d-flex px-3">
@@ -210,21 +211,16 @@
                         </p>
                       </td>
                       <td>
-                        <p class="text-sm font-weight-normal mb-0">Rp{{this.grandTotal}}</p>
+                        <p class="text-sm font-weight-normal mb-0">Rp{{formatNumber this.grandTotal}}</p>
                       </td>
                       <td>
-                        <p class="text-sm font-weight-normal text-capitalize mb-0">{{this.paymentMethod}}</p>
+                        <p class="text-sm font-weight-normal text-capitalize mb-0">{{uppercase this.paymentMethod}}</p>
                       </td>
                       <td>
-                        <div class="d-flex align-items-center">
-                          {{#if this.isVoided}}
-                          <span class="badge bg-danger">Voided</span>
-                          {{else}}
-                          <span class="badge bg-success">Completed</span>
-                          {{/if}}
-                        </div>
+                        <span class="badge bg-light text-dark">{{uppercase this.paymentStatus}}</span>
                       </td>
                     </tr>
+                    {{/if}}
                     {{/each}}
                     
                     {{#unless recentTransactions.length}}
@@ -327,15 +323,12 @@
       const paymentMethodChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: ['Cash', 'Credit Card', 'Debit Card', 'Bank Transfer', 'Digital Wallet'],
+          labels: ['Cash', 'QRIS'],
           datasets: [{
             data: [{{paymentMethodData}}],
             backgroundColor: [
               '#4CAF50', // Cash
-              '#2196F3', // Credit Card
-              '#FF9800', // Debit Card
-              '#9C27B0', // Bank Transfer
-              '#03A9F4'  // Digital Wallet
+              '#2196F3',
             ],
             borderWidth: 2,
             borderColor: '#fff'

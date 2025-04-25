@@ -107,11 +107,6 @@ export class AppController {
         totalTransactions: stats.today.count,
         lowStockItems: lowStockCount || 0,
         activeMembers: activeMembers || 0,
-        // Trends (this could be calculated from historical data)
-        salesPercentChange: 8.5,
-        transactionPercentChange: 12.3,
-        lowStockPercentChange: 2.7,
-        memberPercentChange: 3.8,
         // Recent transactions for display
         recentTransactions: latestTransactions,
         // Payment method data for chart
@@ -137,10 +132,7 @@ export class AppController {
       
       // Initialize counts for each payment method
       let cashCount = 0;
-      let creditCardCount = 0;
-      let debitCardCount = 0;
-      let bankTransferCount = 0;
-      let digitalWalletCount = 0;
+      let qrisCount = 0;
       
       // Count transactions by payment method
       transactions.forEach(transaction => {
@@ -150,10 +142,13 @@ export class AppController {
           case 'cash':
             cashCount++;
             break;
+          case 'qris':
+            qrisCount++;
+            break;
         }
       });
       
-      return [cashCount, creditCardCount, debitCardCount, bankTransferCount, digitalWalletCount];
+      return [cashCount, qrisCount];
     } catch (error) {
       console.error('Error fetching payment method breakdown:', error);
       return [40, 25, 15, 10, 10]; // Fallback data
