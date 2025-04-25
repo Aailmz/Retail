@@ -130,11 +130,7 @@
                           <span class="badge bg-light text-dark">{{capitalize this.paymentMethod}}</span>
                         </td>
                         <td>
-                          {{#if this.isVoided}}
-                            <span class="badge bg-danger">Voided</span>
-                          {{else}}
-                            <span class="badge bg-success">Completed</span>
-                          {{/if}}
+                          <span class="badge bg-light text-dark">{{capitalize this.paymentStatus}}</span>
                         </td>
                         <td>
                           <div class="d-flex gap-2">

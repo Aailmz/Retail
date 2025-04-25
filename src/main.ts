@@ -90,6 +90,11 @@ async function bootstrap() {
     return text.charAt(0).toUpperCase() + text.slice(1);
   });
 
+  hbs.registerHelper('uppercase', function(text) {
+    if (!text) return '';
+    return text.toUpperCase();
+  });
+
   hbs.registerHelper('profitMargin', function(sellingPrice, costPrice) {
     const margin = ((sellingPrice - costPrice) / sellingPrice) * 100;
     return margin.toFixed(2);
