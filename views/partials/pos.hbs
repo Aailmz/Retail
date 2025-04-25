@@ -327,7 +327,6 @@ document.addEventListener('DOMContentLoaded', function() {
       discountAmount: transactionData.discountAmount,
       grandTotal: transactionData.grandTotal,
       paymentMethod: transactionData.paymentMethod,
-      paymentReference: transactionData.paymentReference,
       note: transactionData.note || '',
       date: new Date().toLocaleString()
     };
@@ -363,11 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => URL.revokeObjectURL(pdfUrl), 2000);
           }, 1000);
         });
-      } else {
-        // Jika pop-up diblokir, tampilkan saja PDF
-        showAlert('Invoice opened in new tab. Please print manually if desired.');
       }
-      
       // Sediakan link download langsung
       const downloadLink = document.createElement('a');
       downloadLink.href = pdfUrl;
@@ -546,12 +541,6 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       this.classList.add('active');
       selectedPaymentMethod = this.getAttribute('data-method');
-      const referenceContainer = document.getElementById('payment-reference-container');
-      if (selectedPaymentMethod !== 'cash') {
-        referenceContainer.style.display = 'block';
-      } else {
-        referenceContainer.style.display = 'none';
-      }
     });
   });
 
@@ -577,15 +566,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const customerName = document.getElementById('customer-name').value;
     const customerPhone = document.getElementById('customer-phone').value;
     const note = document.getElementById('transaction-note').value;
-    let paymentReference = null;
-
-    if (selectedPaymentMethod !== 'cash') {
-      paymentReference = document.getElementById('payment-reference').value;
-      if (!paymentReference) {
-        showAlert('Please enter payment reference for ' + selectedPaymentMethod);
-        return;
-      }
-    }
 
     const transactionData = {
       userId: selectedMemberId || undefined,
@@ -604,7 +584,6 @@ document.addEventListener('DOMContentLoaded', function() {
       })),
       subtotal: calculateSubtotal(),
       paymentMethod: selectedPaymentMethod,
-      paymentReference: selectedPaymentMethod !== 'cash' ? document.getElementById('payment-reference').value : undefined,
       note: document.getElementById('transaction-note').value || undefined,
       discountAmount: parseFloat(document.getElementById('discount-amount').value) || 0,
       taxAmount: calculateSubtotal() * 0.1,

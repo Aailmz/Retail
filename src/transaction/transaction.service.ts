@@ -188,10 +188,20 @@ export class TransactionService {
     
     // Generate QRIS code through Midtrans
     try {
-      // Format item details from transaction items
       const itemDetails = createTransactionDto.items.map(item => {
         const product = productMap.get(item.productId);
-        const itemPrice = item.discountedPrice || item.markedUpPrice || product.sellingPrice;
+
+        let itemPrice;
+        if (typeof item.discountedPrice === 'number') {
+          itemPrice = item.discountedPrice;
+        } else if (typeof item.markedUpPrice === 'number') {
+          itemPrice = item.markedUpPrice;
+        } else if (typeof product.sellingPrice === 'number') {
+          itemPrice = product.sellingPrice;
+        } else {
+          itemPrice = parseFloat(product.sellingPrice || 0);
+        }
+        
         const quantity = item.quantity;
         const price = parseFloat(itemPrice.toFixed(2));
         
