@@ -654,7 +654,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Cek apakah ini transaksi QRIS
       if (data.isQris && data.qrisImageUrl) {
-        showAlert('QRIS payment generated. Opening QR code...');
+        showAlert('QRIS payment generated.');
         
         // Buka URL QRIS di jendela baru
         window.open(data.qrisImageUrl);
