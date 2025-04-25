@@ -64,9 +64,9 @@ export class TransactionService {
       .createQueryBuilder('transaction')
       .leftJoinAndSelect('transaction.items', 'items')
       .leftJoinAndSelect('transaction.member', 'member')
-      .orderBy('transaction.createdAt', 'DESC');
+      .orderBy('transaction.createdAt', 'DESC')
+      .where('transaction.transactionType = :type', { type: TransactionType.REGULAR });
     
-    // Apply search filter
     if (filterOptions.search) {
       queryBuilder.andWhere(
         '(transaction.transactionCode LIKE :search OR ' +
@@ -77,7 +77,6 @@ export class TransactionService {
       );
     }
     
-    // Apply date range filter
     if (filterOptions.dateRange) {
       queryBuilder.andWhere(
         'transaction.createdAt BETWEEN :startDate AND :endDate',
