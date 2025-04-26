@@ -274,15 +274,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
       console.log('Applicable promotions found:', applicable.length);
 
-      const noPromoDiv = document.createElement('div');
-      noPromoDiv.className = 'form-check mb-2';
-      noPromoDiv.innerHTML = `
-        <input class="form-check-input" type="radio" name="productPromotion" id="promo-none" value="none" checked>
-        <label class="form-check-label" for="promo-none">No promotion</label>
-      `;
-      promotionsContainer.appendChild(noPromoDiv);
-
       if (applicable.length > 0) {
+        // Auto-select the first promotion by default
+        let isFirstPromo = true;
+        
         applicable.forEach(promo => {
           const promoDiv = document.createElement('div');
           promoDiv.className = 'form-check mb-2';
@@ -301,13 +296,17 @@ document.addEventListener('DOMContentLoaded', function() {
           }
 
           promoDiv.innerHTML = `
-            <input class="form-check-input" type="radio" name="productPromotion" id="promo-${promo.id}" value="${promo.id}">
+            <input class="form-check-input" type="radio" name="productPromotion" 
+                  id="promo-${promo.id}" value="${promo.id}" ${isFirstPromo ? 'checked' : ''}>
             <label class="form-check-label" for="promo-${promo.id}">
               <strong>${promo.name}</strong> - ${promoDescription}
               <div class="text-muted text-sm">${promo.description || ''}</div>
             </label>
           `;
           promotionsContainer.appendChild(promoDiv);
+          
+          // Only the first one should be checked by default
+          isFirstPromo = false;
         });
       } else {
         const noApplicableDiv = document.createElement('div');
