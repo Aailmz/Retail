@@ -496,7 +496,7 @@ export class TransactionService {
       where: {
         createdAt: Between(startDate, endDate),
         isVoided: false,
-        transactionType: TransactionType.REGULAR // Only include regular transactions
+        transactionType: TransactionType.REGULAR
       },
       relations: ['items']
     });
@@ -526,7 +526,6 @@ export class TransactionService {
         count: parseInt(todayStats.count) || 0,
         total: parseFloat(todayStats.total) || 0
       }
-      // Add other stats as needed
     };
   }
 
@@ -535,7 +534,7 @@ export class TransactionService {
       relations: ['items', 'member'],
       order: { createdAt: 'DESC' },
       take: limit,
-      where: { transactionType: TransactionType.REGULAR } // Only include regular transactions
+      where: { transactionType: TransactionType.REGULAR }
     });
   }
   
