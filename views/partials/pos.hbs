@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
           } else if (promo.type === 'buy_x_get_y_free' || promo.type === 'buy_x_get_y') {
             const buyQty = promo.buy_count || 1;
             const freeQty = promo.get_count || 1;
-            promoDescription = `Buy ${buyQty}, get ${freeQty} free`;
+            promoDescription = `Buy X get Y free`;
           }
 
           promoDiv.innerHTML = `
@@ -934,7 +934,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const getCount = promo.get_count || 1;
         const freeProductCard = document.querySelector(`.product-card[data-id="${promo.free_product_id}"]`);
         const freeProductName = freeProductCard ? freeProductCard.getAttribute('data-name') : 'Unknown Product';
-        promoDescription = `Buy ${buyCount} ${item.name}, get ${getCount} ${freeProductName} free`;
+        promoDescription = `Buy X get Y free`;
         discountAmount = promo.free_product_price * getCount;
         discountedPrice = markedUpPrice; // Paid product price remains marked up
       }
