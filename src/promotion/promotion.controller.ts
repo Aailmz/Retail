@@ -94,7 +94,7 @@ export class PromotionController {
   @Get('active')
   async findActive(@Res() res: Response) {
     try {
-      const activePromotions = await this.promotionService.findAll();
+      const activePromotions = await this.promotionService.findActive();
       return res.status(200).json({
         success: true,
         data: activePromotions
